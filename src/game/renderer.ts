@@ -560,49 +560,40 @@ export class GameRenderer {
   }
 
   /**
-   * Draw glowing weapon spawn pads on the map
-   * - Available: Only weapon sprite + subtle halo glow (NO LABELS / NO TEXT)
-   * - Picked Up: Completely empty (NO SPRITE, NO INACTIVE SILHOUETTE, NO TEXT)
+   * Draw weapon spawns on the map
+   * - Available: Only weapon sprite + subtle halo glow (NO MARKERS, NO LINES, NO TEXT)
+   * - Picked Up: Completely empty (NO SPRITE, NO MARKER, NO SILHOUETTE, NO TEXT)
    */
   private drawWeaponSpawns(spawns: ActiveWeaponSpawn[], time: number) {
     const ctx = this.ctx;
     ctx.save();
 
     for (const sp of spawns) {
+      if (!sp.isAvailable) continue; // When picked up / during cooldown: COMPLETELY EMPTY!
+
       const config = WEAPONS_CONFIG[sp.weaponType];
       if (!config) continue;
 
       const sx = sp.x;
       const sy = sp.y;
 
-      // 1. Sleek comic-style floor spawn marker
-      ctx.fillStyle = '#1E293B';
-      ctx.strokeStyle = '#0F172A';
-      ctx.lineWidth = 2.5;
-      this.roundRect(ctx, sx - 24, sy + 10, 48, 8, 4);
+      // Floating Halo Glow
+      const bob = Math.sin(time * 0.005 + sx) * 6;
+      const floatY = sy - 8 + bob;
+
+      ctx.fillStyle = config.color;
+      ctx.globalAlpha = 0.25 + Math.sin(time * 0.008) * 0.1;
+      ctx.beginPath();
+      ctx.arc(sx, floatY, 24, 0, Math.PI * 2);
       ctx.fill();
-      ctx.stroke();
+      ctx.globalAlpha = 1.0;
 
-      if (sp.isAvailable) {
-        // Floating Halo Glow
-        const bob = Math.sin(time * 0.005 + sx) * 6;
-        const floatY = sy - 8 + bob;
-
-        ctx.fillStyle = config.color;
-        ctx.globalAlpha = 0.25 + Math.sin(time * 0.008) * 0.1;
-        ctx.beginPath();
-        ctx.arc(sx, floatY, 24, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1.0;
-
-        // Weapon Model hovering (ONLY the weapon sprite, absolutely NO text/name tags)
-        ctx.save();
-        ctx.translate(sx, floatY);
-        const spawnScale = config.spawnScale || (config.isSuper ? 0.7 : 1.25);
-        this.drawWeaponSprite(ctx, sp.weaponType, spawnScale);
-        ctx.restore();
-      }
-      // When picked up: completely empty pad (no sprite, no icon, no text)
+      // Weapon Model hovering (ONLY the weapon sprite, absolutely NO floor lines / text / markers)
+      ctx.save();
+      ctx.translate(sx, floatY);
+      const spawnScale = config.spawnScale || (config.isSuper ? 0.7 : 1.25);
+      this.drawWeaponSprite(ctx, sp.weaponType, spawnScale);
+      ctx.restore();
     }
 
     ctx.restore();

@@ -376,26 +376,34 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
 
     const updateSize = () => {
       const rect = container.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) return;
+      const cssW = rect.width > 0 ? rect.width : window.innerWidth;
+      const cssH = rect.height > 0 ? rect.height : window.innerHeight;
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const targetW = Math.floor(rect.width * dpr);
-      const targetH = Math.floor(rect.height * dpr);
+      const targetW = Math.floor(cssW * dpr);
+      const targetH = Math.floor(cssH * dpr);
 
       if (canvas.width !== targetW || canvas.height !== targetH) {
         canvas.width = targetW;
         canvas.height = targetH;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        rendererRef.current?.setDimensions(rect.width, rect.height);
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (rendererRef.current) {
+        rendererRef.current.setDimensions(cssW, cssH);
       }
     };
 
+    // Synchronously measure initial viewport before starting render loop
     updateSize();
 
     const resizeObserver = new ResizeObserver(() => {
       updateSize();
     });
     resizeObserver.observe(container);
+
+    window.addEventListener('resize', updateSize);
+    window.addEventListener('orientationchange', updateSize);
+    document.addEventListener('fullscreenchange', updateSize);
 
     let animId: number;
     let lastTime = Date.now();
@@ -404,6 +412,9 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
       const now = Date.now();
       const dt = Math.min(0.05, (now - lastTime) / 1000);
       lastTime = now;
+
+      // Keep viewport dimensions updated
+      updateSize();
 
       const curRoom = roomRef.current;
       const curPops = comicPopsRef.current;
@@ -490,6 +501,9 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
     return () => {
       cancelAnimationFrame(animId);
       resizeObserver.disconnect();
+      window.removeEventListener('resize', updateSize);
+      window.removeEventListener('orientationchange', updateSize);
+      document.removeEventListener('fullscreenchange', updateSize);
     };
   }, []);
 

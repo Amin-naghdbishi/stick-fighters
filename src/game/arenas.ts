@@ -545,187 +545,326 @@ export const ARENAS: Record<string, Arena> = {
   mystery_sky: {
     id: 'mystery_sky',
     name: 'Mystery I: Aetheria Sky Apex',
-    description: 'A colossal 6,000px vertical floating realm high above the clouds with dangerous cliffs, soaring jump-pads, narrow suspension bridges, and the Legendary Thunder Sword at its highest apex.',
+    description: 'A colossal 6,000px vertical sky sanctuary with dense, reachable cloud catwalks, skyways, soaring launch-pads, and the Legendary Thunder Sword at its highest apex.',
     theme: 'mystery_sky',
     size: 'mystery',
     width: 6000,
     height: 3600,
     bgColor: '#EFF6FF',
-    features: ['6000px Vertical Sky Realm', 'High Altitude Cliffs & Narrow Bridges', 'Apex Sanctuary Thunder Sword'],
+    features: ['6000px Vertical Sky Realm', 'Reachably Spaced Catwalks & Towers', 'Apex Sanctuary Thunder Sword'],
     spawnPoints: [
-      { x: 800, y: 2900 },
-      { x: 5200, y: 2900 },
-      { x: 1800, y: 2200 },
-      { x: 4200, y: 2200 },
-      { x: 3000, y: 1500 },
-      { x: 1200, y: 1100 },
-      { x: 4800, y: 1100 },
-      { x: 2200, y: 700 },
-      { x: 3800, y: 700 },
-      { x: 3000, y: 2900 },
+      { x: 800, y: 3100 },
+      { x: 5200, y: 3100 },
+      { x: 1800, y: 2600 },
+      { x: 4200, y: 2600 },
+      { x: 3000, y: 2100 },
+      { x: 1200, y: 1600 },
+      { x: 4800, y: 1600 },
+      { x: 2200, y: 1100 },
+      { x: 3800, y: 1100 },
+      { x: 3000, y: 3100 },
     ],
     weaponSpawns: [
-      // Exactly 10 Normal Weapon Spawns spread across the massive vertical space
-      { id: 'ms_wpn_1', weaponType: 'pebble_blaster', x: 800, y: 2800, respawnTime: 5 },
-      { id: 'ms_wpn_2', weaponType: 'pistol', x: 1800, y: 2400, respawnTime: 7 },
-      { id: 'ms_wpn_3', weaponType: 'burst_smg', x: 5200, y: 2800, respawnTime: 8 },
-      { id: 'ms_wpn_4', weaponType: 'shotgun', x: 1200, y: 1600, respawnTime: 12 },
-      { id: 'ms_wpn_5', weaponType: 'rifle', x: 4800, y: 1600, respawnTime: 15 },
-      { id: 'ms_wpn_6', weaponType: 'flame_gun', x: 2400, y: 1200, respawnTime: 18 },
-      { id: 'ms_wpn_7', weaponType: 'grenade_launcher', x: 3600, y: 1200, respawnTime: 22 },
-      { id: 'ms_wpn_8', weaponType: 'heavy_cannon', x: 1500, y: 800, respawnTime: 25 },
-      { id: 'ms_wpn_9', weaponType: 'rocket_launcher', x: 4500, y: 800, respawnTime: 30 },
-      { id: 'ms_wpn_10', weaponType: 'railgun', x: 3000, y: 900, respawnTime: 45 },
-      // SUPER WEAPON #1: Thunder Sword at the highest apex platform!
+      // 10 Normal Weapons placed directly on accessible platform walkways
+      { id: 'ms_wpn_1', weaponType: 'pebble_blaster', x: 700, y: 2880, respawnTime: 5 },
+      { id: 'ms_wpn_2', weaponType: 'pistol', x: 1500, y: 2630, respawnTime: 7 },
+      { id: 'ms_wpn_3', weaponType: 'burst_smg', x: 4500, y: 2880, respawnTime: 8 },
+      { id: 'ms_wpn_4', weaponType: 'shotgun', x: 700, y: 2130, respawnTime: 12 },
+      { id: 'ms_wpn_5', weaponType: 'rifle', x: 5300, y: 2130, respawnTime: 15 },
+      { id: 'ms_wpn_6', weaponType: 'flame_gun', x: 1800, y: 1630, respawnTime: 18 },
+      { id: 'ms_wpn_7', weaponType: 'grenade_launcher', x: 4100, y: 1630, respawnTime: 22 },
+      { id: 'ms_wpn_8', weaponType: 'heavy_cannon', x: 2000, y: 1130, respawnTime: 25 },
+      { id: 'ms_wpn_9', weaponType: 'rocket_launcher', x: 4000, y: 1130, respawnTime: 30 },
+      { id: 'ms_wpn_10', weaponType: 'railgun', x: 3000, y: 1130, respawnTime: 45 },
+      // SUPER WEAPON #1: Thunder Sword at the highest apex platform
       { id: 'ms_super_1', weaponType: 'thunder_sword', x: 3000, y: 350, respawnTime: 150 },
     ],
     platforms: [
-      // Ground Islands (Low level)
-      { id: 'ms_g_l', x: 400, y: 3000, width: 1200, height: 180, color: '#3B82F6', type: 'ground', isPassableDown: false },
-      { id: 'ms_g_c', x: 2300, y: 3020, width: 1400, height: 160, color: '#0284C7', type: 'ground', isPassableDown: false },
-      { id: 'ms_g_r', x: 4400, y: 3000, width: 1200, height: 180, color: '#3B82F6', type: 'ground', isPassableDown: false },
-      // Tier 1 Bridges & Platforms (y ~ 2400 - 2600)
-      { id: 'ms_t1_l', x: 1200, y: 2500, width: 650, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t1_r', x: 4150, y: 2500, width: 650, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t1_c', x: 2600, y: 2400, width: 800, height: 32, color: '#60A5FA', type: 'stone', isPassableDown: true },
-      // Tier 2 Mid-air Sky Catwalks (y ~ 1700 - 1900)
-      { id: 'ms_t2_l', x: 800, y: 1800, width: 800, height: 32, color: '#818CF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t2_r', x: 4400, y: 1800, width: 800, height: 32, color: '#818CF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t2_c', x: 2400, y: 1700, width: 1200, height: 34, color: '#A7F3D0', type: 'stone', isPassableDown: true },
-      // Tier 3 High Spire Walkways (y ~ 1000 - 1300)
-      { id: 'ms_t3_l', x: 1400, y: 1100, width: 700, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
-      { id: 'ms_t3_r', x: 3900, y: 1100, width: 700, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
-      { id: 'ms_t3_c', x: 2600, y: 1000, width: 800, height: 32, color: '#F59E0B', type: 'stone', isPassableDown: true },
-      // Tier 4 Apex Spire & Thunder Sword Shrine (y ~ 400 - 700)
-      { id: 'ms_t4_l', x: 2000, y: 650, width: 550, height: 28, color: '#A855F7', type: 'stone', isPassableDown: true },
-      { id: 'ms_t4_r', x: 3450, y: 650, width: 550, height: 28, color: '#A855F7', type: 'stone', isPassableDown: true },
-      { id: 'ms_apex', x: 2750, y: 420, width: 500, height: 36, color: '#FACC15', type: 'stone', isPassableDown: true },
-      // Launch pads (Spring Bouncers) for vertical ascent
-      { id: 'ms_b_1', x: 500, y: 2820, width: 120, height: 26, color: '#FF5252', type: 'bounce', isPassableDown: true },
-      { id: 'ms_b_2', x: 5380, y: 2820, width: 120, height: 26, color: '#FF5252', type: 'bounce', isPassableDown: true },
-      { id: 'ms_b_3', x: 1900, y: 2320, width: 110, height: 26, color: '#FFD700', type: 'bounce', isPassableDown: true },
-      { id: 'ms_b_4', x: 3990, y: 2320, width: 110, height: 26, color: '#FFD700', type: 'bounce', isPassableDown: true },
-      { id: 'ms_b_5', x: 2950, y: 1580, width: 100, height: 24, color: '#38BDF8', type: 'bounce', isPassableDown: true },
+      // Ground Islands (y = 3200)
+      { id: 'ms_g_1', x: 200, y: 3200, width: 1400, height: 200, color: '#3B82F6', type: 'ground', isPassableDown: false },
+      { id: 'ms_g_2', x: 1800, y: 3220, width: 1200, height: 200, color: '#0284C7', type: 'ground', isPassableDown: false },
+      { id: 'ms_g_3', x: 3200, y: 3220, width: 1200, height: 200, color: '#0284C7', type: 'ground', isPassableDown: false },
+      { id: 'ms_g_4', x: 4600, y: 3200, width: 1200, height: 200, color: '#3B82F6', type: 'ground', isPassableDown: false },
+
+      // Tier 1 Walkways (y = 2950) - 250px above ground
+      { id: 'ms_t1_1', x: 400, y: 2950, width: 650, height: 28, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t1_2', x: 1300, y: 2950, width: 650, height: 28, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t1_3', x: 2200, y: 2950, width: 650, height: 28, color: '#60A5FA', type: 'stone', isPassableDown: true },
+      { id: 'ms_t1_4', x: 3150, y: 2950, width: 650, height: 28, color: '#60A5FA', type: 'stone', isPassableDown: true },
+      { id: 'ms_t1_5', x: 4050, y: 2950, width: 650, height: 28, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t1_6', x: 4950, y: 2950, width: 650, height: 28, color: '#38BDF8', type: 'wood', isPassableDown: true },
+
+      // Tier 2 Catwalks (y = 2700) - 250px above Tier 1
+      { id: 'ms_t2_1', x: 200, y: 2700, width: 750, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t2_2', x: 1150, y: 2700, width: 850, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t2_3', x: 2200, y: 2700, width: 750, height: 30, color: '#A7F3D0', type: 'stone', isPassableDown: true },
+      { id: 'ms_t2_4', x: 3050, y: 2700, width: 750, height: 30, color: '#A7F3D0', type: 'stone', isPassableDown: true },
+      { id: 'ms_t2_5', x: 4000, y: 2700, width: 850, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t2_6', x: 5050, y: 2700, width: 750, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
+
+      // Tier 3 Bridges (y = 2450)
+      { id: 'ms_t3_1', x: 500, y: 2450, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t3_2', x: 1550, y: 2450, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t3_3', x: 2600, y: 2450, width: 800, height: 32, color: '#60A5FA', type: 'stone', isPassableDown: true },
+      { id: 'ms_t3_4', x: 3600, y: 2450, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t3_5', x: 4650, y: 2450, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+
+      // Tier 4 Sky Highway (y = 2200)
+      { id: 'ms_t4_1', x: 300, y: 2200, width: 800, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
+      { id: 'ms_t4_2', x: 1300, y: 2200, width: 900, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
+      { id: 'ms_t4_3', x: 2400, y: 2200, width: 1200, height: 32, color: '#F59E0B', type: 'stone', isPassableDown: true },
+      { id: 'ms_t4_4', x: 3800, y: 2200, width: 900, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
+      { id: 'ms_t4_5', x: 4900, y: 2200, width: 800, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
+
+      // Tier 5 Mid Skyway (y = 1950)
+      { id: 'ms_t5_1', x: 600, y: 1950, width: 900, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'ms_t5_2', x: 1700, y: 1950, width: 950, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'ms_t5_3', x: 2850, y: 1950, width: 300, height: 30, color: '#A855F7', type: 'wood', isPassableDown: true },
+      { id: 'ms_t5_4', x: 3350, y: 1950, width: 950, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'ms_t5_5', x: 4500, y: 1950, width: 900, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+
+      // Tier 6 High Cloud Runway (y = 1700)
+      { id: 'ms_t6_1', x: 400, y: 1700, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t6_2', x: 1450, y: 1700, width: 1000, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t6_3', x: 2600, y: 1700, width: 800, height: 32, color: '#60A5FA', type: 'stone', isPassableDown: true },
+      { id: 'ms_t6_4', x: 3550, y: 1700, width: 1000, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t6_5', x: 4750, y: 1700, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+
+      // Tier 7 Cloud Deck (y = 1450)
+      { id: 'ms_t7_1', x: 700, y: 1450, width: 900, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t7_2', x: 1800, y: 1450, width: 950, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t7_3', x: 2900, y: 1450, width: 200, height: 30, color: '#A7F3D0', type: 'stone', isPassableDown: true },
+      { id: 'ms_t7_4', x: 3250, y: 1450, width: 950, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t7_5', x: 4400, y: 1450, width: 900, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
+
+      // Tier 8 Spire Concourse (y = 1200)
+      { id: 'ms_t8_1', x: 500, y: 1200, width: 900, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
+      { id: 'ms_t8_2', x: 1600, y: 1200, width: 1000, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
+      { id: 'ms_t8_3', x: 2700, y: 1200, width: 600, height: 32, color: '#F59E0B', type: 'stone', isPassableDown: true },
+      { id: 'ms_t8_4', x: 3400, y: 1200, width: 1000, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
+      { id: 'ms_t8_5', x: 4600, y: 1200, width: 900, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
+
+      // Tier 9 Upper Spire Ledges (y = 950)
+      { id: 'ms_t9_1', x: 800, y: 950, width: 950, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'ms_t9_2', x: 1950, y: 950, width: 850, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'ms_t9_3', x: 3200, y: 950, width: 850, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'ms_t9_4', x: 4250, y: 950, width: 950, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+
+      // Tier 10 Apex Approach (y = 700)
+      { id: 'ms_t10_1', x: 1100, y: 700, width: 1000, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t10_2', x: 2300, y: 700, width: 600, height: 30, color: '#60A5FA', type: 'stone', isPassableDown: true },
+      { id: 'ms_t10_3', x: 3100, y: 700, width: 600, height: 30, color: '#60A5FA', type: 'stone', isPassableDown: true },
+      { id: 'ms_t10_4', x: 3900, y: 700, width: 1000, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+
+      // Tier 11 Apex Shrine (y = 420)
+      { id: 'ms_t11_1', x: 1600, y: 480, width: 750, height: 30, color: '#FACC15', type: 'stone', isPassableDown: true },
+      { id: 'ms_apex_shrine', x: 2600, y: 420, width: 800, height: 36, color: '#FACC15', type: 'stone', isPassableDown: true },
+      { id: 'ms_t11_2', x: 3650, y: 480, width: 750, height: 30, color: '#FACC15', type: 'stone', isPassableDown: true },
+
+      // Vertical Boost Bouncers for rapid upward traversal
+      { id: 'ms_b_1', x: 500, y: 3180, width: 120, height: 24, color: '#FF5252', type: 'bounce', isPassableDown: true },
+      { id: 'ms_b_2', x: 5380, y: 3180, width: 120, height: 24, color: '#FF5252', type: 'bounce', isPassableDown: true },
+      { id: 'ms_b_3', x: 1900, y: 2680, width: 110, height: 24, color: '#FFD700', type: 'bounce', isPassableDown: true },
+      { id: 'ms_b_4', x: 3990, y: 2680, width: 110, height: 24, color: '#FFD700', type: 'bounce', isPassableDown: true },
+      { id: 'ms_b_5', x: 2950, y: 2180, width: 100, height: 24, color: '#38BDF8', type: 'bounce', isPassableDown: true },
+      { id: 'ms_b_6', x: 2950, y: 1180, width: 100, height: 24, color: '#38BDF8', type: 'bounce', isPassableDown: true },
     ],
   },
   mystery_depths: {
     id: 'mystery_depths',
     name: 'Mystery II: Subterranean Abyss',
-    description: 'A deep 7,200px underground cavern world filled with narrow basalt corridors, dripping toxic stalactites, low trenches, and the Infinite Gun hidden deep below the central shaft.',
+    description: 'A deep 7,200px underground cavern with continuous basalt ledges, interconnecting corridors, steam bounce-shafts, and the Infinite Gun hidden in the lower subterranean chamber.',
     theme: 'mystery_depths',
     size: 'mystery',
     width: 7200,
     height: 3200,
     bgColor: '#0F172A',
-    features: ['7200px Underground Abyss', 'Claustrophobic Basalt Tunnels', 'Abyssal Shaft Infinite Gun'],
+    features: ['7200px Underground Abyss', 'Multi-level Basalt Corridors', 'Abyssal Shaft Infinite Gun'],
     spawnPoints: [
-      { x: 1000, y: 1300 },
-      { x: 6200, y: 1300 },
-      { x: 2200, y: 1700 },
-      { x: 5000, y: 1700 },
-      { x: 3600, y: 900 },
-      { x: 1200, y: 2500 },
-      { x: 6000, y: 2500 },
-      { x: 2400, y: 2300 },
-      { x: 4800, y: 2300 },
-      { x: 3600, y: 1900 },
+      { x: 1000, y: 1000 },
+      { x: 6200, y: 1000 },
+      { x: 2200, y: 1500 },
+      { x: 5000, y: 1500 },
+      { x: 3600, y: 750 },
+      { x: 1200, y: 2200 },
+      { x: 6000, y: 2200 },
+      { x: 2400, y: 2000 },
+      { x: 4800, y: 2000 },
+      { x: 3600, y: 1750 },
     ],
     weaponSpawns: [
-      // Exactly 10 Normal Weapon Spawns spread across the deep caverns
-      { id: 'md_wpn_1', weaponType: 'pebble_blaster', x: 1000, y: 1200, respawnTime: 5 },
-      { id: 'md_wpn_2', weaponType: 'pistol', x: 6200, y: 1200, respawnTime: 7 },
-      { id: 'md_wpn_3', weaponType: 'burst_smg', x: 2200, y: 1600, respawnTime: 8 },
-      { id: 'md_wpn_4', weaponType: 'shotgun', x: 5000, y: 1600, respawnTime: 12 },
-      { id: 'md_wpn_5', weaponType: 'rifle', x: 3600, y: 800, respawnTime: 15 },
-      { id: 'md_wpn_6', weaponType: 'flame_gun', x: 1200, y: 2400, respawnTime: 18 },
-      { id: 'md_wpn_7', weaponType: 'grenade_launcher', x: 6000, y: 2400, respawnTime: 22 },
-      { id: 'md_wpn_8', weaponType: 'heavy_cannon', x: 2400, y: 2200, respawnTime: 25 },
-      { id: 'md_wpn_9', weaponType: 'rocket_launcher', x: 4800, y: 2200, respawnTime: 30 },
-      { id: 'md_wpn_10', weaponType: 'railgun', x: 3600, y: 1800, respawnTime: 45 },
-      // SUPER WEAPON #2: Infinite Gun located deep in the lower subterranean central shaft!
+      { id: 'md_wpn_1', weaponType: 'pebble_blaster', x: 800, y: 980, respawnTime: 5 },
+      { id: 'md_wpn_2', weaponType: 'pistol', x: 6400, y: 980, respawnTime: 7 },
+      { id: 'md_wpn_3', weaponType: 'burst_smg', x: 1000, y: 1480, respawnTime: 8 },
+      { id: 'md_wpn_4', weaponType: 'shotgun', x: 6200, y: 1480, respawnTime: 12 },
+      { id: 'md_wpn_5', weaponType: 'rifle', x: 3600, y: 730, respawnTime: 15 },
+      { id: 'md_wpn_6', weaponType: 'flame_gun', x: 1200, y: 1980, respawnTime: 18 },
+      { id: 'md_wpn_7', weaponType: 'grenade_launcher', x: 6000, y: 1980, respawnTime: 22 },
+      { id: 'md_wpn_8', weaponType: 'heavy_cannon', x: 2800, y: 1730, respawnTime: 25 },
+      { id: 'md_wpn_9', weaponType: 'rocket_launcher', x: 4400, y: 1730, respawnTime: 30 },
+      { id: 'md_wpn_10', weaponType: 'railgun', x: 3600, y: 1480, respawnTime: 45 },
+      // SUPER WEAPON #2: Infinite Gun in the lower subterranean shaft chamber
       { id: 'md_super_2', weaponType: 'infinite_gun', x: 3600, y: 2850, respawnTime: 120 },
     ],
     platforms: [
-      // Upper Level Cavern Floors (y ~ 1400)
-      { id: 'md_up_l', x: 500, y: 1400, width: 1400, height: 160, color: '#334155', type: 'stone', isPassableDown: false },
-      { id: 'md_up_c', x: 2800, y: 1000, width: 1600, height: 140, color: '#475569', type: 'stone', isPassableDown: false },
-      { id: 'md_up_r', x: 5300, y: 1400, width: 1400, height: 160, color: '#334155', type: 'stone', isPassableDown: false },
-      // Mid Cavern Trenches & Bridges (y ~ 1800 - 2000)
-      { id: 'md_mid_l', x: 1800, y: 1800, width: 900, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
-      { id: 'md_mid_r', x: 4500, y: 1800, width: 900, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
-      { id: 'md_mid_c', x: 3100, y: 1950, width: 1000, height: 32, color: '#78350F', type: 'wood', isPassableDown: true },
-      // Lower Cavern Floors (y ~ 2600)
-      { id: 'md_low_l', x: 800, y: 2600, width: 1200, height: 180, color: '#1E293B', type: 'ground', isPassableDown: false },
-      { id: 'md_low_c1', x: 2200, y: 2400, width: 800, height: 30, color: '#94A3B8', type: 'stone', isPassableDown: true },
-      { id: 'md_low_c2', x: 4200, y: 2400, width: 800, height: 30, color: '#94A3B8', type: 'stone', isPassableDown: true },
-      { id: 'md_low_r', x: 5200, y: 2600, width: 1200, height: 180, color: '#1E293B', type: 'ground', isPassableDown: false },
-      // Deepest Shaft & Infinite Gun Chamber (y ~ 2900)
+      // Level 1 - Roof Bridges & Upper Cavern (y = 800)
+      { id: 'md_l1_1', x: 400, y: 800, width: 1400, height: 32, color: '#334155', type: 'stone', isPassableDown: false },
+      { id: 'md_l1_2', x: 2000, y: 800, width: 1500, height: 32, color: '#475569', type: 'stone', isPassableDown: false },
+      { id: 'md_l1_3', x: 3700, y: 800, width: 1500, height: 32, color: '#475569', type: 'stone', isPassableDown: false },
+      { id: 'md_l1_4', x: 5400, y: 800, width: 1400, height: 32, color: '#334155', type: 'stone', isPassableDown: false },
+
+      // Level 2 - Upper Tunnels (y = 1050)
+      { id: 'md_l2_1', x: 200, y: 1050, width: 1600, height: 30, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'md_l2_2', x: 2000, y: 1050, width: 1000, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'md_l2_3', x: 3200, y: 1050, width: 800, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'md_l2_4', x: 4200, y: 1050, width: 1000, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'md_l2_5', x: 5400, y: 1050, width: 1600, height: 30, color: '#475569', type: 'stone', isPassableDown: true },
+
+      // Level 3 - High Basalt Ridge (y = 1300)
+      { id: 'md_l3_1', x: 500, y: 1300, width: 1600, height: 32, color: '#334155', type: 'stone', isPassableDown: true },
+      { id: 'md_l3_2', x: 2300, y: 1300, width: 1100, height: 32, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'md_l3_3', x: 3800, y: 1300, width: 1100, height: 32, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'md_l3_4', x: 5100, y: 1300, width: 1600, height: 32, color: '#334155', type: 'stone', isPassableDown: true },
+
+      // Level 4 - Mid Cavern Highway (y = 1550)
+      { id: 'md_l4_1', x: 300, y: 1550, width: 1700, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'md_l4_2', x: 2200, y: 1550, width: 1200, height: 30, color: '#78350F', type: 'wood', isPassableDown: true },
+      { id: 'md_l4_3', x: 3800, y: 1550, width: 1200, height: 30, color: '#78350F', type: 'wood', isPassableDown: true },
+      { id: 'md_l4_4', x: 5200, y: 1550, width: 1700, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+
+      // Level 5 - Lower Cavern Corridors (y = 1800)
+      { id: 'md_l5_1', x: 600, y: 1800, width: 1600, height: 30, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'md_l5_2', x: 2400, y: 1800, width: 1000, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'md_l5_3', x: 3800, y: 1800, width: 1000, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'md_l5_4', x: 5000, y: 1800, width: 1600, height: 30, color: '#475569', type: 'stone', isPassableDown: true },
+
+      // Level 6 - Abyss Trench Ledges (y = 2050)
+      { id: 'md_l6_1', x: 400, y: 2050, width: 1700, height: 32, color: '#334155', type: 'stone', isPassableDown: true },
+      { id: 'md_l6_2', x: 2300, y: 2050, width: 1100, height: 32, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'md_l6_3', x: 3800, y: 2050, width: 1100, height: 32, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'md_l6_4', x: 5100, y: 2050, width: 1700, height: 32, color: '#334155', type: 'stone', isPassableDown: true },
+
+      // Level 7 - Subterranean Floor (y = 2300)
+      { id: 'md_l7_1', x: 200, y: 2300, width: 2000, height: 140, color: '#1E293B', type: 'ground', isPassableDown: false },
+      { id: 'md_l7_2', x: 2400, y: 2300, width: 900, height: 30, color: '#94A3B8', type: 'stone', isPassableDown: true },
+      { id: 'md_l7_3', x: 3900, y: 2300, width: 900, height: 30, color: '#94A3B8', type: 'stone', isPassableDown: true },
+      { id: 'md_l7_4', x: 5000, y: 2300, width: 2000, height: 140, color: '#1E293B', type: 'ground', isPassableDown: false },
+
+      // Level 8 - Shaft Descent Stairs & Ledges (y = 2550 & 2800)
+      { id: 'md_l8_1', x: 2600, y: 2550, width: 750, height: 30, color: '#B45309', type: 'stone', isPassableDown: true },
+      { id: 'md_l8_2', x: 3850, y: 2550, width: 750, height: 30, color: '#B45309', type: 'stone', isPassableDown: true },
+      { id: 'md_l8_3', x: 2850, y: 2800, width: 500, height: 28, color: '#B45309', type: 'stone', isPassableDown: true },
+      { id: 'md_l8_4', x: 3850, y: 2800, width: 500, height: 28, color: '#B45309', type: 'stone', isPassableDown: true },
+
+      // Level 9 - Infinite Gun Deep Chamber Floor (y = 2950)
       { id: 'md_deep_chamber', x: 3200, y: 2950, width: 800, height: 140, color: '#EA580C', type: 'ground', isPassableDown: false },
-      { id: 'md_deep_ledge_l', x: 2800, y: 2800, width: 350, height: 26, color: '#B45309', type: 'stone', isPassableDown: true },
-      { id: 'md_deep_ledge_r', x: 4050, y: 2800, width: 350, height: 26, color: '#B45309', type: 'stone', isPassableDown: true },
-      // Steam Bouncers
-      { id: 'md_b_1', x: 600, y: 1280, width: 110, height: 24, color: '#EA580C', type: 'bounce', isPassableDown: true },
-      { id: 'md_b_2', x: 6490, y: 1280, width: 110, height: 24, color: '#EA580C', type: 'bounce', isPassableDown: true },
-      { id: 'md_b_3', x: 3550, y: 2300, width: 100, height: 24, color: '#F59E0B', type: 'bounce', isPassableDown: true },
+
+      // Steam Launch Bouncers for rapid vertical escape out of the lower shaft
+      { id: 'md_b_1', x: 600, y: 2280, width: 110, height: 24, color: '#EA580C', type: 'bounce', isPassableDown: true },
+      { id: 'md_b_2', x: 6490, y: 2280, width: 110, height: 24, color: '#EA580C', type: 'bounce', isPassableDown: true },
+      { id: 'md_b_3', x: 3100, y: 2930, width: 100, height: 24, color: '#F59E0B', type: 'bounce', isPassableDown: true },
+      { id: 'md_b_4', x: 4000, y: 2930, width: 100, height: 24, color: '#F59E0B', type: 'bounce', isPassableDown: true },
     ],
   },
   mystery_void: {
     id: 'mystery_void',
     name: 'Mystery III: Cosmic Rift Void',
-    description: 'An expansive 8,000px alien void archipelago featuring floating monoliths, strange gravity anomaly pads, long-distance jump traversal, and the terrifying Inferno Cannon perched on a distant void spire.',
+    description: 'An expansive 8,000px alien void archipelago featuring floating monoliths, gravity anomaly pads, interconnected skyways, and the terrifying Inferno Cannon perched on a distant void spire.',
     theme: 'mystery_void',
     size: 'mystery',
     width: 8000,
     height: 2800,
     bgColor: '#090D16',
-    features: ['8000px Cosmic Rift', 'Floating Alien Monoliths', 'Void Spire Inferno Cannon'],
+    features: ['8000px Cosmic Rift', 'Interconnected Monolith Chain', 'Void Spire Inferno Cannon'],
     spawnPoints: [
       { x: 800, y: 2200 },
-      { x: 4000, y: 2100 },
-      { x: 2400, y: 1900 },
-      { x: 5600, y: 1900 },
-      { x: 6800, y: 1600 },
-      { x: 1600, y: 1300 },
+      { x: 4000, y: 1950 },
+      { x: 2000, y: 1950 },
+      { x: 6000, y: 1950 },
+      { x: 6900, y: 1700 },
+      { x: 1500, y: 1450 },
       { x: 3200, y: 1200 },
       { x: 4800, y: 1200 },
-      { x: 6400, y: 1100 },
+      { x: 6500, y: 950 },
       { x: 4000, y: 700 },
     ],
     weaponSpawns: [
-      // Exactly 10 Normal Weapon Spawns spread across the sprawling void
-      { id: 'mv_wpn_1', weaponType: 'pebble_blaster', x: 800, y: 2100, respawnTime: 5 },
-      { id: 'mv_wpn_2', weaponType: 'pistol', x: 2400, y: 1800, respawnTime: 7 },
-      { id: 'mv_wpn_3', weaponType: 'burst_smg', x: 4000, y: 2000, respawnTime: 8 },
-      { id: 'mv_wpn_4', weaponType: 'shotgun', x: 5600, y: 1800, respawnTime: 12 },
-      { id: 'mv_wpn_5', weaponType: 'rifle', x: 6800, y: 1500, respawnTime: 15 },
-      { id: 'mv_wpn_6', weaponType: 'flame_gun', x: 1600, y: 1200, respawnTime: 18 },
-      { id: 'mv_wpn_7', weaponType: 'grenade_launcher', x: 3200, y: 1100, respawnTime: 22 },
-      { id: 'mv_wpn_8', weaponType: 'heavy_cannon', x: 4800, y: 1100, respawnTime: 25 },
-      { id: 'mv_wpn_9', weaponType: 'rocket_launcher', x: 6400, y: 1000, respawnTime: 30 },
-      { id: 'mv_wpn_10', weaponType: 'railgun', x: 4000, y: 600, respawnTime: 45 },
-      // SUPER WEAPON #3: Inferno Cannon on the far-distant isolated void sanctuary spire!
+      { id: 'mv_wpn_1', weaponType: 'pebble_blaster', x: 800, y: 2280, respawnTime: 5 },
+      { id: 'mv_wpn_2', weaponType: 'pistol', x: 2000, y: 2030, respawnTime: 7 },
+      { id: 'mv_wpn_3', weaponType: 'burst_smg', x: 5100, y: 2030, respawnTime: 8 },
+      { id: 'mv_wpn_4', weaponType: 'shotgun', x: 1800, y: 1780, respawnTime: 12 },
+      { id: 'mv_wpn_5', weaponType: 'rifle', x: 5400, y: 1780, respawnTime: 15 },
+      { id: 'mv_wpn_6', weaponType: 'flame_gun', x: 2000, y: 1530, respawnTime: 18 },
+      { id: 'mv_wpn_7', weaponType: 'grenade_launcher', x: 4600, y: 1530, respawnTime: 22 },
+      { id: 'mv_wpn_8', weaponType: 'heavy_cannon', x: 2000, y: 1280, respawnTime: 25 },
+      { id: 'mv_wpn_9', weaponType: 'rocket_launcher', x: 4600, y: 1280, respawnTime: 30 },
+      { id: 'mv_wpn_10', weaponType: 'railgun', x: 3800, y: 780, respawnTime: 45 },
+      // SUPER WEAPON #3: Inferno Cannon on the far-distant isolated void sanctuary spire
       { id: 'mv_super_3', weaponType: 'inferno_cannon', x: 7400, y: 650, respawnTime: 180 },
     ],
     platforms: [
-      // Monolith Ground Islands
-      { id: 'mv_mono_1', x: 400, y: 2300, width: 1000, height: 160, color: '#7C3AED', type: 'ground', isPassableDown: false },
-      { id: 'mv_mono_2', x: 1900, y: 2000, width: 1100, height: 150, color: '#6D28D9', type: 'ground', isPassableDown: false },
-      { id: 'mv_mono_3', x: 3400, y: 2200, width: 1200, height: 160, color: '#5B21B6', type: 'ground', isPassableDown: false },
-      { id: 'mv_mono_4', x: 5100, y: 2000, width: 1100, height: 150, color: '#6D28D9', type: 'ground', isPassableDown: false },
-      { id: 'mv_mono_5', x: 6400, y: 1700, width: 1000, height: 150, color: '#7C3AED', type: 'ground', isPassableDown: false },
-      // Floating Void Bridges (y ~ 1200 - 1500)
-      { id: 'mv_bridge_1', x: 1200, y: 1400, width: 800, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
-      { id: 'mv_bridge_2', x: 2800, y: 1300, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
-      { id: 'mv_bridge_3', x: 4400, y: 1300, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
-      { id: 'mv_bridge_4', x: 6000, y: 1200, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
-      // High Apex Void Sanctuary (y ~ 700)
-      { id: 'mv_apex_c', x: 3500, y: 720, width: 1000, height: 32, color: '#A855F7', type: 'stone', isPassableDown: true },
+      // Level 1 - Low Void Islands (y = 2300)
+      { id: 'mv_l1_1', x: 200, y: 2300, width: 1200, height: 160, color: '#7C3AED', type: 'ground', isPassableDown: false },
+      { id: 'mv_l1_2', x: 1600, y: 2300, width: 1200, height: 160, color: '#6D28D9', type: 'ground', isPassableDown: false },
+      { id: 'mv_l1_3', x: 3000, y: 2300, width: 1200, height: 160, color: '#5B21B6', type: 'ground', isPassableDown: false },
+      { id: 'mv_l1_4', x: 4400, y: 2300, width: 1200, height: 160, color: '#6D28D9', type: 'ground', isPassableDown: false },
+      { id: 'mv_l1_5', x: 5800, y: 2300, width: 1200, height: 160, color: '#7C3AED', type: 'ground', isPassableDown: false },
+      { id: 'mv_l1_6', x: 7000, y: 2300, width: 800, height: 160, color: '#7C3AED', type: 'ground', isPassableDown: false },
+
+      // Level 2 - Stepping Monoliths (y = 2050)
+      { id: 'mv_l2_1', x: 500, y: 2050, width: 800, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l2_2', x: 1500, y: 2050, width: 800, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l2_3', x: 2500, y: 2050, width: 900, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l2_4', x: 3600, y: 2050, width: 900, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l2_5', x: 4700, y: 2050, width: 800, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l2_6', x: 5700, y: 2050, width: 800, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l2_7', x: 6700, y: 2050, width: 800, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+
+      // Level 3 - Mid Void Bridges (y = 1800)
+      { id: 'mv_l3_1', x: 300, y: 1800, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l3_2', x: 1300, y: 1800, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l3_3', x: 2400, y: 1800, width: 1000, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l3_4', x: 3600, y: 1800, width: 1000, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l3_5', x: 4800, y: 1800, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l3_6', x: 5900, y: 1800, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l3_7', x: 6900, y: 1800, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+
+      // Level 4 - Monolith Skyway (y = 1550)
+      { id: 'mv_l4_1', x: 600, y: 1550, width: 900, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l4_2', x: 1700, y: 1550, width: 900, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l4_3', x: 2800, y: 1550, width: 1100, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l4_4', x: 4100, y: 1550, width: 1100, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l4_5', x: 5400, y: 1550, width: 900, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l4_6', x: 6500, y: 1550, width: 900, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+
+      // Level 5 - High Rift Catwalks (y = 1300)
+      { id: 'mv_l5_1', x: 400, y: 1300, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l5_2', x: 1500, y: 1300, width: 1000, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l5_3', x: 2700, y: 1300, width: 1200, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l5_4', x: 4100, y: 1300, width: 1200, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l5_5', x: 5500, y: 1300, width: 1000, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l5_6', x: 6700, y: 1300, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+
+      // Level 6 - Upper Void Sanctuary (y = 1050)
+      { id: 'mv_l6_1', x: 800, y: 1050, width: 1000, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l6_2', x: 2000, y: 1050, width: 1000, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l6_3', x: 3200, y: 1050, width: 1400, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l6_4', x: 4800, y: 1050, width: 1000, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l6_5', x: 6000, y: 1050, width: 1000, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+
+      // Level 7 - Cosmic Apex & Inferno Spire (y = 800 & 750)
+      { id: 'mv_l7_1', x: 1200, y: 800, width: 1000, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l7_2', x: 2400, y: 800, width: 1200, height: 32, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l7_3', x: 3800, y: 800, width: 1200, height: 32, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_l7_4', x: 5200, y: 800, width: 1000, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_l7_5', x: 6400, y: 800, width: 700, height: 30, color: '#DC2626', type: 'stone', isPassableDown: true },
       { id: 'mv_inferno_spire', x: 7100, y: 750, width: 600, height: 36, color: '#DC2626', type: 'stone', isPassableDown: true },
-      // Anomaly Jump Pads (Gravity Launchers)
-      { id: 'mv_pad_1', x: 600, y: 2180, width: 120, height: 26, color: '#A855F7', type: 'bounce', isPassableDown: true },
-      { id: 'mv_pad_2', x: 2900, y: 1880, width: 110, height: 26, color: '#A855F7', type: 'bounce', isPassableDown: true },
-      { id: 'mv_pad_3', x: 4500, y: 2080, width: 110, height: 26, color: '#A855F7', type: 'bounce', isPassableDown: true },
-      { id: 'mv_pad_4', x: 6900, y: 1580, width: 120, height: 26, color: '#EF4444', type: 'bounce', isPassableDown: true },
+
+      // Gravity Anomaly Jump Launchers
+      { id: 'mv_pad_1', x: 600, y: 2280, width: 120, height: 24, color: '#A855F7', type: 'bounce', isPassableDown: true },
+      { id: 'mv_pad_2', x: 2900, y: 2280, width: 110, height: 24, color: '#A855F7', type: 'bounce', isPassableDown: true },
+      { id: 'mv_pad_3', x: 4500, y: 2280, width: 110, height: 24, color: '#A855F7', type: 'bounce', isPassableDown: true },
+      { id: 'mv_pad_4', x: 6900, y: 1780, width: 120, height: 24, color: '#EF4444', type: 'bounce', isPassableDown: true },
     ],
   },
 };
