@@ -332,6 +332,7 @@ export class GameRenderer {
       ctx.quadraticCurveTo(1100, 520, 1600, 750);
       ctx.lineTo(1600, 950);
       ctx.lineTo(-100, 950);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
@@ -430,6 +431,7 @@ export class GameRenderer {
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(arena.width / 2, arena.height + 200, 500, 0, Math.PI, true);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
     } else if (arena.theme === 'forest') {
@@ -444,6 +446,7 @@ export class GameRenderer {
       }
       ctx.lineTo(arena.width, arena.height);
       ctx.lineTo(0, arena.height);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
@@ -485,6 +488,7 @@ export class GameRenderer {
       }
       ctx.lineTo(arena.width, arena.height);
       ctx.lineTo(0, arena.height);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
     } else if (arena.theme === 'metropolis') {
@@ -520,6 +524,7 @@ export class GameRenderer {
       }
       ctx.lineTo(arena.width, arena.height);
       ctx.lineTo(0, arena.height);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
@@ -539,6 +544,7 @@ export class GameRenderer {
       }
       ctx.lineTo(arena.width, arena.height);
       ctx.lineTo(0, arena.height);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
@@ -563,6 +569,7 @@ export class GameRenderer {
       }
       ctx.lineTo(arena.width, arena.height);
       ctx.lineTo(0, arena.height);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
@@ -1817,27 +1824,32 @@ export class GameRenderer {
     ctx.save();
     ctx.fillStyle = '#FFFFFF';
     ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 3.5;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
 
+    const baseY = y + r * 0.35;
+    const leftX = x - r * 0.65;
+    const rightX = x + r * 1.33;
+
+    // 1. Fill cloud interior
     ctx.beginPath();
-    ctx.arc(x, y, r * 0.55, 0, Math.PI * 2);
+    ctx.arc(x - r * 0.25, y, r * 0.42, 0, Math.PI * 2);
+    ctx.arc(x + r * 0.15, y - r * 0.3, r * 0.55, 0, Math.PI * 2);
+    ctx.arc(x + r * 0.65, y - r * 0.2, r * 0.48, 0, Math.PI * 2);
+    ctx.arc(x + r * 0.95, y + r * 0.05, r * 0.40, 0, Math.PI * 2);
+    ctx.fillRect(leftX, y - r * 0.1, rightX - leftX, baseY - (y - r * 0.1));
     ctx.fill();
 
+    // 2. Stroke complete outer perimeter (including bottom base line)
     ctx.beginPath();
-    ctx.arc(x + r * 0.45, y - r * 0.25, r * 0.65, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(x + r * 0.95, y, r * 0.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillRect(x, y - r * 0.1, r * 0.95, r * 0.45);
-
-    // Outer outline stroke
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.55, Math.PI * 0.7, Math.PI * 1.8);
-    ctx.arc(x + r * 0.45, y - r * 0.25, r * 0.65, Math.PI * 1.1, Math.PI * 1.9);
-    ctx.arc(x + r * 0.95, y, r * 0.5, Math.PI * 1.7, Math.PI * 0.4);
+    ctx.moveTo(leftX, baseY);
+    ctx.arc(x - r * 0.25, y, r * 0.42, Math.PI * 0.75, Math.PI * 1.45);
+    ctx.arc(x + r * 0.15, y - r * 0.3, r * 0.55, Math.PI * 1.15, Math.PI * 1.95);
+    ctx.arc(x + r * 0.65, y - r * 0.2, r * 0.48, Math.PI * 1.6, Math.PI * 2.2);
+    ctx.arc(x + r * 0.95, y + r * 0.05, r * 0.40, Math.PI * 1.85, Math.PI * 0.35);
+    ctx.lineTo(leftX, baseY); // Complete bottom line stroke connecting base
+    ctx.closePath();
     ctx.stroke();
 
     ctx.restore();
@@ -1846,27 +1858,54 @@ export class GameRenderer {
   private drawCartoonTree(x: number, y: number, size: number) {
     const ctx = this.ctx;
     ctx.save();
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 3;
+
+    // 1. Trunk
     ctx.fillStyle = '#8D6E63';
     ctx.strokeStyle = '#2D3748';
-    ctx.lineWidth = 3;
-    ctx.fillRect(x - 10, y, 20, 80);
-    ctx.strokeRect(x - 10, y, 20, 80);
+    ctx.beginPath();
+    ctx.rect(x - 10, y, 20, 80);
+    ctx.fill();
+    ctx.stroke();
 
+    // 2. Fill foliage canopy solid
     ctx.fillStyle = '#4CAF50';
     ctx.beginPath();
     ctx.arc(x, y - 20, size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
     ctx.arc(x - size * 0.5, y, size * 0.7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
     ctx.arc(x + size * 0.5, y, size * 0.7, 0, Math.PI * 2);
     ctx.fill();
+
+    // 3. Stroke outer canopy boundary without internal line artifacts
+    ctx.strokeStyle = '#2D3748';
+    ctx.beginPath();
+    ctx.arc(x - size * 0.5, y, size * 0.7, Math.PI * 0.5, Math.PI * 1.55);
+    ctx.arc(x, y - 20, size, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.arc(x + size * 0.5, y, size * 0.7, Math.PI * 1.45, Math.PI * 0.5);
+    ctx.closePath();
     ctx.stroke();
 
-    ctx.fillStyle = '#FF3B30';
-    ctx.beginPath();
-    ctx.arc(x - 15, y - 25, 6, 0, Math.PI * 2);
-    ctx.arc(x + 18, y - 10, 6, 0, Math.PI * 2);
-    ctx.arc(x, y + 10, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+    // 4. Berries / Apples
+    ctx.fillStyle = '#EF4444';
+    ctx.strokeStyle = '#7F1D1D';
+    ctx.lineWidth = 1.5;
+    const berries = [
+      { bx: x - 15, by: y - 25 },
+      { bx: x + 18, by: y - 10 },
+      { bx: x, by: y + 10 },
+    ];
+    for (const b of berries) {
+      ctx.beginPath();
+      ctx.arc(b.bx, b.by, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
 
     ctx.restore();
   }
