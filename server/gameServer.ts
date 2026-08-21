@@ -200,13 +200,10 @@ export class GameServer {
     client.customization = playerCust;
     const fighter = createInitialFighter(
       client.id,
-      playerCust.name,
-      playerCust.gender,
-      playerCust.color,
-      playerCust.hat,
-      spawn.x,
-      spawn.y,
-      false
+      playerCust,
+      spawn.x as any,
+      spawn.y as any,
+      false as any
     );
 
     const validDuration = [0, 300, 600, 900].includes(matchDuration) ? matchDuration : 300;
@@ -329,13 +326,10 @@ export class GameServer {
 
     const fighter = createInitialFighter(
       client.id,
-      playerCust.name,
-      playerCust.gender,
-      playerCust.color,
-      playerCust.hat,
-      spawn.x,
-      spawn.y,
-      false
+      playerCust,
+      spawn.x as any,
+      spawn.y as any,
+      false as any
     );
 
     room.players[client.id] = fighter;
@@ -352,7 +346,7 @@ export class GameServer {
 
     if (room) {
       delete room.players[client.id];
-      const remainingHumanIds = Object.keys(room.players).filter((id) => !room.players[id].isBot);
+      const remainingHumanIds = Object.keys(room.players).filter((id) => !room.players[id].isBot && this.clients.has(id));
 
       if (remainingHumanIds.length === 0) {
         this.stopRoomLoop(roomId);

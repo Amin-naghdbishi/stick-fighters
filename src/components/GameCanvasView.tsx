@@ -419,9 +419,6 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
       const dt = Math.min(0.05, (now - lastTime) / 1000);
       lastTime = now;
 
-      // Keep viewport dimensions updated
-      updateSize();
-
       const curRoom = roomRef.current;
       const curPops = comicPopsRef.current;
       const arena = ARENAS[curRoom.mapId] || ARENAS.park;

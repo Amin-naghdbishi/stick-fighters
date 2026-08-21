@@ -1170,7 +1170,7 @@ export class GameRenderer {
     if (f.effect === 'hearts') {
       ctx.fillStyle = '#F472B6';
       for (let i = 0; i < 3; i++) {
-        const floatY = cy - 20 - ((time * 0.05 + i * 30) % 60);
+        const floatY = cy - 20 - ((time * 0.05 + i * 20) % 55);
         const floatX = cx + Math.sin(time * 0.005 + i) * 16;
         ctx.beginPath();
         ctx.arc(floatX - 3, floatY - 3, 4, Math.PI, 0);
@@ -1193,7 +1193,7 @@ export class GameRenderer {
       ctx.strokeStyle = '#38BDF8';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 4; i++) {
         const rx = cx + (Math.random() - 0.5) * 35;
         const ry = cy - Math.random() * 65;
         ctx.moveTo(rx, ry);
@@ -1201,10 +1201,10 @@ export class GameRenderer {
       }
       ctx.stroke();
     } else if (f.effect === 'smoke' || f.effect === 'dark_smoke') {
-      ctx.fillStyle = f.effect === 'dark_smoke' ? 'rgba(15, 23, 42, 0.45)' : 'rgba(148, 163, 184, 0.4)';
-      for (let i = 0; i < 4; i++) {
-        const sx = cx + (Math.random() - 0.5) * 30;
-        const sy = cy - 5 - Math.random() * 25;
+      ctx.fillStyle = f.effect === 'dark_smoke' ? 'rgba(15, 23, 42, 0.55)' : 'rgba(148, 163, 184, 0.4)';
+      for (let i = 0; i < 5; i++) {
+        const sx = cx + (Math.random() - 0.5) * 32;
+        const sy = cy - 5 - Math.random() * 30;
         const sr = 6 + Math.random() * 8;
         ctx.beginPath();
         ctx.arc(sx, sy, sr, 0, Math.PI * 2);
@@ -1212,32 +1212,32 @@ export class GameRenderer {
       }
     } else if (f.effect === 'sparkles') {
       ctx.fillStyle = '#FEF08A';
-      for (let i = 0; i < 5; i++) {
-        const sx = cx + (Math.random() - 0.5) * 40;
-        const sy = cy - Math.random() * 70;
+      for (let i = 0; i < 6; i++) {
+        const sx = cx + (Math.random() - 0.5) * 44;
+        const sy = cy - Math.random() * 75;
         ctx.beginPath();
-        ctx.arc(sx, sy, 2 + Math.random() * 2, 0, Math.PI * 2);
+        ctx.arc(sx, sy, 2 + Math.random() * 2.5, 0, Math.PI * 2);
         ctx.fill();
       }
     } else if (f.effect === 'aura') {
-      ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
-      const auraPulse = Math.sin(time * 0.01) * 5;
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.28)';
+      const auraPulse = Math.sin(time * 0.01) * 6;
       ctx.beginPath();
-      ctx.arc(cx, cy - 30, 36 + auraPulse, 0, Math.PI * 2);
+      ctx.arc(cx, cy - 30, 38 + auraPulse, 0, Math.PI * 2);
       ctx.fill();
     } else if (f.effect === 'cute_particles') {
-      ctx.fillStyle = 'rgba(244, 114, 182, 0.4)';
+      ctx.fillStyle = 'rgba(244, 114, 182, 0.45)';
       for (let i = 0; i < 4; i++) {
         const bx = cx + Math.sin(time * 0.004 + i) * 22;
         const by = cy - 20 - ((time * 0.04 + i * 20) % 50);
         ctx.beginPath();
-        ctx.arc(bx, by, 4 + (i % 3), 0, Math.PI * 2);
+        ctx.arc(bx, by, 4.5, 0, Math.PI * 2);
         ctx.fill();
       }
     } else if (f.effect === 'light_glow') {
-      ctx.fillStyle = 'rgba(253, 224, 71, 0.28)';
+      ctx.fillStyle = 'rgba(253, 224, 71, 0.32)';
       ctx.beginPath();
-      ctx.arc(cx, cy - 35, 42, 0, Math.PI * 2);
+      ctx.arc(cx, cy - 35, 44, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -1258,41 +1258,115 @@ export class GameRenderer {
     const capeColor = f.capeColor || f.secondaryColor || '#EF4444';
     const sway = Math.sin(time * 0.01 + f.vx * 0.15) * 8;
 
-    if (f.cape.includes('cape')) {
+    if (f.cape === 'short_cape') {
       ctx.fillStyle = capeColor;
       ctx.strokeStyle = '#0F172A';
       ctx.beginPath();
       ctx.moveTo(nx - 4, ny);
-      ctx.quadraticCurveTo(nx - 16, ny + 15 + sway, nx - 22, ny + 45 + sway);
-      ctx.lineTo(nx + 6, ny + 40 + sway * 0.5);
+      ctx.quadraticCurveTo(nx - 14, ny + 12 + sway, nx - 18, ny + 28 + sway);
+      ctx.lineTo(nx + 4, ny + 24 + sway * 0.5);
       ctx.lineTo(nx + 4, ny);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-    } else if (f.cape.includes('backpack')) {
-      ctx.fillStyle = f.capeColor || '#8D6E63';
+    } else if (f.cape === 'long_cape' || f.cape === 'superhero_cape') {
+      ctx.fillStyle = capeColor;
       ctx.strokeStyle = '#0F172A';
-      ctx.fillRect(nx - 14, ny + 2, 10, 20);
-      ctx.strokeRect(nx - 14, ny + 2, 10, 20);
+      ctx.beginPath();
+      ctx.moveTo(nx - 4, ny);
+      ctx.quadraticCurveTo(nx - 18, ny + 15 + sway, nx - 26, ny + 52 + sway);
+      ctx.lineTo(nx + 6, ny + 46 + sway * 0.5);
+      ctx.lineTo(nx + 4, ny);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (f.cape === 'torn_cape') {
+      ctx.fillStyle = capeColor;
+      ctx.strokeStyle = '#0F172A';
+      ctx.beginPath();
+      ctx.moveTo(nx - 4, ny);
+      ctx.lineTo(nx - 22, ny + 45 + sway);
+      ctx.lineTo(nx - 15, ny + 40 + sway);
+      ctx.lineTo(nx - 8, ny + 48 + sway);
+      ctx.lineTo(nx, ny + 42 + sway);
+      ctx.lineTo(nx + 4, ny);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (f.cape === 'royal_cape') {
+      ctx.fillStyle = capeColor;
+      ctx.strokeStyle = '#0F172A';
+      ctx.beginPath();
+      ctx.moveTo(nx - 5, ny);
+      ctx.lineTo(nx - 24, ny + 50 + sway);
+      ctx.lineTo(nx + 6, ny + 44 + sway);
+      ctx.lineTo(nx + 5, ny);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Gold trim
+      ctx.fillStyle = '#FACC15';
+      ctx.fillRect(nx - 5, ny, 10, 4);
+    } else if (f.cape === 'ninja_cape') {
+      ctx.fillStyle = capeColor;
+      ctx.strokeStyle = '#0F172A';
+      ctx.beginPath();
+      ctx.moveTo(nx, ny);
+      ctx.quadraticCurveTo(nx - 22, ny - 5 + sway, nx - 32, ny + 8 + sway);
+      ctx.lineTo(nx - 26, ny + 14 + sway);
+      ctx.lineTo(nx, ny + 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (f.cape === 'small_backpack' || f.cape === 'large_backpack' || f.cape === 'military_backpack') {
+      const packW = f.cape === 'large_backpack' ? 14 : 11;
+      const packH = f.cape === 'large_backpack' ? 24 : 18;
+      ctx.fillStyle = f.capeColor || f.secondaryColor || '#8D6E63';
+      ctx.strokeStyle = '#0F172A';
+      ctx.roundRect(nx - packW - 4, ny + 2, packW, packH, 3);
+      ctx.fill();
+      ctx.stroke();
+      // Zipper pocket
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(nx - packW - 2, ny + packH - 6, packW - 4, 4);
     } else if (f.cape === 'jetpack') {
       ctx.fillStyle = '#64748B';
       ctx.strokeStyle = '#0F172A';
-      ctx.fillRect(nx - 14, ny, 8, 22);
-      ctx.strokeRect(nx - 14, ny, 8, 22);
-      ctx.fillStyle = '#EF4444';
-      ctx.beginPath();
-      ctx.arc(nx - 10, ny + 26, 4 + Math.random() * 3, 0, Math.PI * 2);
+      ctx.roundRect(nx - 15, ny - 2, 10, 24, 3);
       ctx.fill();
-    } else if (f.cape.includes('wings')) {
+      ctx.stroke();
+      // Dual Nozzles
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(nx - 14, ny + 22, 4, 5);
+      ctx.fillRect(nx - 9, ny + 22, 4, 5);
+      // Flame particles
+      ctx.fillStyle = Math.random() < 0.5 ? '#EF4444' : '#F97316';
+      ctx.beginPath();
+      ctx.arc(nx - 12, ny + 30, 4 + Math.random() * 3, 0, Math.PI * 2);
+      ctx.arc(nx - 7, ny + 30, 4 + Math.random() * 3, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (f.cape === 'angel_wings' || f.cape === 'small_wings') {
       const wingFlap = Math.sin(time * 0.008) * 8;
-      ctx.fillStyle = f.cape === 'demon_wings' ? '#1E293B' : f.cape === 'small_wings' ? 'rgba(244, 114, 182, 0.7)' : '#FFFFFF';
+      ctx.fillStyle = f.cape === 'small_wings' ? 'rgba(244, 114, 182, 0.75)' : '#FFFFFF';
       ctx.strokeStyle = '#0F172A';
-
-      // Left Wing
       ctx.beginPath();
       ctx.moveTo(nx, ny + 5);
       ctx.quadraticCurveTo(nx - 28, ny - 25 + wingFlap, nx - 38, ny + 5 + wingFlap);
-      ctx.quadraticCurveTo(nx - 20, ny + 15, nx, ny + 15);
+      ctx.quadraticCurveTo(nx - 20, ny + 18, nx, ny + 15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (f.cape === 'demon_wings' || f.cape === 'large_wings') {
+      const wingFlap = Math.sin(time * 0.008) * 8;
+      ctx.fillStyle = f.cape === 'demon_wings' ? '#1E293B' : '#DC2626';
+      ctx.strokeStyle = '#0F172A';
+      ctx.beginPath();
+      ctx.moveTo(nx, ny + 5);
+      ctx.lineTo(nx - 22, ny - 28 + wingFlap);
+      ctx.lineTo(nx - 36, ny - 10 + wingFlap);
+      ctx.lineTo(nx - 28, ny + 6 + wingFlap);
+      ctx.lineTo(nx - 42, ny + 18 + wingFlap);
+      ctx.lineTo(nx, ny + 16);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
@@ -1325,14 +1399,40 @@ export class GameRenderer {
     for (const ft of feet) {
       ctx2.beginPath();
       if (f.shoes === 'cartoon_shoes') {
-        ctx2.ellipse(ft.x + 2, ft.y, 8, 5, 0, 0, Math.PI * 2);
+        ctx2.ellipse(ft.x + 2, ft.y, 8, 5.5, 0, 0, Math.PI * 2);
+        ctx2.fill();
+        ctx2.stroke();
       } else if (f.shoes === 'cute_shoes') {
-        ctx2.ellipse(ft.x + 2, ft.y, 7, 4.5, 0, 0, Math.PI * 2);
+        // Bunny slipper
+        ctx2.ellipse(ft.x + 2, ft.y, 7, 5, 0, 0, Math.PI * 2);
+        ctx2.fill();
+        ctx2.stroke();
+        ctx2.fillStyle = '#F472B6';
+        ctx2.fillRect(ft.x + 4, ft.y - 6, 2, 4);
+      } else if (f.shoes === 'samurai_sandals') {
+        // Geta Wooden Block
+        ctx2.fillStyle = '#8D6E63';
+        ctx2.fillRect(ft.x - 3, ft.y - 1, 10, 4);
+        ctx2.strokeRect(ft.x - 3, ft.y - 1, 10, 4);
+        ctx2.fillStyle = '#EF4444';
+        ctx2.fillRect(ft.x + 1, ft.y - 3, 2, 3);
+      } else if (f.shoes === 'military_boots' || f.shoes === 'boots') {
+        ctx2.fillStyle = shoeColor;
+        ctx2.roundRect(ft.x - 3, ft.y - 6, 9, 8, 2);
+        ctx2.fill();
+        ctx2.stroke();
+      } else if (f.shoes === 'futuristic') {
+        ctx2.fillStyle = '#06B6D4';
+        ctx2.roundRect(ft.x - 3, ft.y - 3, 10, 5, 2);
+        ctx2.fill();
+        ctx2.stroke();
+        ctx2.fillStyle = '#38BDF8';
+        ctx2.fillRect(ft.x - 2, ft.y + 1, 8, 2);
       } else {
         ctx2.roundRect(ft.x - 3, ft.y - 3, 9, 5, 2);
+        ctx2.fill();
+        ctx2.stroke();
       }
-      ctx2.fill();
-      ctx2.stroke();
     }
 
     ctx2.restore();
@@ -1364,14 +1464,42 @@ export class GameRenderer {
     if (f.outfit === 'cute_tshirt') {
       ctx.fillStyle = '#EF4444';
       ctx.beginPath();
-      ctx.arc(nx, ny + 10, 3, 0, Math.PI * 2);
+      ctx.arc(nx, ny + 10, 3.5, 0, Math.PI * 2);
       ctx.fill();
-    } else if (f.outfit === 'combat' || f.outfit === 'tactical') {
+    } else if (f.outfit === 'cute_hoodie' || f.outfit === 'hoodie') {
+      // Hood pouch
+      ctx.fillStyle = f.accentColor || '#1E293B';
+      ctx.fillRect(nx - 4, ny + 14, 8, 7);
+      ctx.strokeRect(nx - 4, ny + 14, 8, 7);
+    } else if (f.outfit === 'combat' || f.outfit === 'tactical' || f.outfit === 'soldier') {
       ctx.fillStyle = '#334155';
       ctx.fillRect(nx - 5, ny + 6, 10, 8);
+      ctx.strokeRect(nx - 5, ny + 6, 10, 8);
+    } else if (f.outfit === 'dark_warrior') {
+      ctx.fillStyle = '#991B1B';
+      ctx.beginPath();
+      ctx.moveTo(nx, ny + 4);
+      ctx.lineTo(nx - 6, ny + 18);
+      ctx.lineTo(nx + 6, ny + 18);
+      ctx.closePath();
+      ctx.fill();
+    } else if (f.outfit === 'samurai' || f.outfit === 'ninja') {
+      ctx.strokeStyle = '#FACC15';
+      ctx.beginPath();
+      ctx.moveTo(nx - 5, ny + 2);
+      ctx.lineTo(nx + 5, ny + 20);
+      ctx.moveTo(nx + 5, ny + 2);
+      ctx.lineTo(nx - 5, ny + 20);
+      ctx.stroke();
     } else if (f.outfit === 'royal') {
       ctx.fillStyle = '#FACC15';
-      ctx.fillRect(nx - 1, ny + 2, 2, Math.abs(bodyH));
+      ctx.fillRect(nx - 1.5, ny + 2, 3, Math.abs(bodyH));
+    } else if (f.outfit === 'space_suit' || f.outfit === 'robot') {
+      ctx.fillStyle = '#06B6D4';
+      ctx.beginPath();
+      ctx.arc(nx, ny + 12, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
     }
 
     ctx.restore();
@@ -1418,6 +1546,11 @@ export class GameRenderer {
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+    } else if (f.hair === 'messy' || f.hair === 'curly') {
+      ctx.beginPath();
+      ctx.arc(hx, hy - 4, 14.5, Math.PI * 0.75, Math.PI * 2.25);
+      ctx.fill();
+      ctx.stroke();
     } else if (f.hair === 'mohawk') {
       ctx.beginPath();
       ctx.moveTo(hx - 3, hy - 10);
@@ -1439,9 +1572,17 @@ export class GameRenderer {
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-    } else if (f.hair === 'large_cartoon' || f.hair === 'afro') {
+    } else if (f.hair === 'large_cartoon' || f.hair === 'afro' || f.hair === 'wild') {
       ctx.beginPath();
       ctx.arc(hx, hy - 8, 19, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    } else if (f.hair === 'dreads' || f.hair === 'bob') {
+      ctx.beginPath();
+      ctx.arc(hx, hy - 3, 14, Math.PI * 0.7, Math.PI * 2.3);
+      ctx.lineTo(hx - 12, hy + 12);
+      ctx.lineTo(hx - 6, hy + 6);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
     }
@@ -1514,6 +1655,45 @@ export class GameRenderer {
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+    } else if (hat === 'wizard') {
+      ctx.fillStyle = '#7C3AED';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 11, 17, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(hx - 10, hy - 12);
+      ctx.lineTo(hx, hy - 32);
+      ctx.lineTo(hx + 10, hy - 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (hat === 'samurai') {
+      ctx.fillStyle = '#0F172A';
+      ctx.beginPath();
+      ctx.arc(hx, hy - 5, 14.5, Math.PI, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Gold Horn Crest
+      ctx.fillStyle = '#FACC15';
+      ctx.beginPath();
+      ctx.moveTo(hx - 10, hy - 22);
+      ctx.lineTo(hx, hy - 14);
+      ctx.lineTo(hx + 10, hy - 22);
+      ctx.lineTo(hx, hy - 11);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (hat === 'pirate') {
+      ctx.fillStyle = '#1E293B';
+      ctx.beginPath();
+      ctx.moveTo(hx - 18, hy - 10);
+      ctx.lineTo(hx, hy - 25);
+      ctx.lineTo(hx + 18, hy - 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
     } else if (hat === 'ninja') {
       ctx.fillStyle = '#0F172A';
       ctx.fillRect(hx - 13, hy - 1, 26, 12);
@@ -1579,13 +1759,42 @@ export class GameRenderer {
       ctx.arc(hx, hy - 1, 16, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-    } else if (hat === 'military_helmet' || hat === 'helmet') {
+    } else if (hat === 'military_helmet' || hat === 'helmet' || hat === 'army_hat' || hat === 'jungle_hat') {
       ctx.fillStyle = '#334155';
       ctx.beginPath();
       ctx.arc(hx, hy - 3, 14.5, Math.PI, 0);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+    } else if (hat === 'cone') {
+      ctx.fillStyle = '#F43F5E';
+      ctx.beginPath();
+      ctx.moveTo(hx - 8, hy - 12);
+      ctx.lineTo(hx, hy - 28);
+      ctx.lineTo(hx + 8, hy - 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (hat === 'beanie') {
+      ctx.fillStyle = '#0284C7';
+      ctx.beginPath();
+      ctx.arc(hx, hy - 5, 14, Math.PI * 0.8, Math.PI * 2.2);
+      ctx.fill();
+      ctx.stroke();
+    } else if (hat === 'robot_antennas') {
+      ctx.strokeStyle = '#64748B';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(hx - 6, hy - 12);
+      ctx.lineTo(hx - 10, hy - 24);
+      ctx.moveTo(hx + 6, hy - 12);
+      ctx.lineTo(hx + 10, hy - 24);
+      ctx.stroke();
+      ctx.fillStyle = '#EF4444';
+      ctx.beginPath();
+      ctx.arc(hx - 10, hy - 25, 3, 0, Math.PI * 2);
+      ctx.arc(hx + 10, hy - 25, 3, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     ctx.restore();
@@ -1622,11 +1831,32 @@ export class GameRenderer {
       ctx.fillStyle = '#1E293B';
       ctx.fillRect(hx - 2, hy, 14, 10);
       ctx.strokeRect(hx - 2, hy, 14, 10);
+    } else if (f.face === 'gas_mask') {
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(hx - 4, hy - 1, 17, 11);
+      ctx.strokeRect(hx - 4, hy - 1, 17, 11);
+      ctx.fillStyle = '#F59E0B';
+      ctx.beginPath();
+      ctx.arc(hx + 10, hy + 4, 4, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (f.face === 'samurai_mask') {
+      ctx.fillStyle = '#DC2626';
+      ctx.fillRect(hx - 2, hy + 1, 14, 9);
+      ctx.strokeRect(hx - 2, hy + 1, 14, 9);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(hx + 2, hy + 4, 2, 4);
+      ctx.fillRect(hx + 8, hy + 4, 2, 4);
     } else if (f.face === 'cute_blush') {
       ctx.fillStyle = 'rgba(244, 114, 182, 0.7)';
       ctx.beginPath();
       ctx.arc(hx + 5, hy + 2, 3, 0, Math.PI * 2);
       ctx.fill();
+    } else if (f.face === 'scar') {
+      ctx.strokeStyle = '#DC2626';
+      ctx.beginPath();
+      ctx.moveTo(hx + 3, hy - 8);
+      ctx.lineTo(hx + 6, hy + 4);
+      ctx.stroke();
     }
 
     ctx.restore();
@@ -1671,6 +1901,17 @@ export class GameRenderer {
       ctx.moveTo(nx - 6, ny);
       ctx.lineTo(nx + 6, ny + 22);
       ctx.stroke();
+    } else if (f.accessory === 'shoulder_pad') {
+      ctx.fillStyle = '#0F172A';
+      ctx.beginPath();
+      ctx.arc(nx - 7, ny + 2, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    } else if (f.accessory === 'badge') {
+      ctx.fillStyle = '#FACC15';
+      ctx.beginPath();
+      ctx.arc(nx + 2, ny + 6, 3, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     ctx.restore();
