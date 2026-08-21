@@ -42,9 +42,29 @@ class SoundEngine {
 
   // Track step pointers
   private stepIndex: number = 0;
+  private userInteracted: boolean = false;
 
   constructor() {
     this.loadSettings();
+    this.setupGestureListeners();
+  }
+
+  private setupGestureListeners() {
+    if (typeof window === 'undefined') return;
+    const unlock = () => {
+      this.unlockAudio();
+    };
+
+    const options = { capture: true, passive: true };
+    window.addEventListener('pointerdown', unlock, options);
+    window.addEventListener('keydown', unlock, options);
+    window.addEventListener('touchstart', unlock, options);
+    window.addEventListener('click', unlock, options);
+  }
+
+  public unlockAudio() {
+    this.userInteracted = true;
+    this.initCtx();
   }
 
   private loadSettings() {
@@ -82,7 +102,7 @@ class SoundEngine {
         this.applyGains();
       }
     }
-    if (this.ctx && this.ctx.state === 'suspended') {
+    if (this.ctx && this.ctx.state === 'suspended' && this.userInteracted) {
       this.ctx.resume().catch(() => {});
     }
   }
@@ -1504,14 +1524,20 @@ class SoundEngine {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
+    const filter = this.ctx.createBiquadFilter();
     const gain = this.ctx.createGain();
-    osc.type = 'highpass' as any; // fallback
-    osc.frequency.setValueAtTime(1200, now);
 
-    gain.gain.setValueAtTime(vol, now);
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(8000, now);
+
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(7000, now);
+
+    gain.gain.setValueAtTime(vol * 0.4, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
 
-    osc.connect(gain);
+    osc.connect(filter);
+    filter.connect(gain);
     gain.connect(output);
     osc.start(now);
     osc.stop(now + 0.035);

@@ -161,6 +161,9 @@ export class LocalGameEngine {
 
       // Check Weapon Pickups
       const pickups = checkWeaponPickups(fighters, this.room.weaponSpawns);
+      if (pickups.length > 0) {
+        sound.playWeaponPickup();
+      }
       for (const pk of pickups) {
         const weaponCfg = WEAPONS_CONFIG[pk.weaponType];
         this.comicPops.push({
@@ -192,7 +195,10 @@ export class LocalGameEngine {
 
         // Firing weapon
         if (input.fire && f.activeWeapon && f.weaponCooldown <= 0 && !f.isDead && !f.isBlocking) {
-          fireFighterWeapon(f, this.room.projectiles, fighters, extraHits, extraExplosions);
+          const fired = fireFighterWeapon(f, this.room.projectiles, fighters, extraHits, extraExplosions);
+          if (fired) {
+            sound.playWeaponFire(f.activeWeapon);
+          }
         }
       }
 
@@ -226,6 +232,12 @@ export class LocalGameEngine {
       const allHitsCombined = [...projResult.hits, ...extraHits];
 
       // Hits
+      if (allHitsCombined.length > 0) {
+        const hasHeavy = allHitsCombined.some((h) => h.isHeavy);
+        if (hasHeavy) sound.playHeavyHit();
+        else sound.playFastPunch();
+      }
+
       for (const hit of allHitsCombined) {
         const pop: ComicPop = {
           id: 'pop_' + Math.random().toString(36).substring(2, 7),
@@ -244,6 +256,9 @@ export class LocalGameEngine {
       }
 
       const allExplosionsCombined = [...projResult.explosions, ...extraExplosions];
+      if (allExplosionsCombined.length > 0) {
+        sound.playExplosion();
+      }
 
       // Explosions
       for (const exp of allExplosionsCombined) {
