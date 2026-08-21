@@ -1,4 +1,7 @@
+import http from 'http';
 import { WebSocket } from 'ws';
+
+const httpAgent = new http.Agent({ keepAlive: true, maxSockets: 2000 });
 
 /**
  * Stick Fighters Multiplayer Server Load & Stress Testing Utility
@@ -78,7 +81,7 @@ class SimulatedClient {
   public async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        this.ws = new WebSocket(serverUrl);
+        this.ws = new WebSocket(serverUrl, { agent: httpAgent });
       } catch (e) {
         stats.errorsEncountered++;
         reject(e);
@@ -89,6 +92,12 @@ class SimulatedClient {
         stats.errorsEncountered++;
         reject(new Error('Connection timeout'));
       }, 10000);
+
+      this.ws.on('error', (err) => {
+        stats.errorsEncountered++;
+        clearTimeout(timeout);
+        reject(err);
+      });
 
       this.ws.on('open', async () => {
         clearTimeout(timeout);
@@ -124,7 +133,7 @@ class SimulatedClient {
           }
         }
 
-        // Start input loop at 30Hz
+        // Start input loop at 10Hz
         this.inputInterval = setInterval(() => {
           if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             const aim = (Math.random() - 0.5) * Math.PI * 2;
@@ -143,7 +152,7 @@ class SimulatedClient {
               },
             });
           }
-        }, 33);
+        }, 100);
 
         // Send pings every 3 seconds
         this.pingInterval = setInterval(() => {
@@ -151,8 +160,6 @@ class SimulatedClient {
             this.send({ type: 'ping', timestamp: Date.now() });
           }
         }, 3000);
-
-        resolve();
       });
 
       this.ws.on('message', (data: Buffer | string) => {
@@ -164,6 +171,7 @@ class SimulatedClient {
           if (msg.type === 'room_joined') {
             this.serverRoomCode = msg.room.roomId;
             this.id = msg.yourId;
+            resolve();
 
             if (this.isHost) {
               stats.createdRooms++;
@@ -177,12 +185,15 @@ class SimulatedClient {
               }
             } else {
               stats.joinedRooms++;
+              // Automatically mark ready for match launch
+              this.send({ type: 'set_ready', isReady: true });
             }
           } else if (msg.type === 'room_state') {
             // Host starts game when all players joined
             if (this.isHost && msg.room?.status === 'lobby') {
               const playerCount = msg.room.players ? Object.keys(msg.room.players).length : 0;
-              if (playerCount >= playersPerRoom) {
+              const allReady = Object.values(msg.room.players || {}).every((p: any) => p.id === msg.room.hostId || p.isReady);
+              if (playerCount >= playersPerRoom && allReady) {
                 this.send({ type: 'start_game' });
                 stats.gamesStarted++;
               }
@@ -271,18 +282,17 @@ async function runLoadTest() {
     }
 
     // Small delay before spawning other players in room
-    await new Promise((res) => setTimeout(res, 100));
+    await new Promise((res) => setTimeout(res, 30));
 
+    const peerPromises = [];
     for (let p = 1; p < playersPerRoom; p++) {
       const peer = new SimulatedClient(false, r);
       clients.push(peer);
-      try {
-        await peer.connect();
-      } catch (e) {
+      peerPromises.push(peer.connect().catch((e) => {
         console.error(`  ⚠ Player ${p} for room ${r} failed to connect`);
-      }
-      await new Promise((res) => setTimeout(res, 30));
+      }));
     }
+    await Promise.all(peerPromises);
 
     if ((r + 1) % 5 === 0) {
       console.log(`  ✓ Created ${r + 1}/${targetRooms} rooms (${stats.connectedClients} clients connected)`);

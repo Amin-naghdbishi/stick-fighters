@@ -139,9 +139,59 @@ export default function App() {
           break;
 
         case 'game_tick':
-          setRoom(msg.room);
-          if (msg.room.status === 'in_game' || msg.room.status === 'countdown' || msg.room.status === 'round_end') {
-            if (view !== 'game' && !isPreviewMode) setView('game');
+          if (msg.tick) {
+            const tick = msg.tick;
+            setRoom((prevRoom) => {
+              if (!prevRoom || prevRoom.roomId !== tick.roomId) return prevRoom;
+
+              const updatedPlayers = { ...prevRoom.players };
+              for (const fd of tick.fighters) {
+                const existing = updatedPlayers[fd.id];
+                if (existing) {
+                  existing.x = fd.x;
+                  existing.y = fd.y;
+                  existing.vx = fd.vx;
+                  existing.vy = fd.vy;
+                  existing.facing = fd.facing;
+                  existing.hp = fd.hp;
+                  existing.shield = fd.shield;
+                  existing.state = fd.state;
+                  if (fd.isGrounded !== undefined) existing.isGrounded = fd.isGrounded;
+                  if (fd.isBlocking !== undefined) existing.isBlocking = fd.isBlocking;
+                  if (fd.isDead !== undefined) existing.isDead = fd.isDead;
+                  existing.activeWeapon = fd.activeWeapon;
+                  if (fd.aimAngle !== undefined) existing.aimAngle = fd.aimAngle;
+                  if (fd.weaponCooldown !== undefined) existing.weaponCooldown = fd.weaponCooldown;
+                  if (fd.invincibleTimer !== undefined) existing.invincibleTimer = fd.invincibleTimer;
+                  if (fd.burningTimer !== undefined) existing.burningTimer = fd.burningTimer;
+                  if (fd.respawnTimer !== undefined) existing.respawnTimer = fd.respawnTimer;
+                  if (fd.kills !== undefined) existing.kills = fd.kills;
+                  if (fd.deaths !== undefined) existing.deaths = fd.deaths;
+                  if (fd.score !== undefined) existing.score = fd.score;
+                  if (fd.weapons !== undefined) existing.weapons = fd.weapons;
+                }
+              }
+
+              return {
+                ...prevRoom,
+                status: tick.status,
+                countdown: tick.countdown !== undefined ? tick.countdown : prevRoom.countdown,
+                roundTimer: tick.roundTimer,
+                matchTimeRemaining: tick.matchTimeRemaining,
+                currentDuelRound: tick.currentDuelRound !== undefined ? tick.currentDuelRound : prevRoom.currentDuelRound,
+                players: updatedPlayers,
+                projectiles: tick.projectiles || [],
+                burningGround: tick.burningGround || [],
+              };
+            });
+            if (tick.status === 'in_game' || tick.status === 'countdown' || tick.status === 'round_end') {
+              if (view !== 'game' && !isPreviewMode) setView('game');
+            }
+          } else if (msg.room) {
+            setRoom(msg.room);
+            if (msg.room.status === 'in_game' || msg.room.status === 'countdown' || msg.room.status === 'round_end') {
+              if (view !== 'game' && !isPreviewMode) setView('game');
+            }
           }
           break;
 

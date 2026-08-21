@@ -26,6 +26,8 @@ export class NetworkClient {
   private pingListeners: Set<PingCallback> = new Set();
 
   public myId: string | null = null;
+  public sessionToken: string | null = null;
+  public currentRoomId: string | null = null;
   public isConnected: boolean = false;
   public connectionStatus: ConnectionStatus = 'DISCONNECTED';
   public ping: number = 0;
@@ -134,6 +136,8 @@ export class NetworkClient {
 
           if (msg.type === 'room_joined') {
             this.myId = msg.yourId;
+            this.sessionToken = msg.sessionToken || null;
+            this.currentRoomId = msg.room?.roomId || null;
           }
           this.notify(msg);
         } catch (err) {
@@ -266,11 +270,13 @@ export class NetworkClient {
     });
   }
 
-  public joinRoom(roomId: string, player: FighterCustomization) {
+  public joinRoom(roomId: string, player: FighterCustomization, sessionToken?: string, reconnectId?: string) {
     this.send({
       type: 'join_room',
       roomId,
       player,
+      sessionToken: sessionToken || (this.sessionToken || undefined),
+      reconnectId: reconnectId || (this.myId || undefined),
     });
   }
 
@@ -315,6 +321,8 @@ export class NetworkClient {
   }
 
   public leaveRoom() {
+    this.sessionToken = null;
+    this.currentRoomId = null;
     this.send({
       type: 'leave_room',
     });

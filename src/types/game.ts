@@ -374,9 +374,46 @@ export interface RoomState {
   burningGround?: BurningGroundState[];
 }
 
+export interface TickFighterDelta {
+  id: string;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  facing: 1 | -1;
+  hp: number;
+  shield: number;
+  state: FighterActionState;
+  isGrounded?: boolean;
+  isBlocking?: boolean;
+  isDead?: boolean;
+  activeWeapon: WeaponType | null;
+  aimAngle?: number;
+  weaponCooldown?: number;
+  invincibleTimer?: number;
+  burningTimer?: number;
+  respawnTimer?: number;
+  kills?: number;
+  deaths?: number;
+  score?: number;
+  weapons?: Record<string, number>;
+}
+
+export interface TickSnapshot {
+  roomId: string;
+  status: RoomStatus;
+  countdown?: number;
+  roundTimer: number;
+  matchTimeRemaining: number;
+  currentDuelRound?: number;
+  fighters: TickFighterDelta[];
+  projectiles?: ProjectileState[];
+  burningGround?: BurningGroundState[];
+}
+
 // Client to Server Messages
 export type ClientMessage =
-  | { type: 'join_room'; roomId: string; player: FighterCustomization; mode?: GameMode; mapId?: string; fillWithBots?: boolean; botCount?: number; botDifficulty?: BotDifficultyLevel; matchDuration?: number; duelRoundsTotal?: number }
+  | { type: 'join_room'; roomId: string; player: FighterCustomization; sessionToken?: string; reconnectId?: string; mode?: GameMode; mapId?: string; fillWithBots?: boolean; botCount?: number; botDifficulty?: BotDifficultyLevel; matchDuration?: number; duelRoundsTotal?: number }
   | { type: 'quick_match'; player: FighterCustomization; mode: GameMode }
   | { type: 'create_room'; player: FighterCustomization; mode: GameMode; mapId: string; fillWithBots: boolean; maxPlayers: number; botCount?: number; botDifficulty?: BotDifficultyLevel; roomName?: string; matchDuration?: number; duelRoundsTotal?: number }
   | { type: 'leave_room' }
@@ -392,10 +429,10 @@ export type ClientMessage =
 
 // Server to Client Messages
 export type ServerMessage =
-  | { type: 'room_joined'; room: RoomState; yourId: string }
+  | { type: 'room_joined'; room: RoomState; yourId: string; sessionToken?: string }
   | { type: 'room_state'; room: RoomState }
   | { type: 'game_started'; room: RoomState }
-  | { type: 'game_tick'; room: RoomState; comicPops?: ComicPop[]; hits?: { x: number; y: number; heavy: boolean }[] }
+  | { type: 'game_tick'; tick: TickSnapshot; room?: RoomState; comicPops?: ComicPop[]; hits?: { x: number; y: number; heavy: boolean }[] }
   | { type: 'hit_event'; attackerId: string; targetId: string; damage: number; x: number; y: number; isHeavy: boolean; popText: string }
   | { type: 'weapon_pickup_event'; playerId: string; weaponType: WeaponType; x: number; y: number }
   | { type: 'weapon_fire_event'; playerId: string; weaponType: WeaponType; x: number; y: number; aimAngle: number }

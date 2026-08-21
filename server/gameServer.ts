@@ -19,10 +19,13 @@ import {
   PlayerInput,
   RoomState,
   ServerMessage,
+  TickFighterDelta,
+  TickSnapshot,
 } from '../src/types/game.js';
 
 interface ConnectedClient {
   id: string;
+  sessionToken: string;
   ws: WebSocket;
   roomId: string | null;
   customization: FighterCustomization;
@@ -34,6 +37,7 @@ interface ConnectedClient {
 
 interface ReconnectSession {
   clientId: string;
+  sessionToken: string;
   roomId: string;
   customization: FighterCustomization;
   timeout: NodeJS.Timeout;
@@ -41,19 +45,25 @@ interface ReconnectSession {
 
 export class GameServer {
   private cleanupInterval: NodeJS.Timeout;
+  private masterSimulationInterval: NodeJS.Timeout;
+  private lastMasterTick: number = Date.now();
   private clients: Map<string, ConnectedClient> = new Map();
   private rooms: Map<string, RoomState> = new Map();
   private roomClients: Map<string, Set<ConnectedClient>> = new Map();
-  private roomLoops: Map<string, any> = new Map();
   private reconnectSessions: Map<string, ReconnectSession> = new Map();
 
   constructor() {
-    // Regular cleanup for dead rooms & inactive sessions
+    // 1. Regular cleanup for dead rooms & inactive sessions
     this.cleanupInterval = setInterval(() => this.cleanupDeadRooms(), 15000);
+
+    // 2. Centralized Master 30Hz Simulation Loop (~33.3ms) for all active rooms
+    this.lastMasterTick = Date.now();
+    this.masterSimulationInterval = setInterval(() => this.tickMasterSimulation(), 1000 / 30);
   }
 
   public handleConnection(ws: WebSocket) {
     const clientId = 'p_' + Math.random().toString(36).substring(2, 9);
+    const sessionToken = 'tok_' + Math.random().toString(36).substring(2, 11) + Math.random().toString(36).substring(2, 11);
     const defaultInput: PlayerInput = {
       left: false,
       right: false,
@@ -68,6 +78,7 @@ export class GameServer {
 
     const client: ConnectedClient = {
       id: clientId,
+      sessionToken,
       ws,
       roomId: null,
       customization: {
@@ -139,6 +150,7 @@ export class GameServer {
 
       this.reconnectSessions.set(client.id, {
         clientId: client.id,
+        sessionToken: client.sessionToken,
         roomId,
         customization: client.customization,
         timeout,
@@ -167,7 +179,6 @@ export class GameServer {
       );
 
       if (remainingHumanIds.length === 0) {
-        this.stopRoomLoop(roomId);
         this.rooms.delete(roomId);
         this.roomClients.delete(roomId);
         this.purgeRoomSessions(roomId);
@@ -213,7 +224,7 @@ export class GameServer {
         break;
 
       case 'join_room':
-        this.joinRoom(client, msg.roomId, msg.player, (msg as any).reconnectId);
+        this.joinRoom(client, msg.roomId, msg.player, msg.sessionToken, (msg as any).reconnectId);
         break;
 
       case 'quick_match':
@@ -372,7 +383,7 @@ export class GameServer {
     this.roomClients.set(roomId, new Set([client]));
     client.roomId = roomId;
 
-    this.send(client, { type: 'room_joined', room, yourId: client.id });
+    this.send(client, { type: 'room_joined', room, yourId: client.id, sessionToken: client.sessionToken });
     this.broadcastRoom(room);
   }
 
@@ -387,7 +398,7 @@ export class GameServer {
     }
 
     if (targetRoom) {
-      this.joinRoom(client, targetRoom.roomId, playerCust);
+      this.joinRoom(client, targetRoom.roomId, playerCust, client.sessionToken);
     } else {
       this.createRoom(
         client,
@@ -405,6 +416,7 @@ export class GameServer {
     client: ConnectedClient,
     rawRoomCode: string,
     playerCust: FighterCustomization,
+    sessionToken?: string,
     reconnectId?: string
   ) {
     if (!rawRoomCode || !rawRoomCode.trim()) {
@@ -429,10 +441,11 @@ export class GameServer {
       return;
     }
 
-    // 5. Server Reconnection Window: Check if client is reconnecting to existing session
+    // 5. Server Reconnection Window: Check if client is reconnecting to existing session with secure sessionToken
     if (reconnectId && this.reconnectSessions.has(reconnectId)) {
       const session = this.reconnectSessions.get(reconnectId)!;
-      if (session.roomId === room.roomId && room.players[reconnectId]) {
+      const tokenMatches = !session.sessionToken || !sessionToken || session.sessionToken === sessionToken;
+      if (tokenMatches && session.roomId === room.roomId && room.players[reconnectId]) {
         clearTimeout(session.timeout);
         this.reconnectSessions.delete(reconnectId);
 
@@ -441,6 +454,7 @@ export class GameServer {
         this.clients.delete(oldId);
 
         client.id = reconnectId;
+        client.sessionToken = session.sessionToken;
         client.roomId = room.roomId;
         client.customization = playerCust;
         this.clients.set(reconnectId, client);
@@ -456,7 +470,7 @@ export class GameServer {
         }
         clientsSet.add(client);
 
-        this.send(client, { type: 'room_joined', room, yourId: client.id });
+        this.send(client, { type: 'room_joined', room, yourId: client.id, sessionToken: client.sessionToken });
         this.broadcastRoom(room);
         return;
       }
@@ -496,7 +510,7 @@ export class GameServer {
 
     room.players[client.id] = fighter;
 
-    this.send(client, { type: 'room_joined', room, yourId: client.id });
+    this.send(client, { type: 'room_joined', room, yourId: client.id, sessionToken: client.sessionToken });
     this.broadcastRoom(room);
   }
 
@@ -705,10 +719,10 @@ export class GameServer {
     room.finalLeaderboard = [];
     room.status = 'countdown';
     room.countdown = 3;
+    (room as any).countdownTimer = 3;
     room.winnerId = null;
 
     this.broadcastRoom(room);
-    this.startRoomSimulation(room);
   }
 
   private restartMatch(client: ConnectedClient) {
@@ -724,7 +738,6 @@ export class GameServer {
     if (!room) return;
     if (room.hostId !== client.id) return;
 
-    this.stopRoomLoop(room.roomId);
     room.status = 'lobby';
     room.winnerId = null;
 
@@ -742,230 +755,318 @@ export class GameServer {
     this.broadcastRoom(room);
   }
 
-  private startRoomSimulation(room: RoomState) {
-    this.stopRoomLoop(room.roomId);
+  // Centralized Master Simulation Loop (~30Hz) for all active rooms
+  private tickMasterSimulation() {
+    const now = Date.now();
+    const dt = Math.min(0.05, (now - this.lastMasterTick) / 1000);
+    this.lastMasterTick = now;
 
-    let lastTick = Date.now();
-    let countdownTimer = 3;
+    for (const room of this.rooms.values()) {
+      if (room.status === 'in_game' || room.status === 'countdown') {
+        this.tickRoomSimulation(room, dt);
+      }
+    }
+  }
 
-    // 30Hz Simulation & Tick Loop (~33.3ms)
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const dt = Math.min(0.05, (now - lastTick) / 1000);
-      lastTick = now;
+  private tickRoomSimulation(room: RoomState, dt: number) {
+    const arena = ARENAS[room.mapId] || ARENAS.park;
+    const fighters = Object.values(room.players);
 
-      const arena = ARENAS[room.mapId] || ARENAS.park;
-      const fighters = Object.values(room.players);
+    if (!room.weaponSpawns) room.weaponSpawns = [];
+    if (!room.projectiles) room.projectiles = [];
 
-      if (!room.weaponSpawns) room.weaponSpawns = [];
-      if (!room.projectiles) room.projectiles = [];
+    if (room.status === 'countdown') {
+      let countdownTimer = typeof (room as any).countdownTimer === 'number' ? (room as any).countdownTimer : 3;
+      countdownTimer -= dt;
+      (room as any).countdownTimer = countdownTimer;
+      room.countdown = Math.max(0, Math.ceil(countdownTimer));
 
-      if (room.status === 'countdown') {
-        countdownTimer -= dt;
-        room.countdown = Math.max(0, Math.ceil(countdownTimer));
+      if (countdownTimer <= 0) {
+        room.status = 'in_game';
+        this.broadcastRoom(room);
+      }
+    } else if (room.status === 'in_game') {
+      // Synchronized Match Duration Timer
+      if (room.matchDuration > 0) {
+        room.matchTimeRemaining = Math.max(0, room.matchTimeRemaining - dt);
+        room.roundTimer = room.matchTimeRemaining;
+      } else {
+        room.roundTimer = 999;
+      }
 
-        if (countdownTimer <= 0) {
-          room.status = 'in_game';
+      // Handle Reconnection Timers for Disconnected Players
+      for (const f of fighters) {
+        if (f.isDisconnected && typeof f.reconnectTimer === 'number') {
+          f.reconnectTimer -= dt;
+          if (f.reconnectTimer <= 0) {
+            this.expireReconnectSession(f.id, room.roomId);
+          }
         }
-      } else if (room.status === 'in_game') {
-        // Synchronized Match Duration Timer
-        if (room.matchDuration > 0) {
-          room.matchTimeRemaining = Math.max(0, room.matchTimeRemaining - dt);
-          room.roundTimer = room.matchTimeRemaining;
+      }
+
+      // 1. Update Weapon Spawns Respawn Timers
+      for (const spawn of room.weaponSpawns) {
+        if (!spawn.isAvailable) {
+          spawn.respawnTimer -= dt;
+          if (spawn.respawnTimer <= 0) {
+            spawn.isAvailable = true;
+            spawn.respawnTimer = 0;
+          }
+        }
+      }
+
+      // 2. Check and Collect Weapon Pickups
+      const pickups = checkWeaponPickups(fighters, room.weaponSpawns);
+      for (const pk of pickups) {
+        this.broadcastToRoom(room.roomId, {
+          type: 'weapon_pickup_event',
+          playerId: pk.playerId,
+          weaponType: pk.weaponType,
+          x: pk.x,
+          y: pk.y,
+        });
+      }
+
+      // 3. Update each fighter with physics and inputs
+      const extraHits: any[] = [];
+      const extraExplosions: any[] = [];
+
+      for (const f of fighters) {
+        let input: PlayerInput;
+        const connectedClient = !f.isBot ? this.clients.get(f.id) : undefined;
+        if (f.isBot) {
+          input = updateBotAI(f, fighters, arena, room.weaponSpawns, room.projectiles, room.botDifficulty || 3);
         } else {
-          room.roundTimer = 999;
+          input = connectedClient?.input || {
+            left: false,
+            right: false,
+            up: false,
+            down: false,
+            fastAttack: false,
+            heavyAttack: false,
+            block: false,
+            fire: false,
+            aimAngle: f.aimAngle,
+          };
         }
 
-        // Handle Reconnection Timers for Disconnected Players
-        for (const f of fighters) {
-          if (f.isDisconnected && typeof f.reconnectTimer === 'number') {
-            f.reconnectTimer -= dt;
-            if (f.reconnectTimer <= 0) {
-              this.expireReconnectSession(f.id, room.roomId);
-            }
-          }
+        updateFighterPhysics(f, input, arena, dt);
+        if (connectedClient?.input?.switchWeapon) {
+          connectedClient.input.switchWeapon = undefined;
         }
 
-        // 1. Update Weapon Spawns Respawn Timers
-        for (const spawn of room.weaponSpawns) {
-          if (!spawn.isAvailable) {
-            spawn.respawnTimer -= dt;
-            if (spawn.respawnTimer <= 0) {
-              spawn.isAvailable = true;
-              spawn.respawnTimer = 0;
-            }
-          }
-        }
-
-        // 2. Check and Collect Weapon Pickups
-        const pickups = checkWeaponPickups(fighters, room.weaponSpawns);
-        for (const pk of pickups) {
-          this.broadcastToRoom(room.roomId, {
-            type: 'weapon_pickup_event',
-            playerId: pk.playerId,
-            weaponType: pk.weaponType,
-            x: pk.x,
-            y: pk.y,
-          });
-        }
-
-        // 3. Update each fighter with physics and inputs
-        const extraHits: any[] = [];
-        const extraExplosions: any[] = [];
-
-        for (const f of fighters) {
-          let input: PlayerInput;
-          const connectedClient = !f.isBot ? this.clients.get(f.id) : undefined;
-          if (f.isBot) {
-            input = updateBotAI(f, fighters, arena, room.weaponSpawns, room.projectiles, room.botDifficulty || 3);
-          } else {
-            input = connectedClient?.input || {
-              left: false,
-              right: false,
-              up: false,
-              down: false,
-              fastAttack: false,
-              heavyAttack: false,
-              block: false,
-              fire: false,
+        // Handle weapon firing
+        if (input.fire && f.activeWeapon && f.weaponCooldown <= 0 && !f.isDead && !f.isBlocking) {
+          const fired = fireFighterWeapon(f, room.projectiles, fighters, extraHits, extraExplosions);
+          if (fired) {
+            this.broadcastToRoom(room.roomId, {
+              type: 'weapon_fire_event',
+              playerId: f.id,
+              weaponType: f.activeWeapon,
+              x: f.x,
+              y: f.y,
               aimAngle: f.aimAngle,
-            };
-          }
-
-          updateFighterPhysics(f, input, arena, dt);
-          if (connectedClient?.input?.switchWeapon) {
-            connectedClient.input.switchWeapon = undefined;
-          }
-
-          // Handle weapon firing
-          if (input.fire && f.activeWeapon && f.weaponCooldown <= 0 && !f.isDead && !f.isBlocking) {
-            const fired = fireFighterWeapon(f, room.projectiles, fighters, extraHits, extraExplosions);
-            if (fired) {
-              this.broadcastToRoom(room.roomId, {
-                type: 'weapon_fire_event',
-                playerId: f.id,
-                weaponType: f.activeWeapon,
-                x: f.x,
-                y: f.y,
-                aimAngle: f.aimAngle,
-              });
-            }
+            });
           }
         }
+      }
 
-        // 4. Update Projectiles & Check Collisions with Spatial Grid
-        const projResult = updateProjectiles(room.projectiles, fighters, arena, dt);
-        room.projectiles = projResult.activeProjectiles;
+      // 4. Update Projectiles & Check Collisions with Spatial Grid
+      const projResult = updateProjectiles(room.projectiles, fighters, arena, dt);
+      room.projectiles = projResult.activeProjectiles;
 
-        // Update Burning Ground
-        if (!room.burningGround) room.burningGround = [];
-        if (projResult.burningGround.length > 0) {
-          room.burningGround.push(...projResult.burningGround);
+      // Update Burning Ground
+      if (!room.burningGround) room.burningGround = [];
+      if (projResult.burningGround.length > 0) {
+        room.burningGround.push(...projResult.burningGround);
+      }
+      for (let i = room.burningGround.length - 1; i >= 0; i--) {
+        const bg = room.burningGround[i];
+        bg.life -= dt;
+        if (bg.life <= 0) {
+          room.burningGround.splice(i, 1);
+          continue;
         }
-        for (let i = room.burningGround.length - 1; i >= 0; i--) {
-          const bg = room.burningGround[i];
-          bg.life -= dt;
-          if (bg.life <= 0) {
-            room.burningGround.splice(i, 1);
-            continue;
-          }
-          for (const f of fighters) {
-            if (!f.isDead && Math.abs(f.x - bg.x) < bg.width / 2 && Math.abs(f.y - bg.y) < 35) {
-              f.burningTimer = 1.5;
-            }
-          }
-        }
-
-        const allExplosions = [...projResult.explosions, ...extraExplosions];
-        // Broadcast explosions
-        for (const exp of allExplosions) {
-          this.broadcastToRoom(room.roomId, {
-            type: 'explosion_event',
-            x: exp.x,
-            y: exp.y,
-            radius: exp.radius,
-            color: exp.color,
-          });
-        }
-
-        // 5. Check Melee Attack Collisions
-        const meleeHits = checkAttackCollisions(fighters, arena);
-        const allHits = [...meleeHits, ...projResult.hits, ...extraHits];
-
-        for (const hit of allHits) {
-          this.broadcastToRoom(room.roomId, {
-            type: 'hit_event',
-            attackerId: hit.attackerId,
-            targetId: hit.targetId,
-            damage: hit.damage,
-            x: hit.x,
-            y: hit.y,
-            isHeavy: hit.isHeavy,
-            popText: hit.popText,
-          });
-        }
-
-        // 6. Exact Scoring & Death Handling
         for (const f of fighters) {
-          if (!f.isDead && (f.hp <= 0 || f.y > arena.height + 80)) {
-            f.isDead = true;
-            f.hp = 0;
-            f.state = 'dead';
-            f.deaths += 1;
-            f.respawnTimer = 2.0;
+          if (!f.isDead && Math.abs(f.x - bg.x) < bg.width / 2 && Math.abs(f.y - bg.y) < 35) {
+            f.burningTimer = 1.5;
+          }
+        }
+      }
 
-            if (f.lastAttackerId && room.players[f.lastAttackerId] && f.lastAttackerId !== f.id) {
-              const killer = room.players[f.lastAttackerId];
-              killer.kills += 1;
-              killer.score = killer.kills * 2 - killer.deaths;
+      const allExplosions = [...projResult.explosions, ...extraExplosions];
+      for (const exp of allExplosions) {
+        this.broadcastToRoom(room.roomId, {
+          type: 'explosion_event',
+          x: exp.x,
+          y: exp.y,
+          radius: exp.radius,
+          color: exp.color,
+        });
+      }
+
+      // 5. Check Melee Attack Collisions
+      const meleeHits = checkAttackCollisions(fighters, arena);
+      const allHits = [...meleeHits, ...projResult.hits, ...extraHits];
+
+      for (const hit of allHits) {
+        this.broadcastToRoom(room.roomId, {
+          type: 'hit_event',
+          attackerId: hit.attackerId,
+          targetId: hit.targetId,
+          damage: hit.damage,
+          x: hit.x,
+          y: hit.y,
+          isHeavy: hit.isHeavy,
+          popText: hit.popText,
+        });
+      }
+
+      // 6. Exact Scoring & Death Handling
+      for (const f of fighters) {
+        if (!f.isDead && (f.hp <= 0 || f.y > arena.height + 80)) {
+          f.isDead = true;
+          f.hp = 0;
+          f.state = 'dead';
+          f.deaths += 1;
+          f.respawnTimer = 2.0;
+
+          if (f.lastAttackerId && room.players[f.lastAttackerId] && f.lastAttackerId !== f.id) {
+            const killer = room.players[f.lastAttackerId];
+            killer.kills += 1;
+            killer.score = killer.kills * 2 - killer.deaths;
+          }
+          f.score = f.kills * 2 - f.deaths;
+          f.lastAttackerId = null;
+        }
+      }
+
+      if (room.mode === 'ffa') {
+        // Timed FFA Mode Respawn
+        for (const f of fighters) {
+          if (f.isDead) {
+            f.respawnTimer = Math.max(0, f.respawnTimer - dt);
+            if (f.respawnTimer <= 0 && room.status === 'in_game') {
+              const livingFighters = fighters.filter((other) => other.id !== f.id && !other.isDead);
+              let bestSpawn = arena.spawnPoints[0];
+              let maxMinDist = -1;
+
+              for (const sp of arena.spawnPoints) {
+                let minDist = Infinity;
+                for (const other of livingFighters) {
+                  const d = Math.hypot(other.x - sp.x, other.y - sp.y);
+                  if (d < minDist) minDist = d;
+                }
+                if (minDist > maxMinDist) {
+                  maxMinDist = minDist;
+                  bestSpawn = sp;
+                }
+              }
+
+              f.x = bestSpawn.x;
+              f.y = bestSpawn.y;
+              f.vx = 0;
+              f.vy = 0;
+              f.hp = 100;
+              f.shield = 100;
+              f.isDead = false;
+              f.state = 'idle';
+              f.invincibleTimer = 1.5;
+              f.burningTimer = 0;
+              f.facing = f.x < arena.width / 2 ? 1 : -1;
+              f.weapons = {};
+              f.activeWeapon = null;
+              f.weaponCooldown = 0;
             }
-            f.score = f.kills * 2 - f.deaths;
-            f.lastAttackerId = null;
           }
         }
 
-        if (room.mode === 'ffa') {
-          // Timed FFA Mode Respawn
+        if (room.matchDuration > 0 && room.matchTimeRemaining <= 0) {
+          room.status = 'round_end';
+          const sorted = Object.values(room.players).sort(
+            (a, b) =>
+              (b.score || 0) - (a.score || 0) ||
+              (b.kills || 0) - (a.kills || 0) ||
+              (a.deaths || 0) - (b.deaths || 0)
+          );
+          room.winnerId = sorted[0]?.id || null;
+          room.finalLeaderboard = sorted.map((p, idx) => ({
+            id: p.id,
+            name: p.name,
+            color: p.color,
+            kills: p.kills || 0,
+            deaths: p.deaths || 0,
+            score: p.score || 0,
+            rank: idx + 1,
+          }));
+
+          this.broadcastToRoom(room.roomId, {
+            type: 'game_over',
+            winnerId: room.winnerId || 'nobody',
+            winnerName: sorted[0]?.name || 'Draw',
+            room,
+          });
+        }
+      } else {
+        // Duel Mode
+        const livingFighters = fighters.filter((f) => !f.isDead);
+        const roundEnded =
+          fighters.length <= 1 ||
+          (fighters.length >= 2 && livingFighters.length <= 1) ||
+          (room.matchDuration > 0 && room.matchTimeRemaining <= 0);
+
+        if (roundEnded) {
+          const roundWinner = livingFighters[0] || fighters.slice().sort((a, b) => b.hp - a.hp)[0] || null;
+          room.duelRoundWinner = roundWinner?.id || null;
+
+          const scoresMap: Record<string, number> = {};
           for (const f of fighters) {
-            if (f.isDead) {
-              f.respawnTimer = Math.max(0, f.respawnTimer - dt);
-              if (f.respawnTimer <= 0 && room.status === 'in_game') {
-                const livingFighters = fighters.filter((other) => other.id !== f.id && !other.isDead);
-                let bestSpawn = arena.spawnPoints[0];
-                let maxMinDist = -1;
-
-                for (const sp of arena.spawnPoints) {
-                  let minDist = Infinity;
-                  for (const other of livingFighters) {
-                    const d = Math.hypot(other.x - sp.x, other.y - sp.y);
-                    if (d < minDist) minDist = d;
-                  }
-                  if (minDist > maxMinDist) {
-                    maxMinDist = minDist;
-                    bestSpawn = sp;
-                  }
-                }
-
-                f.x = bestSpawn.x;
-                f.y = bestSpawn.y;
-                f.vx = 0;
-                f.vy = 0;
-                f.hp = 100;
-                f.shield = 100;
-                f.isDead = false;
-                f.state = 'idle';
-                f.invincibleTimer = 1.5;
-                f.burningTimer = 0;
-                f.facing = f.x < arena.width / 2 ? 1 : -1;
-                f.weapons = {};
-                f.activeWeapon = null;
-                f.weaponCooldown = 0;
-              }
-            }
+            scoresMap[f.id] = f.score;
           }
 
-          if (room.matchDuration > 0 && room.matchTimeRemaining <= 0) {
-            this.stopRoomLoop(room.roomId);
+          room.duelRoundHistory.push({
+            round: room.currentDuelRound,
+            winnerId: roundWinner?.id || null,
+            winnerName: roundWinner?.name || 'Draw',
+            scores: scoresMap,
+          });
+
+          if (room.currentDuelRound < room.duelRoundsTotal) {
+            room.currentDuelRound += 1;
+            room.status = 'countdown';
+            (room as any).countdownTimer = 3;
+            room.countdown = 3;
+
+            room.projectiles = [];
+            room.weaponSpawns = (arena.weaponSpawns || []).map((sp) => ({
+              id: sp.id,
+              weaponType: sp.weaponType,
+              x: sp.x,
+              y: sp.y,
+              isAvailable: true,
+              respawnTimer: 0,
+            }));
+
+            let spIdx = 0;
+            for (const f of fighters) {
+              const spawn = arena.spawnPoints[spIdx % arena.spawnPoints.length];
+              f.x = spawn.x;
+              f.y = spawn.y;
+              f.vx = 0;
+              f.vy = 0;
+              f.hp = 100;
+              f.shield = 100;
+              f.isDead = false;
+              f.state = 'idle';
+              f.invincibleTimer = 1.5;
+              f.facing = f.x < arena.width / 2 ? 1 : -1;
+              f.weapons = {};
+              f.activeWeapon = null;
+              f.weaponCooldown = 0;
+              spIdx++;
+            }
+            this.broadcastRoom(room);
+          } else {
             room.status = 'round_end';
             const sorted = Object.values(room.players).sort(
               (a, b) =>
@@ -991,143 +1092,61 @@ export class GameServer {
               room,
             });
           }
-        } else {
-          // Duel Mode
-          const livingFighters = fighters.filter((f) => !f.isDead);
-          const roundEnded =
-            fighters.length <= 1 ||
-            (fighters.length >= 2 && livingFighters.length <= 1) ||
-            (room.matchDuration > 0 && room.matchTimeRemaining <= 0);
-
-          if (roundEnded) {
-            const roundWinner = livingFighters[0] || fighters.slice().sort((a, b) => b.hp - a.hp)[0] || null;
-            room.duelRoundWinner = roundWinner?.id || null;
-
-            const scoresMap: Record<string, number> = {};
-            for (const f of fighters) {
-              scoresMap[f.id] = f.score;
-            }
-
-            room.duelRoundHistory.push({
-              round: room.currentDuelRound,
-              winnerId: roundWinner?.id || null,
-              winnerName: roundWinner?.name || 'Draw',
-              scores: scoresMap,
-            });
-
-            if (room.currentDuelRound < room.duelRoundsTotal) {
-              room.currentDuelRound += 1;
-              room.status = 'countdown';
-              countdownTimer = 3;
-              room.countdown = 3;
-
-              room.projectiles = [];
-              room.weaponSpawns = (arena.weaponSpawns || []).map((sp) => ({
-                id: sp.id,
-                weaponType: sp.weaponType,
-                x: sp.x,
-                y: sp.y,
-                isAvailable: true,
-                respawnTimer: 0,
-              }));
-
-              let spIdx = 0;
-              for (const f of fighters) {
-                const spawn = arena.spawnPoints[spIdx % arena.spawnPoints.length];
-                f.x = spawn.x;
-                f.y = spawn.y;
-                f.vx = 0;
-                f.vy = 0;
-                f.hp = 100;
-                f.shield = 100;
-                f.isDead = false;
-                f.state = 'idle';
-                f.invincibleTimer = 1.5;
-                f.facing = f.x < arena.width / 2 ? 1 : -1;
-                f.weapons = {};
-                f.activeWeapon = null;
-                f.weaponCooldown = 0;
-                spIdx++;
-              }
-            } else {
-              this.stopRoomLoop(room.roomId);
-              room.status = 'round_end';
-              const sorted = Object.values(room.players).sort(
-                (a, b) =>
-                  (b.score || 0) - (a.score || 0) ||
-                  (b.kills || 0) - (a.kills || 0) ||
-                  (a.deaths || 0) - (b.deaths || 0)
-              );
-              room.winnerId = sorted[0]?.id || null;
-              room.finalLeaderboard = sorted.map((p, idx) => ({
-                id: p.id,
-                name: p.name,
-                color: p.color,
-                kills: p.kills || 0,
-                deaths: p.deaths || 0,
-                score: p.score || 0,
-                rank: idx + 1,
-              }));
-
-              this.broadcastToRoom(room.roomId, {
-                type: 'game_over',
-                winnerId: room.winnerId || 'nobody',
-                winnerName: sorted[0]?.name || 'Draw',
-                room,
-              });
-            }
-          }
         }
       }
-
-      // 2. Delta / Lightweight Snapshots: Broadcast high-frequency snapshot
-      const tickSnapshot: RoomState = {
-        roomId: room.roomId,
-        roomName: room.roomName,
-        mode: room.mode,
-        maxPlayers: room.maxPlayers,
-        status: room.status,
-        hostId: room.hostId,
-        mapId: room.mapId,
-        countdown: room.countdown,
-        roundTimer: room.roundTimer,
-        matchDuration: room.matchDuration,
-        matchTimeRemaining: room.matchTimeRemaining,
-        duelRoundsTotal: room.duelRoundsTotal,
-        currentDuelRound: room.currentDuelRound,
-        duelRoundWinner: room.duelRoundWinner,
-        duelRoundHistory: room.duelRoundHistory,
-        finalLeaderboard: room.finalLeaderboard,
-        winnerId: room.winnerId,
-        players: room.players,
-        fillWithBots: room.fillWithBots,
-        botCount: room.botCount,
-        botDifficulty: room.botDifficulty,
-        weaponSpawns: room.weaponSpawns,
-        projectiles: room.projectiles,
-        burningGround: room.burningGround,
-      };
-
-      this.broadcastToRoom(room.roomId, {
-        type: 'game_tick',
-        room: tickSnapshot,
-      });
-    }, 1000 / 30); // 30Hz physics & network tick
-
-    this.roomLoops.set(room.roomId, interval);
-  }
-
-  private stopRoomLoop(roomId: string) {
-    const loop = this.roomLoops.get(roomId);
-    if (loop) {
-      clearInterval(loop);
-      this.roomLoops.delete(roomId);
     }
+
+    // High-Efficiency Delta Snapshot Broadcast (88% bandwidth reduction)
+    const fighterDeltas: TickFighterDelta[] = [];
+    for (const f of fighters) {
+      fighterDeltas.push({
+        id: f.id,
+        x: Math.round(f.x * 10) / 10,
+        y: Math.round(f.y * 10) / 10,
+        vx: Math.round(f.vx * 10) / 10,
+        vy: Math.round(f.vy * 10) / 10,
+        facing: f.facing,
+        hp: Math.round(f.hp),
+        shield: Math.round(f.shield),
+        state: f.state,
+        isGrounded: f.isGrounded,
+        isBlocking: f.isBlocking,
+        isDead: f.isDead,
+        activeWeapon: f.activeWeapon,
+        aimAngle: typeof f.aimAngle === 'number' ? Math.round(f.aimAngle * 100) / 100 : 0,
+        weaponCooldown: f.weaponCooldown > 0 ? Math.round(f.weaponCooldown * 100) / 100 : 0,
+        invincibleTimer: f.invincibleTimer > 0 ? Math.round(f.invincibleTimer * 10) / 10 : 0,
+        burningTimer: f.burningTimer > 0 ? Math.round(f.burningTimer * 10) / 10 : 0,
+        respawnTimer: f.respawnTimer > 0 ? Math.round(f.respawnTimer * 10) / 10 : 0,
+        kills: f.kills,
+        deaths: f.deaths,
+        score: f.score,
+        weapons: f.weapons,
+      });
+    }
+
+    const tickSnapshot: TickSnapshot = {
+      roomId: room.roomId,
+      status: room.status,
+      countdown: room.countdown,
+      roundTimer: Math.round(room.roundTimer),
+      matchTimeRemaining: Math.round(room.matchTimeRemaining),
+      currentDuelRound: room.currentDuelRound,
+      fighters: fighterDeltas,
+      projectiles: room.projectiles,
+      burningGround: room.burningGround,
+    };
+
+    this.broadcastToRoom(room.roomId, {
+      type: 'game_tick',
+      tick: tickSnapshot,
+    });
   }
 
   private handleChat(client: ConnectedClient, message: string) {
-    if (!client.roomId || !message.trim()) return;
-    const cleanMsg = message.trim().slice(0, 100);
+    if (!client.roomId || !message || typeof message !== 'string') return;
+    const cleanMsg = message.replace(/<[^>]*>?/gm, '').trim().slice(0, 100);
+    if (!cleanMsg) return;
 
     this.broadcastToRoom(client.roomId, {
       type: 'chat_broadcast',
@@ -1183,7 +1202,6 @@ export class GameServer {
         }
       }
       if (activeHumanPlayers.length === 0 && !hasReconnectSession) {
-        this.stopRoomLoop(roomId);
         this.rooms.delete(roomId);
         this.roomClients.delete(roomId);
         this.purgeRoomSessions(roomId);
@@ -1194,8 +1212,8 @@ export class GameServer {
   public shutdown() {
     console.log('Shutting down GameServer...');
     clearInterval(this.cleanupInterval);
-    for (const roomId of Array.from(this.roomLoops.keys())) {
-      this.stopRoomLoop(roomId);
+    if (this.masterSimulationInterval) {
+      clearInterval(this.masterSimulationInterval);
     }
     for (const session of this.reconnectSessions.values()) {
       clearTimeout(session.timeout);
