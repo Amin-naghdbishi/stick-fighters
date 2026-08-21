@@ -507,9 +507,9 @@ export class GameRenderer {
         }
       }
     } else if (arena.theme === 'mystery_mountain' || arena.theme === 'mystery_sky') {
-      // Stormpeak Mountain Backdrop: Jagged slate peaks, storm clouds, lightning atmosphere
-      ctx.fillStyle = '#1E293B';
-      ctx.strokeStyle = '#0F172A';
+      // Stormpeak Mountain Backdrop: Light slate alpine peaks, storm clouds, bright atmosphere
+      ctx.fillStyle = '#CBD5E1';
+      ctx.strokeStyle = '#64748B';
       ctx.lineWidth = 4;
 
       ctx.beginPath();
@@ -527,9 +527,9 @@ export class GameRenderer {
         this.drawComicCloud(cx, 400 + Math.sin(cx * 0.01 + time * 0.0005) * 60, 120);
       }
     } else if (arena.theme === 'mystery_jungle' || arena.theme === 'mystery_depths') {
-      // Primordial Jungle Backdrop: Dense rainforest canopy, ancient stone ruins, hanging vines
-      ctx.fillStyle = '#14532D';
-      ctx.strokeStyle = '#052E16';
+      // Primordial Jungle Backdrop: Lush rainforest canopy, ancient stone ruins, vibrant foliage
+      ctx.fillStyle = '#16A34A';
+      ctx.strokeStyle = '#15803D';
       ctx.lineWidth = 4;
 
       ctx.beginPath();
@@ -543,16 +543,16 @@ export class GameRenderer {
       ctx.stroke();
 
       for (let tx = 400; tx < arena.width; tx += 650) {
-        ctx.fillStyle = '#78350F';
-        ctx.strokeStyle = '#451A03';
+        ctx.fillStyle = '#854D0E';
+        ctx.strokeStyle = '#543007';
         ctx.fillRect(tx, 300, 90, arena.height - 300);
         ctx.strokeRect(tx, 300, 90, arena.height - 300);
         this.drawCartoonTree(tx + 45, 260, 140);
       }
     } else if (arena.theme === 'mystery_volcanic' || arena.theme === 'mystery_void') {
-      // Obsidian Volcanic Rift Backdrop: Lava rivers at bottom, dark basalt cliffs, glowing magma
-      ctx.fillStyle = '#27272A';
-      ctx.strokeStyle = '#09090B';
+      // Obsidian Volcanic Rift Backdrop: Warm terracotta rock cliffs, glowing orange lava pools
+      ctx.fillStyle = '#D97706';
+      ctx.strokeStyle = '#92400E';
       ctx.lineWidth = 4;
 
       ctx.beginPath();
@@ -567,12 +567,12 @@ export class GameRenderer {
       ctx.stroke();
 
       // Bubbling Lava Floor Pool at bottom of volcanic rift
-      ctx.fillStyle = '#DC2626';
-      ctx.strokeStyle = '#991B1B';
+      ctx.fillStyle = '#F97316';
+      ctx.strokeStyle = '#EF4444';
       ctx.fillRect(0, arena.height - 160, arena.width, 160);
       ctx.strokeRect(0, arena.height - 160, arena.width, 160);
 
-      ctx.fillStyle = '#FACC15';
+      ctx.fillStyle = '#FDE047';
       for (let lx = 100; lx < arena.width; lx += 220) {
         const bubble = Math.sin(time * 0.004 + lx) * 10;
         ctx.beginPath();

@@ -490,6 +490,8 @@ export function fireFighterWeapon(
   const config = WEAPONS_CONFIG[fighter.activeWeapon];
   if (!config) return false;
 
+  const now = Date.now();
+
   // Deduct ammo (Super weapons have unlimited ammo during active 15s lifetime)
   if (config.isSuper) {
     fighter.weapons[fighter.activeWeapon] = 999;
@@ -567,8 +569,6 @@ export function fireFighterWeapon(
   // Apply recoil impulse
   fighter.vx -= Math.cos(fighter.aimAngle) * config.recoil;
   fighter.vy -= Math.sin(fighter.aimAngle) * (config.recoil * 0.5);
-
-  const now = Date.now();
 
   if (config.pellets && config.pellets > 1) {
     // Shotgun spread
