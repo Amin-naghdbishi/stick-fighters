@@ -53,49 +53,49 @@ export interface WeaponConfig {
   * Easy to rebalance damage, cooldowns, ammo, recoil, and respawn timers.
   */
 export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
-  // 1. Pebble Blaster (Tier 1 - Weakest, fast & light)
+  // 1. Pebble Blaster (Tier 1 - Weakest, ultra fast & light)
   pebble_blaster: {
     id: 'pebble_blaster',
     name: 'Pebble Blaster',
     category: 'light',
     tier: 1,
     damage: 7,
-    fireRate: 0.16,
+    fireRate: 0.10, // 10 rounds/sec rapid tapping
     projectileSpeed: 26,
     projectileLife: 1.8,
     range: 1400,
     ammoCapacity: 10,
-    recoil: 1.2,
+    recoil: 1.0,
     knockback: 3.5,
     respawnTime: 5,
     color: '#9CA3AF',
     bulletColor: '#6B7280',
     icon: '🪨',
-    description: 'Fires high-speed little pebble stones. Low damage but rapid-fire.',
+    description: 'Fires rapid bursts of high-speed pebble stones. Light, ultra-responsive trigger.',
   },
 
-  // 2. Pistol (Tier 2 - Standard reliable sidearm)
+  // 2. Pistol (Tier 2 - Snappy semi-automatic sidearm)
   pistol: {
     id: 'pistol',
     name: 'Pistol',
     category: 'light',
     tier: 2,
     damage: 16,
-    fireRate: 0.32,
+    fireRate: 0.15, // 6.67 rounds/sec snappy semi-auto double-taps
     projectileSpeed: 32,
     projectileLife: 2.0,
     range: 1920,
     ammoCapacity: 10,
-    recoil: 2.2,
+    recoil: 1.8,
     knockback: 6.0,
     respawnTime: 7,
     color: '#475569',
     bulletColor: '#F59E0B',
     icon: '🔫',
-    description: 'Crisp semi-automatic sidearm. Accurate with dependable long range.',
+    description: 'Crisp semi-automatic sidearm with zero trigger delay for rapid double-taps.',
   },
 
-  // 3. Burst SMG (Tier 3 - 3-round burst combat)
+  // 3. Burst SMG (Tier 3 - 3-round rapid burst combat)
   burst_smg: {
     id: 'burst_smg',
     name: 'Burst SMG',
@@ -103,22 +103,22 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     tier: 3,
     damage: 10,
     burstCount: 3,
-    burstDelay: 0.07,
-    fireRate: 0.44,
+    burstDelay: 0.05,
+    fireRate: 0.22, // Smooth rapid consecutive burst cycles
     projectileSpeed: 30,
     projectileLife: 1.8,
     range: 1620,
     ammoCapacity: 10,
-    recoil: 3.2,
+    recoil: 2.6,
     knockback: 4.5,
     respawnTime: 8,
     color: '#0284C7',
     bulletColor: '#38BDF8',
     icon: '⚡',
-    description: 'Fires rapid 3-round bursts in quick succession with solid reach.',
+    description: 'Fires high-tempo 3-round bursts with fast cycling between bursts.',
   },
 
-  // 4. Shotgun (Tier 4 - Multi-pellet devastating blast)
+  // 4. Shotgun (Tier 4 - Multi-pellet pump-action blast)
   shotgun: {
     id: 'shotgun',
     name: 'Shotgun',
@@ -126,42 +126,42 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     tier: 4,
     damage: 8, // per pellet
     pellets: 5, // 5 x 8 = 40 max point-blank
-    fireRate: 0.72,
+    fireRate: 0.36, // Fast pump action ~2.8 blasts/sec
     projectileSpeed: 26,
     projectileLife: 1.2,
     range: 936,
     ammoCapacity: 10,
-    recoil: 7.5,
+    recoil: 6.0,
     knockback: 11.0,
     respawnTime: 12,
     color: '#B45309',
     bulletColor: '#F97316',
     icon: '💥',
-    description: 'Wide 5-pellet buckshot spread reaching across medium platforms.',
+    description: 'Wide 5-pellet buckshot spread with a snappy pump-action rhythm.',
   },
 
-  // 5. Rifle (Tier 5 - High velocity extreme-range precision rifle)
+  // 5. Rifle (Tier 5 - High velocity precision marksman rifle)
   rifle: {
     id: 'rifle',
     name: 'Rifle',
     category: 'medium',
     tier: 5,
     damage: 32,
-    fireRate: 0.52,
+    fireRate: 0.24, // 4.17 shots/sec snappy precision tapping
     projectileSpeed: 42,
     projectileLife: 2.8,
     range: 3500,
     ammoCapacity: 10,
-    recoil: 4.8,
+    recoil: 3.8,
     knockback: 9.0,
     respawnTime: 15,
     color: '#15803D',
     bulletColor: '#84CC16',
     icon: '🎯',
-    description: 'High-velocity precision rifle engineered to cross the largest arenas.',
+    description: 'High-velocity precision rifle engineered for responsive rapid long-range marksman fire.',
   },
 
-  // 6. Flame Gun (Tier 6 - Fiery continuous stream & area denial)
+  // 6. Flame Gun (Tier 6 - Continuous fiery torrent & area denial)
   flame_gun: {
     id: 'flame_gun',
     name: 'Flame Gun',
@@ -169,18 +169,18 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     tier: 6,
     damage: 5, // per tick
     isFlame: true,
-    fireRate: 0.08,
+    fireRate: 0.06, // Continuous uninterrupted flame stream
     projectileSpeed: 18,
     projectileLife: 1.0,
     range: 540,
     ammoCapacity: 10,
-    recoil: 1.0,
+    recoil: 0.8,
     knockback: 2.0,
     respawnTime: 18,
     color: '#EA580C',
     bulletColor: '#EF4444',
     icon: '🔥',
-    description: 'Sprays continuous licking flames that roast enemies in an expanded cone.',
+    description: 'Sprays continuous licking flames that roast enemies in an expanded torrent.',
   },
 
   // 7. Grenade Launcher (Tier 7 - Arcing bouncing explosive grenade)
@@ -192,18 +192,18 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     damage: 48,
     hasGravity: true,
     explosionRadius: 95,
-    fireRate: 0.85,
+    fireRate: 0.38, // Fast tactical grenade lobs
     projectileSpeed: 22,
     projectileLife: 2.6,
     range: 1716,
     ammoCapacity: 10,
-    recoil: 6.0,
+    recoil: 5.0,
     knockback: 14.0,
     respawnTime: 22,
     color: '#4D7C0F',
     bulletColor: '#65A30D',
     icon: '💣',
-    description: 'Launches high-arc bouncing explosive canisters that detonate on impact or timer.',
+    description: 'Launches high-arc bouncing explosive canisters with fluid consecutive fire.',
   },
 
   // 8. Heavy Cannon (Tier 8 - Massive crushing iron cannonball)
@@ -213,12 +213,12 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     category: 'heavy',
     tier: 8,
     damage: 58,
-    fireRate: 1.15,
+    fireRate: 0.48, // Responsive heavy cannon shots ~2.1 shots/sec
     projectileSpeed: 18,
     projectileLife: 2.4,
     range: 1300,
     ammoCapacity: 10,
-    recoil: 9.5,
+    recoil: 7.5,
     knockback: 20.0,
     respawnTime: 25,
     color: '#334155',
@@ -235,18 +235,18 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     tier: 9,
     damage: 68,
     explosionRadius: 120,
-    fireRate: 1.3,
+    fireRate: 0.50, // Responsive rocket launches 2.0 shots/sec
     projectileSpeed: 28,
     projectileLife: 3.0,
     range: 2520,
     ammoCapacity: 10,
-    recoil: 9.0,
+    recoil: 7.0,
     knockback: 18.0,
     respawnTime: 30,
     color: '#DC2626',
     bulletColor: '#F43F5E',
     icon: '🚀',
-    description: 'Long-range propelled warhead creating massive fiery shockwaves.',
+    description: 'Long-range propelled warhead creating massive fiery shockwaves with smooth follow-ups.',
   },
 
   // 10. Railgun (Tier 10 - Charged hyper-beam accelerator of doom)
@@ -257,19 +257,19 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     tier: 10,
     damage: 88,
     isBeam: true,
-    chargeTime: 0.5,
-    fireRate: 1.6,
+    chargeTime: 0.25, // Snappy 250ms charge
+    fireRate: 0.55,   // Responsive beam cooldown
     projectileSpeed: 65,
     projectileLife: 1.8,
     range: 3510,
     ammoCapacity: 10,
-    recoil: 12.0,
+    recoil: 9.0,
     knockback: 22.0,
     respawnTime: 45,
     color: '#7C3AED',
     bulletColor: '#A855F7',
     icon: '🔮',
-    description: 'High-voltage accelerator beam piercing instantaneously across entire arenas.',
+    description: 'High-voltage accelerator beam with quick charge and instantaneous arena-wide pierce.',
   },
 
   // SUPER WEAPON #1: Thunder Sword (Mystery I Exclusive)
@@ -284,12 +284,12 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     areaDamageRadius: 140,
     lifetime: 15,
     damage: 999,
-    fireRate: 0.5,
+    fireRate: 0.22, // Rapid heroic sword swings
     projectileSpeed: 0,
     projectileLife: 0,
     range: 220,
     ammoCapacity: 999,
-    recoil: 4.0,
+    recoil: 3.0,
     knockback: 35.0,
     respawnTime: 150,
     spawnScale: 0.7,
@@ -309,12 +309,12 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     isSuper: true,
     lifetime: 15,
     damage: 18,
-    fireRate: 0.05,
+    fireRate: 0.04, // 25 rounds / sec hyper-stream
     projectileSpeed: 44,
     projectileLife: 2.6,
     range: 3432,
     ammoCapacity: 999,
-    recoil: 0.8,
+    recoil: 0.6,
     knockback: 8.0,
     respawnTime: 120,
     spawnScale: 0.7,
@@ -335,12 +335,12 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     isFlame: true,
     lifetime: 15,
     damage: 18,
-    fireRate: 0.06,
+    fireRate: 0.05, // 20 ticks / sec apocalyptic fire torrent
     projectileSpeed: 26,
     projectileLife: 1.4,
     range: 1092,
     ammoCapacity: 999,
-    recoil: 1.5,
+    recoil: 1.2,
     knockback: 4.0,
     respawnTime: 180,
     spawnScale: 0.7,
