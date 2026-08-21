@@ -182,6 +182,9 @@ export class LocalGameEngine {
       }
 
       // Update Player & Bots
+      const extraHits: any[] = [];
+      const extraExplosions: any[] = [];
+
       for (const f of fighters) {
         let input: PlayerInput;
         if (f.isBot) {
@@ -193,7 +196,7 @@ export class LocalGameEngine {
 
         // Firing weapon
         if (input.fire && f.activeWeapon && f.weaponCooldown <= 0 && !f.isDead && !f.isBlocking) {
-          fireFighterWeapon(f, this.room.projectiles);
+          fireFighterWeapon(f, this.room.projectiles, fighters, extraHits, extraExplosions);
         }
       }
 
@@ -205,8 +208,10 @@ export class LocalGameEngine {
       const projResult = updateProjectiles(this.room.projectiles, fighters, arena, dt);
       this.room.projectiles = projResult.activeProjectiles;
 
-      // Projectile Hits
-      for (const hit of projResult.hits) {
+      const allHitsCombined = [...projResult.hits, ...extraHits];
+
+      // Hits
+      for (const hit of allHitsCombined) {
         const pop: ComicPop = {
           id: 'pop_' + Math.random().toString(36).substring(2, 7),
           text: hit.popText,
@@ -223,8 +228,10 @@ export class LocalGameEngine {
         newHits.push(hit);
       }
 
-      // Projectile Explosions
-      for (const exp of projResult.explosions) {
+      const allExplosionsCombined = [...projResult.explosions, ...extraExplosions];
+
+      // Explosions
+      for (const exp of allExplosionsCombined) {
         this.comicPops.push({
           id: 'pop_boom_' + Math.random().toString(36).substring(2, 7),
           text: 'BOOOM!',

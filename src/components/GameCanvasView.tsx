@@ -600,8 +600,12 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
                       <div className="text-xs font-black text-black leading-tight flex items-center gap-1">
                         <span>{activeWeaponConfig ? activeWeaponConfig.name : 'Unarmed (Fists)'}</span>
                         {activeWeaponConfig && (
-                          <span className="text-[9px] bg-slate-100 text-slate-700 px-1 rounded border border-slate-300 font-bold uppercase">
-                            T{activeWeaponConfig.tier}
+                          <span className={`text-[9px] px-1 rounded border font-black uppercase ${
+                            activeWeaponConfig.isSuper
+                              ? 'bg-purple-600 text-white border-purple-900 animate-pulse'
+                              : 'bg-slate-100 text-slate-700 border-slate-300'
+                          }`}>
+                            {activeWeaponConfig.isSuper ? '⚡ SUPER' : `T${activeWeaponConfig.tier}`}
                           </span>
                         )}
                       </div>
@@ -613,19 +617,30 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
 
                   {activeWeaponConfig ? (
                     <div className="flex flex-col items-end">
-                      <div className="font-mono font-black text-xs text-black bg-amber-100 px-1.5 py-0.5 rounded border border-amber-400">
-                        {activeAmmo} / {activeWeaponConfig.ammoCapacity}
-                      </div>
-                      <div className="flex gap-0.5 mt-1">
-                        {Array.from({ length: 10 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className={`w-1.5 h-1.5 rounded-xs border border-black ${
-                              i < activeAmmo ? 'bg-amber-400' : 'bg-slate-200'
-                            }`}
-                          />
-                        ))}
-                      </div>
+                      {activeWeaponConfig.isSuper ? (
+                        <div className="font-mono font-black text-xs text-white bg-purple-600 px-2 py-0.5 rounded-lg border border-black animate-pulse flex items-center gap-1">
+                          <span>∞ AMMO</span>
+                          <span className="bg-white text-purple-900 px-1 rounded text-[10px]">
+                            {Math.max(0, Math.ceil(myFighter.superWeaponTimer || 0))}s
+                          </span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="font-mono font-black text-xs text-black bg-amber-100 px-1.5 py-0.5 rounded border border-amber-400">
+                            {activeAmmo} / {activeWeaponConfig.ammoCapacity}
+                          </div>
+                          <div className="flex gap-0.5 mt-1">
+                            {Array.from({ length: 10 }).map((_, i) => (
+                              <div
+                                key={i}
+                                className={`w-1.5 h-1.5 rounded-xs border border-black ${
+                                  i < activeAmmo ? 'bg-amber-400' : 'bg-slate-200'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <span className="text-[10px] font-black text-slate-400 uppercase">

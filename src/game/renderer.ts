@@ -441,6 +441,58 @@ export class GameRenderer {
           }
         }
       }
+    } else if (arena.theme === 'mystery_sky') {
+      // Sky Sanctuary Backdrop: Floating celestial clouds & soaring sky peaks
+      ctx.fillStyle = '#60A5FA';
+      ctx.strokeStyle = '#1D4ED8';
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(0, arena.height - 600);
+      for (let sx = 0; sx <= arena.width; sx += 800) {
+        ctx.quadraticCurveTo(sx + 400, arena.height - 1200, sx + 800, arena.height - 600);
+      }
+      ctx.lineTo(arena.width, arena.height);
+      ctx.lineTo(0, arena.height);
+      ctx.fill();
+      ctx.stroke();
+
+      for (let cx = 300; cx < arena.width; cx += 650) {
+        this.drawComicCloud(cx, 350 + Math.sin(cx * 0.01 + time * 0.0005) * 70, 110);
+      }
+    } else if (arena.theme === 'mystery_depths') {
+      // Subterranean Abyss Backdrop: Cavernous rock pillars & bioluminescent crystals
+      ctx.fillStyle = '#1E1B4B';
+      ctx.strokeStyle = '#0F172A';
+      ctx.lineWidth = 3.5;
+
+      for (let dx = 300; dx < arena.width; dx += 750) {
+        ctx.fillRect(dx, 150, 220, arena.height - 150);
+        ctx.strokeRect(dx, 150, 220, arena.height - 150);
+
+        ctx.fillStyle = '#A855F7';
+        ctx.beginPath();
+        ctx.arc(dx + 110, 500 + ((dx * 7) % 1100), 24, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (arena.theme === 'mystery_void') {
+      // Cosmic Rift Void Backdrop: Deep space grid, floating alien monoliths & nebula rings
+      ctx.strokeStyle = '#818CF8';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 6]);
+      for (let vy = 200; vy < arena.height; vy += 250) {
+        ctx.beginPath();
+        ctx.moveTo(0, vy);
+        ctx.lineTo(arena.width, vy);
+        ctx.stroke();
+      }
+      for (let vx = 300; vx < arena.width; vx += 400) {
+        ctx.beginPath();
+        ctx.moveTo(vx, 0);
+        ctx.lineTo(vx, arena.height);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
     }
   }
 
@@ -546,7 +598,8 @@ export class GameRenderer {
         // Weapon Model hovering (ONLY the weapon sprite, absolutely NO text/name tags)
         ctx.save();
         ctx.translate(sx, floatY);
-        this.drawWeaponSprite(ctx, sp.weaponType, 1.25);
+        const spawnScale = config.spawnScale || (config.isSuper ? 0.7 : 1.25);
+        this.drawWeaponSprite(ctx, sp.weaponType, spawnScale);
         ctx.restore();
       }
       // When picked up: completely empty pad (no sprite, no icon, no text)
@@ -869,7 +922,33 @@ export class GameRenderer {
       ctx.save();
       ctx.translate(rHandX, rHandY);
       ctx.rotate(localAimAngle);
-      this.drawWeaponSprite(ctx, f.activeWeapon!, 1.0);
+      const weaponCfg = WEAPONS_CONFIG[f.activeWeapon!];
+      const heldScale = weaponCfg?.heldScale || (weaponCfg?.isSuper ? 2.4 : 1.0);
+      this.drawWeaponSprite(ctx, f.activeWeapon!, heldScale);
+
+      // Super weapon held visual electric/fire effects
+      if (weaponCfg?.id === 'thunder_sword') {
+        ctx.strokeStyle = '#38BDF8';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        for (let i = 0; i < 4; i++) {
+          const rx = (Math.random() - 0.5) * 45;
+          const ry = (Math.random() - 0.5) * 45;
+          ctx.moveTo(rx, ry);
+          ctx.lineTo(rx + (Math.random() - 0.5) * 20, ry + (Math.random() - 0.5) * 20);
+        }
+        ctx.stroke();
+      } else if (weaponCfg?.id === 'inferno_cannon') {
+        ctx.fillStyle = Math.random() < 0.5 ? '#EF4444' : '#F97316';
+        ctx.beginPath();
+        ctx.arc(36, 0, 10 + Math.random() * 8, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (weaponCfg?.id === 'infinite_gun' && f.weaponCooldown > 0) {
+        ctx.fillStyle = '#F59E0B';
+        ctx.beginPath();
+        ctx.arc(34, 0, 12, 0, Math.PI * 2);
+        ctx.fill();
+      }
       ctx.restore();
     } else {
       // Standard Unarmed Arms
@@ -1088,6 +1167,80 @@ export class GameRenderer {
         ctx.arc(3, 0, 5, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
+        break;
+
+      case 'thunder_sword':
+        // Enormous Lightning Broadsword
+        ctx.fillStyle = '#FACC15';
+        ctx.strokeStyle = '#0F172A';
+        // Handle & Hilt
+        ctx.fillRect(-12, -3, 10, 6);
+        ctx.strokeRect(-12, -3, 10, 6);
+        ctx.fillStyle = '#EAB308';
+        ctx.fillRect(-3, -12, 6, 24);
+        ctx.strokeRect(-3, -12, 6, 24);
+        // Giant Blade
+        ctx.fillStyle = '#38BDF8';
+        ctx.beginPath();
+        ctx.moveTo(3, -9);
+        ctx.lineTo(38, -6);
+        ctx.lineTo(50, 0);
+        ctx.lineTo(38, 6);
+        ctx.lineTo(3, 9);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Electric Core Groove
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(5, -2, 32, 4);
+        break;
+
+      case 'infinite_gun':
+        // Heavy Rotary Machine Gun
+        ctx.fillStyle = '#1E293B';
+        ctx.strokeStyle = '#0F172A';
+        // Main Body & Ammo Drum
+        ctx.fillRect(-10, -8, 22, 16);
+        ctx.strokeRect(-10, -8, 22, 16);
+        ctx.fillStyle = '#F59E0B';
+        ctx.beginPath();
+        ctx.arc(-2, 10, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // Triple Rotary Barrels
+        ctx.fillStyle = '#64748B';
+        ctx.fillRect(12, -9, 26, 5);
+        ctx.strokeRect(12, -9, 26, 5);
+        ctx.fillRect(12, -2, 26, 5);
+        ctx.strokeRect(12, -2, 26, 5);
+        ctx.fillRect(12, 5, 26, 5);
+        ctx.strokeRect(12, 5, 26, 5);
+        break;
+
+      case 'inferno_cannon':
+        // Massive Dragonhead Fire Cannon
+        ctx.fillStyle = '#991B1B';
+        ctx.strokeStyle = '#0F172A';
+        // Heavy Barrel Body
+        ctx.fillRect(-10, -9, 32, 18);
+        ctx.strokeRect(-10, -9, 32, 18);
+        // Twin Flame Canisters
+        ctx.fillStyle = '#EA580C';
+        ctx.fillRect(-6, 9, 24, 7);
+        ctx.strokeRect(-6, 9, 24, 7);
+        // Dragon Mouth Flare Nozzle
+        ctx.fillStyle = '#EF4444';
+        ctx.beginPath();
+        ctx.moveTo(22, -12);
+        ctx.lineTo(36, -6);
+        ctx.lineTo(36, 6);
+        ctx.lineTo(22, 12);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Glowing Nozzle Core
+        ctx.fillStyle = '#FACC15';
+        ctx.fillRect(26, -4, 8, 8);
         break;
     }
 

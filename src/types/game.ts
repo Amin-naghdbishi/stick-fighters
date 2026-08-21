@@ -85,6 +85,7 @@ export interface FighterState {
   aimAngle: number; // in radians
   weaponCooldown: number; // fire cooldown timer
   chargeTimer: number; // for railgun charge up
+  superWeaponTimer?: number; // 15s timer for active super weapons
 }
 
 export interface Platform {

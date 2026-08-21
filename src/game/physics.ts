@@ -104,6 +104,7 @@ export function createInitialFighter(
     aimAngle: 0,
     weaponCooldown: 0,
     chargeTimer: 0,
+    superWeaponTimer: 0,
   };
 }
 
@@ -139,6 +140,23 @@ export function updateFighterPhysics(
   if (fighter.hitStunTimer > 0) {
     fighter.hitStunTimer -= dt;
     fighter.state = 'hit';
+  }
+
+  // Super Weapon 15-second lifetime countdown
+  if (typeof fighter.superWeaponTimer === 'number' && fighter.superWeaponTimer > 0) {
+    fighter.superWeaponTimer -= dt;
+    if (fighter.superWeaponTimer <= 0) {
+      fighter.superWeaponTimer = 0;
+      // Remove any expired super weapons from inventory
+      for (const k of Object.keys(fighter.weapons)) {
+        if (WEAPONS_CONFIG[k as WeaponType]?.isSuper) {
+          delete fighter.weapons[k];
+        }
+      }
+      if (fighter.activeWeapon && (WEAPONS_CONFIG[fighter.activeWeapon]?.isSuper || (fighter.weapons[fighter.activeWeapon] || 0) <= 0)) {
+        autoSwitchToNextAvailableWeapon(fighter);
+      }
+    }
   }
 
   // Auto-switch to next available weapon if current weapon is out of ammo
@@ -421,12 +439,18 @@ export function checkWeaponPickups(
         const config = WEAPONS_CONFIG[spawn.weaponType];
         spawn.respawnTimer = config ? config.respawnTime : 10;
 
-        // Add ammo with a generous cap
-        const ammoToAdd = config ? config.ammoCapacity : 10;
-        f.weapons[spawn.weaponType] = Math.min(30, (f.weapons[spawn.weaponType] || 0) + ammoToAdd);
-
-        if (!f.activeWeapon || (f.weapons[f.activeWeapon] || 0) <= 0) {
+        if (config?.isSuper) {
+          f.weapons[spawn.weaponType] = 999;
+          f.superWeaponTimer = config.lifetime || 15;
           f.activeWeapon = spawn.weaponType;
+        } else {
+          // Add ammo with a generous cap
+          const ammoToAdd = config ? config.ammoCapacity : 10;
+          f.weapons[spawn.weaponType] = Math.min(30, (f.weapons[spawn.weaponType] || 0) + ammoToAdd);
+
+          if (!f.activeWeapon || (f.weapons[f.activeWeapon] || 0) <= 0) {
+            f.activeWeapon = spawn.weaponType;
+          }
         }
 
         pickups.push({
@@ -443,11 +467,14 @@ export function checkWeaponPickups(
 }
 
 /**
- * Fire active weapon from fighter
+ * Fire active weapon from fighter (Server authoritative)
  */
 export function fireFighterWeapon(
   fighter: FighterState,
-  projectiles: ProjectileState[]
+  projectiles: ProjectileState[],
+  allFighters?: FighterState[],
+  hitsOut?: HitResult[],
+  explosionsOut?: { x: number; y: number; radius: number; color: string }[]
 ): boolean {
   if (fighter.isDead || !fighter.activeWeapon || fighter.weaponCooldown > 0) {
     return false;
@@ -463,14 +490,60 @@ export function fireFighterWeapon(
   const config = WEAPONS_CONFIG[fighter.activeWeapon];
   if (!config) return false;
 
-  // Deduct 1 ammo
-  const remainingAmmo = currentAmmo - 1;
-  if (remainingAmmo <= 0) {
-    delete fighter.weapons[fighter.activeWeapon];
+  // Deduct ammo (Super weapons have unlimited ammo during active 15s lifetime)
+  if (config.isSuper) {
+    fighter.weapons[fighter.activeWeapon] = 999;
   } else {
-    fighter.weapons[fighter.activeWeapon] = remainingAmmo;
+    const remainingAmmo = currentAmmo - 1;
+    if (remainingAmmo <= 0) {
+      delete fighter.weapons[fighter.activeWeapon];
+    } else {
+      fighter.weapons[fighter.activeWeapon] = remainingAmmo;
+    }
   }
   fighter.weaponCooldown = config.fireRate;
+
+  // Thunder Sword Special Area Slash & Instant Kill
+  if (config.isInstantKill && config.isMelee) {
+    const strikeDist = 70;
+    const strikeX = fighter.x + Math.cos(fighter.aimAngle) * strikeDist;
+    const strikeY = (fighter.y - FIGHTER_HEIGHT * 0.5) + Math.sin(fighter.aimAngle) * strikeDist;
+    const areaRadius = config.areaDamageRadius || 120;
+
+    if (explosionsOut) {
+      explosionsOut.push({ x: strikeX, y: strikeY, radius: areaRadius, color: '#38BDF8' });
+    }
+
+    if (allFighters) {
+      for (const target of allFighters) {
+        if (target.id === fighter.id || target.isDead || target.invincibleTimer > 0) continue;
+        const d = Math.hypot(target.x - strikeX, (target.y - FIGHTER_HEIGHT * 0.5) - strikeY);
+        if (d <= areaRadius) {
+          // Instant Death calculated on server!
+          target.hp = 0;
+          target.lastAttackerId = fighter.id;
+          target.hitStunTimer = 0.5;
+          target.vx += Math.cos(fighter.aimAngle) * config.knockback;
+          target.vy += Math.sin(fighter.aimAngle) * config.knockback - 6;
+          target.state = 'hit';
+
+          if (hitsOut) {
+            hitsOut.push({
+              attackerId: fighter.id,
+              targetId: target.id,
+              damage: 999,
+              isHeavy: true,
+              x: target.x,
+              y: target.y - FIGHTER_HEIGHT / 2,
+              popText: 'THUNDER SLAM!',
+              blocked: false,
+            });
+          }
+        }
+      }
+    }
+    return true;
+  }
 
   // Muzzle position (torso/hand level)
   const muzzleDist = 32;
@@ -508,7 +581,7 @@ export function fireFighterWeapon(
       });
     }
   } else if (config.burstCount && config.burstCount > 1) {
-    // Burst SMG (primary bullet immediately, others chained or spread slightly)
+    // Burst SMG
     for (let i = 0; i < config.burstCount; i++) {
       const angleOffset = (Math.random() - 0.5) * 0.08;
       const finalAngle = fighter.aimAngle + angleOffset;
@@ -532,7 +605,7 @@ export function fireFighterWeapon(
       });
     }
   } else {
-    // Single projectile / Beam / Rocket / Flame
+    // Single projectile / Beam / Rocket / Flame / Inferno Cannon / Infinite Gun
     const speed = config.projectileSpeed;
     projectiles.push({
       id: `proj_${fighter.id}_${now}`,
@@ -556,7 +629,7 @@ export function fireFighterWeapon(
   }
 
   // If last ammo was used, switch to next available
-  if (remainingAmmo <= 0) {
+  if (!config.isSuper && (fighter.weapons[fighter.activeWeapon] || 0) <= 0) {
     autoSwitchToNextAvailableWeapon(fighter);
   }
 

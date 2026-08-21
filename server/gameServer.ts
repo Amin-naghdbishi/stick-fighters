@@ -629,6 +629,9 @@ export class GameServer {
         }
 
         // 3. Update each fighter with physics and inputs
+        const extraHits: any[] = [];
+        const extraExplosions: any[] = [];
+
         for (const f of fighters) {
           let input: PlayerInput;
           const connectedClient = !f.isBot ? this.clients.get(f.id) : undefined;
@@ -655,7 +658,7 @@ export class GameServer {
 
           // Handle weapon firing
           if (input.fire && f.activeWeapon && f.weaponCooldown <= 0 && !f.isDead && !f.isBlocking) {
-            const fired = fireFighterWeapon(f, room.projectiles);
+            const fired = fireFighterWeapon(f, room.projectiles, fighters, extraHits, extraExplosions);
             if (fired) {
               this.broadcastToRoom(room.roomId, {
                 type: 'weapon_fire_event',
@@ -673,8 +676,9 @@ export class GameServer {
         const projResult = updateProjectiles(room.projectiles, fighters, arena, dt);
         room.projectiles = projResult.activeProjectiles;
 
+        const allExplosions = [...projResult.explosions, ...extraExplosions];
         // Broadcast explosions
-        for (const exp of projResult.explosions) {
+        for (const exp of allExplosions) {
           this.broadcastToRoom(room.roomId, {
             type: 'explosion_event',
             x: exp.x,
@@ -686,7 +690,7 @@ export class GameServer {
 
         // 5. Check Melee Attack Collisions
         const meleeHits = checkAttackCollisions(fighters, arena);
-        const allHits = [...meleeHits, ...projResult.hits];
+        const allHits = [...meleeHits, ...projResult.hits, ...extraHits];
         const pops: ComicPop[] = [];
 
         for (const hit of allHits) {

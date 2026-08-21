@@ -8,13 +8,16 @@ export type WeaponType =
   | 'grenade_launcher'
   | 'heavy_cannon'
   | 'rocket_launcher'
-  | 'railgun';
+  | 'railgun'
+  | 'thunder_sword'
+  | 'infinite_gun'
+  | 'inferno_cannon';
 
 export interface WeaponConfig {
   id: WeaponType;
   name: string;
-  category: 'light' | 'medium' | 'heavy' | 'special';
-  tier: number; // 1 to 10
+  category: 'light' | 'medium' | 'heavy' | 'special' | 'super';
+  tier: number; // 1 to 10, or 11 for Super
   damage: number; // Base direct hit damage
   pellets?: number; // For shotgun
   burstCount?: number; // For burst SMG
@@ -24,7 +27,7 @@ export interface WeaponConfig {
   projectileSpeed: number; // Pixels per second / tick velocity
   projectileLife: number; // Max lifetime in seconds
   range: number; // Effective travel distance (pixels)
-  ammoCapacity: number; // Default ammo per pickup = 10
+  ammoCapacity: number; // Default ammo per pickup = 10 (or 999 for Super)
   recoil: number; // Impulse applied backwards to shooter
   knockback: number; // Impulse applied to target
   respawnTime: number; // Seconds to respawn on map
@@ -32,6 +35,13 @@ export interface WeaponConfig {
   hasGravity?: boolean; // For grenades
   isFlame?: boolean; // For flame gun continuous flow
   isBeam?: boolean; // For railgun instantaneous line
+  isSuper?: boolean; // For Super Weapons
+  isMelee?: boolean; // For Thunder Sword
+  isInstantKill?: boolean; // For Thunder Sword
+  areaDamageRadius?: number; // For Thunder Sword area kill
+  lifetime?: number; // 15 seconds active lifetime
+  spawnScale?: number; // Render scale at spawn (small)
+  heldScale?: number; // Render scale when held (large)
   color: string;
   bulletColor: string;
   icon: string; // Emoji or short symbol
@@ -39,9 +49,9 @@ export interface WeaponConfig {
 }
 
 /**
- * Central Configuration for all 10 Weapons in Stick Fighters.
- * Easy to rebalance damage, cooldowns, ammo, recoil, and respawn timers.
- */
+  * Central Configuration for all Weapons in Stick Fighters including Super Weapons.
+  * Easy to rebalance damage, cooldowns, ammo, recoil, and respawn timers.
+  */
 export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
   // 1. Pebble Blaster (Tier 1 - Weakest, fast & light)
   pebble_blaster: {
@@ -261,6 +271,85 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     icon: '🔮',
     description: 'High-voltage accelerator beam. Requires charging but instantly annihilates on hit.',
   },
+
+  // SUPER WEAPON #1: Thunder Sword (Mystery I Exclusive)
+  thunder_sword: {
+    id: 'thunder_sword',
+    name: 'Thunder Sword',
+    category: 'super',
+    tier: 11,
+    isSuper: true,
+    isMelee: true,
+    isInstantKill: true,
+    areaDamageRadius: 120,
+    lifetime: 15,
+    damage: 999,
+    fireRate: 0.5,
+    projectileSpeed: 0,
+    projectileLife: 0,
+    range: 180,
+    ammoCapacity: 999,
+    recoil: 4.0,
+    knockback: 35.0,
+    respawnTime: 150, // Configurable: 150s cooldown
+    spawnScale: 0.7, // Small at spawn
+    heldScale: 2.5,  // Enormous when held
+    color: '#FACC15',
+    bulletColor: '#38BDF8',
+    icon: '⚡🗡️',
+    description: 'Gigantic sword emitting lightning. Instant death & area strike for 15 seconds.',
+  },
+
+  // SUPER WEAPON #2: Infinite Gun (Mystery II Exclusive)
+  infinite_gun: {
+    id: 'infinite_gun',
+    name: 'Infinite Gun',
+    category: 'super',
+    tier: 11,
+    isSuper: true,
+    lifetime: 15,
+    damage: 18,
+    fireRate: 0.05, // 20 rounds / sec, strictly server-controlled
+    projectileSpeed: 38,
+    projectileLife: 1.4,
+    range: 1400,
+    ammoCapacity: 999,
+    recoil: 0.8,
+    knockback: 8.0,
+    respawnTime: 120, // Configurable: 120s cooldown
+    spawnScale: 0.7, // Small at spawn
+    heldScale: 2.4,  // Enormous when held
+    color: '#EA580C',
+    bulletColor: '#F59E0B',
+    icon: '🌩️🔫',
+    description: 'Colossal heavy machine gun with extreme fire rate & unlimited ammo for 15 seconds.',
+  },
+
+  // SUPER WEAPON #3: Inferno Cannon (Mystery III Exclusive)
+  inferno_cannon: {
+    id: 'inferno_cannon',
+    name: 'Inferno Cannon',
+    category: 'super',
+    tier: 11,
+    isSuper: true,
+    isFlame: true,
+    lifetime: 15,
+    damage: 18, // per tick (dramatically stronger than Flame Gun)
+    fireRate: 0.06,
+    projectileSpeed: 22,
+    projectileLife: 0.85,
+    range: 650, // Much longer range
+    ammoCapacity: 999,
+    recoil: 1.5,
+    knockback: 4.0,
+    respawnTime: 180, // Configurable: 180s cooldown
+    spawnScale: 0.7, // Small at spawn
+    heldScale: 2.4,  // Enormous when held
+    color: '#DC2626',
+    bulletColor: '#F97316',
+    icon: '🌋🔥',
+    description: 'Apocalyptic flame cannon unleashing gigantic raging fire streams for 15 seconds.',
+  },
 };
 
 export const ORDERED_WEAPON_KEYS: WeaponType[] = [
@@ -274,4 +363,8 @@ export const ORDERED_WEAPON_KEYS: WeaponType[] = [
   'heavy_cannon',
   'rocket_launcher',
   'railgun',
+  'thunder_sword',
+  'infinite_gun',
+  'inferno_cannon',
 ];
+

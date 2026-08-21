@@ -542,6 +542,193 @@ export const ARENAS: Record<string, Arena> = {
       { id: 'xl_m_lift_4', x: 3270, y: 840, width: 110, height: 24, color: '#00E676', type: 'bounce', isPassableDown: true },
     ],
   },
+  mystery_sky: {
+    id: 'mystery_sky',
+    name: 'Mystery I: Aetheria Sky Apex',
+    description: 'A colossal 6,000px vertical floating realm high above the clouds with dangerous cliffs, soaring jump-pads, narrow suspension bridges, and the Legendary Thunder Sword at its highest apex.',
+    theme: 'mystery_sky',
+    size: 'mystery',
+    width: 6000,
+    height: 3600,
+    bgColor: '#EFF6FF',
+    features: ['6000px Vertical Sky Realm', 'High Altitude Cliffs & Narrow Bridges', 'Apex Sanctuary Thunder Sword'],
+    spawnPoints: [
+      { x: 800, y: 2900 },
+      { x: 5200, y: 2900 },
+      { x: 1800, y: 2200 },
+      { x: 4200, y: 2200 },
+      { x: 3000, y: 1500 },
+      { x: 1200, y: 1100 },
+      { x: 4800, y: 1100 },
+      { x: 2200, y: 700 },
+      { x: 3800, y: 700 },
+      { x: 3000, y: 2900 },
+    ],
+    weaponSpawns: [
+      // Exactly 10 Normal Weapon Spawns spread across the massive vertical space
+      { id: 'ms_wpn_1', weaponType: 'pebble_blaster', x: 800, y: 2800, respawnTime: 5 },
+      { id: 'ms_wpn_2', weaponType: 'pistol', x: 1800, y: 2400, respawnTime: 7 },
+      { id: 'ms_wpn_3', weaponType: 'burst_smg', x: 5200, y: 2800, respawnTime: 8 },
+      { id: 'ms_wpn_4', weaponType: 'shotgun', x: 1200, y: 1600, respawnTime: 12 },
+      { id: 'ms_wpn_5', weaponType: 'rifle', x: 4800, y: 1600, respawnTime: 15 },
+      { id: 'ms_wpn_6', weaponType: 'flame_gun', x: 2400, y: 1200, respawnTime: 18 },
+      { id: 'ms_wpn_7', weaponType: 'grenade_launcher', x: 3600, y: 1200, respawnTime: 22 },
+      { id: 'ms_wpn_8', weaponType: 'heavy_cannon', x: 1500, y: 800, respawnTime: 25 },
+      { id: 'ms_wpn_9', weaponType: 'rocket_launcher', x: 4500, y: 800, respawnTime: 30 },
+      { id: 'ms_wpn_10', weaponType: 'railgun', x: 3000, y: 900, respawnTime: 45 },
+      // SUPER WEAPON #1: Thunder Sword at the highest apex platform!
+      { id: 'ms_super_1', weaponType: 'thunder_sword', x: 3000, y: 350, respawnTime: 150 },
+    ],
+    platforms: [
+      // Ground Islands (Low level)
+      { id: 'ms_g_l', x: 400, y: 3000, width: 1200, height: 180, color: '#3B82F6', type: 'ground', isPassableDown: false },
+      { id: 'ms_g_c', x: 2300, y: 3020, width: 1400, height: 160, color: '#0284C7', type: 'ground', isPassableDown: false },
+      { id: 'ms_g_r', x: 4400, y: 3000, width: 1200, height: 180, color: '#3B82F6', type: 'ground', isPassableDown: false },
+      // Tier 1 Bridges & Platforms (y ~ 2400 - 2600)
+      { id: 'ms_t1_l', x: 1200, y: 2500, width: 650, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t1_r', x: 4150, y: 2500, width: 650, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t1_c', x: 2600, y: 2400, width: 800, height: 32, color: '#60A5FA', type: 'stone', isPassableDown: true },
+      // Tier 2 Mid-air Sky Catwalks (y ~ 1700 - 1900)
+      { id: 'ms_t2_l', x: 800, y: 1800, width: 800, height: 32, color: '#818CF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t2_r', x: 4400, y: 1800, width: 800, height: 32, color: '#818CF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t2_c', x: 2400, y: 1700, width: 1200, height: 34, color: '#A7F3D0', type: 'stone', isPassableDown: true },
+      // Tier 3 High Spire Walkways (y ~ 1000 - 1300)
+      { id: 'ms_t3_l', x: 1400, y: 1100, width: 700, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
+      { id: 'ms_t3_r', x: 3900, y: 1100, width: 700, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
+      { id: 'ms_t3_c', x: 2600, y: 1000, width: 800, height: 32, color: '#F59E0B', type: 'stone', isPassableDown: true },
+      // Tier 4 Apex Spire & Thunder Sword Shrine (y ~ 400 - 700)
+      { id: 'ms_t4_l', x: 2000, y: 650, width: 550, height: 28, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'ms_t4_r', x: 3450, y: 650, width: 550, height: 28, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'ms_apex', x: 2750, y: 420, width: 500, height: 36, color: '#FACC15', type: 'stone', isPassableDown: true },
+      // Launch pads (Spring Bouncers) for vertical ascent
+      { id: 'ms_b_1', x: 500, y: 2820, width: 120, height: 26, color: '#FF5252', type: 'bounce', isPassableDown: true },
+      { id: 'ms_b_2', x: 5380, y: 2820, width: 120, height: 26, color: '#FF5252', type: 'bounce', isPassableDown: true },
+      { id: 'ms_b_3', x: 1900, y: 2320, width: 110, height: 26, color: '#FFD700', type: 'bounce', isPassableDown: true },
+      { id: 'ms_b_4', x: 3990, y: 2320, width: 110, height: 26, color: '#FFD700', type: 'bounce', isPassableDown: true },
+      { id: 'ms_b_5', x: 2950, y: 1580, width: 100, height: 24, color: '#38BDF8', type: 'bounce', isPassableDown: true },
+    ],
+  },
+  mystery_depths: {
+    id: 'mystery_depths',
+    name: 'Mystery II: Subterranean Abyss',
+    description: 'A deep 7,200px underground cavern world filled with narrow basalt corridors, dripping toxic stalactites, low trenches, and the Infinite Gun hidden deep below the central shaft.',
+    theme: 'mystery_depths',
+    size: 'mystery',
+    width: 7200,
+    height: 3200,
+    bgColor: '#0F172A',
+    features: ['7200px Underground Abyss', 'Claustrophobic Basalt Tunnels', 'Abyssal Shaft Infinite Gun'],
+    spawnPoints: [
+      { x: 1000, y: 1300 },
+      { x: 6200, y: 1300 },
+      { x: 2200, y: 1700 },
+      { x: 5000, y: 1700 },
+      { x: 3600, y: 900 },
+      { x: 1200, y: 2500 },
+      { x: 6000, y: 2500 },
+      { x: 2400, y: 2300 },
+      { x: 4800, y: 2300 },
+      { x: 3600, y: 1900 },
+    ],
+    weaponSpawns: [
+      // Exactly 10 Normal Weapon Spawns spread across the deep caverns
+      { id: 'md_wpn_1', weaponType: 'pebble_blaster', x: 1000, y: 1200, respawnTime: 5 },
+      { id: 'md_wpn_2', weaponType: 'pistol', x: 6200, y: 1200, respawnTime: 7 },
+      { id: 'md_wpn_3', weaponType: 'burst_smg', x: 2200, y: 1600, respawnTime: 8 },
+      { id: 'md_wpn_4', weaponType: 'shotgun', x: 5000, y: 1600, respawnTime: 12 },
+      { id: 'md_wpn_5', weaponType: 'rifle', x: 3600, y: 800, respawnTime: 15 },
+      { id: 'md_wpn_6', weaponType: 'flame_gun', x: 1200, y: 2400, respawnTime: 18 },
+      { id: 'md_wpn_7', weaponType: 'grenade_launcher', x: 6000, y: 2400, respawnTime: 22 },
+      { id: 'md_wpn_8', weaponType: 'heavy_cannon', x: 2400, y: 2200, respawnTime: 25 },
+      { id: 'md_wpn_9', weaponType: 'rocket_launcher', x: 4800, y: 2200, respawnTime: 30 },
+      { id: 'md_wpn_10', weaponType: 'railgun', x: 3600, y: 1800, respawnTime: 45 },
+      // SUPER WEAPON #2: Infinite Gun located deep in the lower subterranean central shaft!
+      { id: 'md_super_2', weaponType: 'infinite_gun', x: 3600, y: 2850, respawnTime: 120 },
+    ],
+    platforms: [
+      // Upper Level Cavern Floors (y ~ 1400)
+      { id: 'md_up_l', x: 500, y: 1400, width: 1400, height: 160, color: '#334155', type: 'stone', isPassableDown: false },
+      { id: 'md_up_c', x: 2800, y: 1000, width: 1600, height: 140, color: '#475569', type: 'stone', isPassableDown: false },
+      { id: 'md_up_r', x: 5300, y: 1400, width: 1400, height: 160, color: '#334155', type: 'stone', isPassableDown: false },
+      // Mid Cavern Trenches & Bridges (y ~ 1800 - 2000)
+      { id: 'md_mid_l', x: 1800, y: 1800, width: 900, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'md_mid_r', x: 4500, y: 1800, width: 900, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'md_mid_c', x: 3100, y: 1950, width: 1000, height: 32, color: '#78350F', type: 'wood', isPassableDown: true },
+      // Lower Cavern Floors (y ~ 2600)
+      { id: 'md_low_l', x: 800, y: 2600, width: 1200, height: 180, color: '#1E293B', type: 'ground', isPassableDown: false },
+      { id: 'md_low_c1', x: 2200, y: 2400, width: 800, height: 30, color: '#94A3B8', type: 'stone', isPassableDown: true },
+      { id: 'md_low_c2', x: 4200, y: 2400, width: 800, height: 30, color: '#94A3B8', type: 'stone', isPassableDown: true },
+      { id: 'md_low_r', x: 5200, y: 2600, width: 1200, height: 180, color: '#1E293B', type: 'ground', isPassableDown: false },
+      // Deepest Shaft & Infinite Gun Chamber (y ~ 2900)
+      { id: 'md_deep_chamber', x: 3200, y: 2950, width: 800, height: 140, color: '#EA580C', type: 'ground', isPassableDown: false },
+      { id: 'md_deep_ledge_l', x: 2800, y: 2800, width: 350, height: 26, color: '#B45309', type: 'stone', isPassableDown: true },
+      { id: 'md_deep_ledge_r', x: 4050, y: 2800, width: 350, height: 26, color: '#B45309', type: 'stone', isPassableDown: true },
+      // Steam Bouncers
+      { id: 'md_b_1', x: 600, y: 1280, width: 110, height: 24, color: '#EA580C', type: 'bounce', isPassableDown: true },
+      { id: 'md_b_2', x: 6490, y: 1280, width: 110, height: 24, color: '#EA580C', type: 'bounce', isPassableDown: true },
+      { id: 'md_b_3', x: 3550, y: 2300, width: 100, height: 24, color: '#F59E0B', type: 'bounce', isPassableDown: true },
+    ],
+  },
+  mystery_void: {
+    id: 'mystery_void',
+    name: 'Mystery III: Cosmic Rift Void',
+    description: 'An expansive 8,000px alien void archipelago featuring floating monoliths, strange gravity anomaly pads, long-distance jump traversal, and the terrifying Inferno Cannon perched on a distant void spire.',
+    theme: 'mystery_void',
+    size: 'mystery',
+    width: 8000,
+    height: 2800,
+    bgColor: '#090D16',
+    features: ['8000px Cosmic Rift', 'Floating Alien Monoliths', 'Void Spire Inferno Cannon'],
+    spawnPoints: [
+      { x: 800, y: 2200 },
+      { x: 4000, y: 2100 },
+      { x: 2400, y: 1900 },
+      { x: 5600, y: 1900 },
+      { x: 6800, y: 1600 },
+      { x: 1600, y: 1300 },
+      { x: 3200, y: 1200 },
+      { x: 4800, y: 1200 },
+      { x: 6400, y: 1100 },
+      { x: 4000, y: 700 },
+    ],
+    weaponSpawns: [
+      // Exactly 10 Normal Weapon Spawns spread across the sprawling void
+      { id: 'mv_wpn_1', weaponType: 'pebble_blaster', x: 800, y: 2100, respawnTime: 5 },
+      { id: 'mv_wpn_2', weaponType: 'pistol', x: 2400, y: 1800, respawnTime: 7 },
+      { id: 'mv_wpn_3', weaponType: 'burst_smg', x: 4000, y: 2000, respawnTime: 8 },
+      { id: 'mv_wpn_4', weaponType: 'shotgun', x: 5600, y: 1800, respawnTime: 12 },
+      { id: 'mv_wpn_5', weaponType: 'rifle', x: 6800, y: 1500, respawnTime: 15 },
+      { id: 'mv_wpn_6', weaponType: 'flame_gun', x: 1600, y: 1200, respawnTime: 18 },
+      { id: 'mv_wpn_7', weaponType: 'grenade_launcher', x: 3200, y: 1100, respawnTime: 22 },
+      { id: 'mv_wpn_8', weaponType: 'heavy_cannon', x: 4800, y: 1100, respawnTime: 25 },
+      { id: 'mv_wpn_9', weaponType: 'rocket_launcher', x: 6400, y: 1000, respawnTime: 30 },
+      { id: 'mv_wpn_10', weaponType: 'railgun', x: 4000, y: 600, respawnTime: 45 },
+      // SUPER WEAPON #3: Inferno Cannon on the far-distant isolated void sanctuary spire!
+      { id: 'mv_super_3', weaponType: 'inferno_cannon', x: 7400, y: 650, respawnTime: 180 },
+    ],
+    platforms: [
+      // Monolith Ground Islands
+      { id: 'mv_mono_1', x: 400, y: 2300, width: 1000, height: 160, color: '#7C3AED', type: 'ground', isPassableDown: false },
+      { id: 'mv_mono_2', x: 1900, y: 2000, width: 1100, height: 150, color: '#6D28D9', type: 'ground', isPassableDown: false },
+      { id: 'mv_mono_3', x: 3400, y: 2200, width: 1200, height: 160, color: '#5B21B6', type: 'ground', isPassableDown: false },
+      { id: 'mv_mono_4', x: 5100, y: 2000, width: 1100, height: 150, color: '#6D28D9', type: 'ground', isPassableDown: false },
+      { id: 'mv_mono_5', x: 6400, y: 1700, width: 1000, height: 150, color: '#7C3AED', type: 'ground', isPassableDown: false },
+      // Floating Void Bridges (y ~ 1200 - 1500)
+      { id: 'mv_bridge_1', x: 1200, y: 1400, width: 800, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_bridge_2', x: 2800, y: 1300, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_bridge_3', x: 4400, y: 1300, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      { id: 'mv_bridge_4', x: 6000, y: 1200, width: 900, height: 30, color: '#C084FC', type: 'wood', isPassableDown: true },
+      // High Apex Void Sanctuary (y ~ 700)
+      { id: 'mv_apex_c', x: 3500, y: 720, width: 1000, height: 32, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mv_inferno_spire', x: 7100, y: 750, width: 600, height: 36, color: '#DC2626', type: 'stone', isPassableDown: true },
+      // Anomaly Jump Pads (Gravity Launchers)
+      { id: 'mv_pad_1', x: 600, y: 2180, width: 120, height: 26, color: '#A855F7', type: 'bounce', isPassableDown: true },
+      { id: 'mv_pad_2', x: 2900, y: 1880, width: 110, height: 26, color: '#A855F7', type: 'bounce', isPassableDown: true },
+      { id: 'mv_pad_3', x: 4500, y: 2080, width: 110, height: 26, color: '#A855F7', type: 'bounce', isPassableDown: true },
+      { id: 'mv_pad_4', x: 6900, y: 1580, width: 120, height: 26, color: '#EF4444', type: 'bounce', isPassableDown: true },
+    ],
+  },
 };
 
 export const DEFAULT_ARENA_ID = 'park';
+

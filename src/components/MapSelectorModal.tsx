@@ -110,6 +110,7 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
               { id: 'medium', label: 'Medium' },
               { id: 'large', label: 'Large' },
               { id: 'xlarge', label: '⭐ Extra Large (XL)' },
+              { id: 'mystery', label: '🌌 Mystery Maps ⚡' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -134,6 +135,7 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredArenas.map((arena) => {
               const isSelected = selectedId === arena.id;
+              const isMystery = arena.size === 'mystery';
 
               return (
                 <div
@@ -142,7 +144,11 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
                   onClick={() => handleCardClick(arena.id)}
                   className={`p-4 rounded-2xl border-4 border-black transition-all cursor-pointer select-none flex flex-col justify-between gap-3 relative ${
                     isSelected
-                      ? 'bg-white ring-4 ring-[#FFD700] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
+                      ? isMystery
+                        ? 'bg-gradient-to-br from-indigo-50 to-purple-50 ring-4 ring-purple-600 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
+                        : 'bg-white ring-4 ring-[#FFD700] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
+                      : isMystery
+                      ? 'bg-gradient-to-br from-purple-50/90 to-indigo-50/90 hover:from-purple-100 hover:to-indigo-100 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-purple-900'
                       : 'bg-white/90 hover:bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]'
                   }`}
                 >
@@ -161,10 +167,12 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
                               ? 'bg-sky-200 text-sky-900'
                               : arena.size === 'large'
                               ? 'bg-purple-200 text-purple-900'
-                              : 'bg-rose-500 text-white animate-pulse'
+                              : arena.size === 'xlarge'
+                              ? 'bg-rose-500 text-white'
+                              : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md font-black animate-pulse'
                           }`}
                         >
-                          {arena.size === 'xlarge' ? 'EXTRA LARGE (XL)' : arena.size}
+                          {arena.size === 'xlarge' ? 'EXTRA LARGE (XL)' : arena.size === 'mystery' ? '🌌 MYSTERY MAP' : arena.size}
                         </span>
                       </div>
                       <p className="text-xs font-bold text-slate-600 mt-1 leading-snug">
