@@ -409,6 +409,7 @@ export interface TickSnapshot {
   fighters: TickFighterDelta[];
   projectiles?: ProjectileState[];
   burningGround?: BurningGroundState[];
+  weaponSpawns?: ActiveWeaponSpawn[];
 }
 
 // Client to Server Messages

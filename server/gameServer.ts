@@ -1135,6 +1135,7 @@ export class GameServer {
       fighters: fighterDeltas,
       projectiles: room.projectiles,
       burningGround: room.burningGround,
+      weaponSpawns: room.weaponSpawns,
     };
 
     this.broadcastToRoom(room.roomId, {

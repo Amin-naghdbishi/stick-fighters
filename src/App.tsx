@@ -180,6 +180,7 @@ export default function App() {
                 players: updatedPlayers,
                 projectiles: tick.projectiles || [],
                 burningGround: tick.burningGround || [],
+                weaponSpawns: tick.weaponSpawns || prevRoom.weaponSpawns || [],
               };
             });
             if (tick.status === 'in_game' || tick.status === 'countdown' || tick.status === 'round_end') {

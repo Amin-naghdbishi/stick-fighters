@@ -489,21 +489,18 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
       const arena = ARENAS[curRoom.mapId] || ARENAS.park;
       const rawFighters: FighterState[] = Object.values(curRoom.players) as FighterState[];
 
-      // Network Smoothing & Interpolation (Removes Remote Player Jitter)
+      // Network Smoothing & Interpolation (Removes Player Position Jitter & Stutter)
       const smoothedFighters: FighterState[] = rawFighters.map((f) => {
-        if (f.id === myIdRef.current) {
-          return f; // Local Player has instant authoritative prediction
-        }
-
         let prev = remoteSmoothMapRef.current.get(f.id);
         const dist = prev ? Math.hypot(f.x - prev.x, f.y - prev.y) : 0;
 
-        if (!prev || dist > 220 || f.isDead) {
+        if (!prev || dist > 200 || f.isDead) {
           prev = { x: f.x, y: f.y, facing: f.facing };
           remoteSmoothMapRef.current.set(f.id, prev);
         } else {
-          // Smooth framerate-independent lerp
-          const lerpFactor = Math.min(1, dt * 25);
+          // Smooth framerate-independent exponential decay lerp
+          const lerpSpeed = f.id === myIdRef.current ? 35 : 25;
+          const lerpFactor = 1 - Math.exp(-lerpSpeed * dt);
           prev.x += (f.x - prev.x) * lerpFactor;
           prev.y += (f.y - prev.y) * lerpFactor;
           prev.facing = f.facing;

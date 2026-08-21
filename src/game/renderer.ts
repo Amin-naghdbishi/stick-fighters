@@ -941,15 +941,16 @@ export class GameRenderer {
     let kickExtension = 0;
 
     if (f.state === 'run') {
-      const runCycle = Math.sin(time * 0.015);
-      headY += Math.abs(runCycle) * 3;
-      neckY += Math.abs(runCycle) * 2;
-      hipY += Math.abs(runCycle) * 2;
+      const runCycle = Math.sin(time * 0.012);
+      const verticalBob = (1 - Math.cos(time * 0.024)) * 1.5;
+      headY += verticalBob;
+      neckY += verticalBob * 0.7;
+      hipY += verticalBob * 0.7;
 
-      leftLegAngle = runCycle * 0.75;
-      rightLegAngle = -runCycle * 0.75;
-      leftArmAngle = -runCycle * 0.65;
-      rightArmAngle = runCycle * 0.65;
+      leftLegAngle = runCycle * 0.65;
+      rightLegAngle = -runCycle * 0.65;
+      leftArmAngle = -runCycle * 0.55;
+      rightArmAngle = runCycle * 0.55;
     } else if (f.state === 'jump') {
       headY -= 4;
       hipY -= 4;

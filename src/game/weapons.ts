@@ -61,9 +61,9 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     tier: 1,
     damage: 7,
     fireRate: 0.16,
-    projectileSpeed: 20,
-    projectileLife: 0.85,
-    range: 520,
+    projectileSpeed: 26,
+    projectileLife: 1.8,
+    range: 1400,
     ammoCapacity: 10,
     recoil: 1.2,
     knockback: 3.5,
@@ -82,9 +82,9 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     tier: 2,
     damage: 16,
     fireRate: 0.32,
-    projectileSpeed: 25,
-    projectileLife: 1.1,
-    range: 720,
+    projectileSpeed: 32,
+    projectileLife: 2.0,
+    range: 1920,
     ammoCapacity: 10,
     recoil: 2.2,
     knockback: 6.0,
@@ -92,10 +92,10 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#475569',
     bulletColor: '#F59E0B',
     icon: '🔫',
-    description: 'Crisp semi-automatic sidearm. Accurate with dependable medium range.',
+    description: 'Crisp semi-automatic sidearm. Accurate with dependable long range.',
   },
 
-  // 3. Burst SMG (Tier 3 - 3-round burst close combat)
+  // 3. Burst SMG (Tier 3 - 3-round burst combat)
   burst_smg: {
     id: 'burst_smg',
     name: 'Burst SMG',
@@ -105,9 +105,9 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     burstCount: 3,
     burstDelay: 0.07,
     fireRate: 0.44,
-    projectileSpeed: 23,
-    projectileLife: 0.9,
-    range: 580,
+    projectileSpeed: 30,
+    projectileLife: 1.8,
+    range: 1620,
     ammoCapacity: 10,
     recoil: 3.2,
     knockback: 4.5,
@@ -115,10 +115,10 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#0284C7',
     bulletColor: '#38BDF8',
     icon: '⚡',
-    description: 'Fires rapid 3-round bursts in quick succession.',
+    description: 'Fires rapid 3-round bursts in quick succession with solid reach.',
   },
 
-  // 4. Shotgun (Tier 4 - Multi-pellet devastating close-range blast)
+  // 4. Shotgun (Tier 4 - Multi-pellet devastating blast)
   shotgun: {
     id: 'shotgun',
     name: 'Shotgun',
@@ -127,9 +127,9 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     damage: 8, // per pellet
     pellets: 5, // 5 x 8 = 40 max point-blank
     fireRate: 0.72,
-    projectileSpeed: 22,
-    projectileLife: 0.65,
-    range: 420,
+    projectileSpeed: 26,
+    projectileLife: 1.2,
+    range: 936,
     ammoCapacity: 10,
     recoil: 7.5,
     knockback: 11.0,
@@ -137,10 +137,10 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#B45309',
     bulletColor: '#F97316',
     icon: '💥',
-    description: 'Wide 5-pellet buckshot spread. Extremely lethal in close quarters.',
+    description: 'Wide 5-pellet buckshot spread reaching across medium platforms.',
   },
 
-  // 5. Rifle (Tier 5 - High velocity long-range marksman rifle)
+  // 5. Rifle (Tier 5 - High velocity extreme-range precision rifle)
   rifle: {
     id: 'rifle',
     name: 'Rifle',
@@ -148,9 +148,9 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     tier: 5,
     damage: 32,
     fireRate: 0.52,
-    projectileSpeed: 34,
-    projectileLife: 1.5,
-    range: 1200,
+    projectileSpeed: 42,
+    projectileLife: 2.8,
+    range: 3500,
     ammoCapacity: 10,
     recoil: 4.8,
     knockback: 9.0,
@@ -158,10 +158,10 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#15803D',
     bulletColor: '#84CC16',
     icon: '🎯',
-    description: 'High-velocity precision rifle built for medium and long-distance marksmen.',
+    description: 'High-velocity precision rifle engineered to cross the largest arenas.',
   },
 
-  // 6. Flame Gun (Tier 6 - Continuous fiery stream & area denial)
+  // 6. Flame Gun (Tier 6 - Fiery continuous stream & area denial)
   flame_gun: {
     id: 'flame_gun',
     name: 'Flame Gun',
@@ -170,9 +170,9 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     damage: 5, // per tick
     isFlame: true,
     fireRate: 0.08,
-    projectileSpeed: 14,
-    projectileLife: 0.55,
-    range: 360,
+    projectileSpeed: 18,
+    projectileLife: 1.0,
+    range: 540,
     ammoCapacity: 10,
     recoil: 1.0,
     knockback: 2.0,
@@ -180,7 +180,7 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#EA580C',
     bulletColor: '#EF4444',
     icon: '🔥',
-    description: 'Sprays continuous licking flames that roast enemies in a short cone.',
+    description: 'Sprays continuous licking flames that roast enemies in an expanded cone.',
   },
 
   // 7. Grenade Launcher (Tier 7 - Arcing bouncing explosive grenade)
@@ -191,11 +191,11 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     tier: 7,
     damage: 48,
     hasGravity: true,
-    explosionRadius: 85,
+    explosionRadius: 95,
     fireRate: 0.85,
-    projectileSpeed: 16,
-    projectileLife: 1.6,
-    range: 650,
+    projectileSpeed: 22,
+    projectileLife: 2.6,
+    range: 1716,
     ammoCapacity: 10,
     recoil: 6.0,
     knockback: 14.0,
@@ -203,10 +203,10 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#4D7C0F',
     bulletColor: '#65A30D',
     icon: '💣',
-    description: 'Launches bouncing explosive canisters that detonate on impact or timer.',
+    description: 'Launches high-arc bouncing explosive canisters that detonate on impact or timer.',
   },
 
-  // 8. Heavy Cannon (Tier 8 - Massive slow iron cannonball with heavy knockback)
+  // 8. Heavy Cannon (Tier 8 - Massive crushing iron cannonball)
   heavy_cannon: {
     id: 'heavy_cannon',
     name: 'Heavy Cannon',
@@ -214,9 +214,9 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     tier: 8,
     damage: 58,
     fireRate: 1.15,
-    projectileSpeed: 13,
-    projectileLife: 1.4,
-    range: 800,
+    projectileSpeed: 18,
+    projectileLife: 2.4,
+    range: 1300,
     ammoCapacity: 10,
     recoil: 9.5,
     knockback: 20.0,
@@ -224,21 +224,21 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#334155',
     bulletColor: '#0F172A',
     icon: '⚙️',
-    description: 'Shoots a gigantic crushing solid iron ball that hurls opponents across the arena.',
+    description: 'Shoots a gigantic crushing solid iron ball that hurls opponents across large arenas.',
   },
 
-  // 9. Rocket Launcher (Tier 9 - Fast rocket with smoke trail and giant explosion)
+  // 9. Rocket Launcher (Tier 9 - Fast propelled warhead with long range)
   rocket_launcher: {
     id: 'rocket_launcher',
     name: 'Rocket Launcher',
     category: 'heavy',
     tier: 9,
     damage: 68,
-    explosionRadius: 115,
+    explosionRadius: 120,
     fireRate: 1.3,
-    projectileSpeed: 21,
-    projectileLife: 1.8,
-    range: 1300,
+    projectileSpeed: 28,
+    projectileLife: 3.0,
+    range: 2520,
     ammoCapacity: 10,
     recoil: 9.0,
     knockback: 18.0,
@@ -246,10 +246,10 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#DC2626',
     bulletColor: '#F43F5E',
     icon: '🚀',
-    description: 'High-speed propelled warhead creating massive fiery shockwaves.',
+    description: 'Long-range propelled warhead creating massive fiery shockwaves.',
   },
 
-  // 10. Railgun (Tier 10 - Charged hyper-beam sniper of doom)
+  // 10. Railgun (Tier 10 - Charged hyper-beam accelerator of doom)
   railgun: {
     id: 'railgun',
     name: 'Railgun',
@@ -259,9 +259,9 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     isBeam: true,
     chargeTime: 0.5,
     fireRate: 1.6,
-    projectileSpeed: 55,
-    projectileLife: 0.35,
-    range: 1800,
+    projectileSpeed: 65,
+    projectileLife: 1.8,
+    range: 3510,
     ammoCapacity: 10,
     recoil: 12.0,
     knockback: 22.0,
@@ -269,7 +269,7 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#7C3AED',
     bulletColor: '#A855F7',
     icon: '🔮',
-    description: 'High-voltage accelerator beam. Requires charging but instantly annihilates on hit.',
+    description: 'High-voltage accelerator beam piercing instantaneously across entire arenas.',
   },
 
   // SUPER WEAPON #1: Thunder Sword (Mystery I Exclusive)
@@ -281,19 +281,19 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     isSuper: true,
     isMelee: true,
     isInstantKill: true,
-    areaDamageRadius: 120,
+    areaDamageRadius: 140,
     lifetime: 15,
     damage: 999,
     fireRate: 0.5,
     projectileSpeed: 0,
     projectileLife: 0,
-    range: 180,
+    range: 220,
     ammoCapacity: 999,
     recoil: 4.0,
     knockback: 35.0,
-    respawnTime: 150, // Configurable: 150s cooldown
-    spawnScale: 0.7, // Small at spawn
-    heldScale: 2.5,  // Enormous when held
+    respawnTime: 150,
+    spawnScale: 0.7,
+    heldScale: 2.5,
     color: '#FACC15',
     bulletColor: '#38BDF8',
     icon: '⚡🗡️',
@@ -309,20 +309,20 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     isSuper: true,
     lifetime: 15,
     damage: 18,
-    fireRate: 0.05, // 20 rounds / sec, strictly server-controlled
-    projectileSpeed: 38,
-    projectileLife: 1.4,
-    range: 1400,
+    fireRate: 0.05,
+    projectileSpeed: 44,
+    projectileLife: 2.6,
+    range: 3432,
     ammoCapacity: 999,
     recoil: 0.8,
     knockback: 8.0,
-    respawnTime: 120, // Configurable: 120s cooldown
-    spawnScale: 0.7, // Small at spawn
-    heldScale: 2.4,  // Enormous when held
+    respawnTime: 120,
+    spawnScale: 0.7,
+    heldScale: 2.4,
     color: '#EA580C',
     bulletColor: '#F59E0B',
     icon: '🌩️🔫',
-    description: 'Colossal heavy machine gun with extreme fire rate & unlimited ammo for 15 seconds.',
+    description: 'Colossal heavy machine gun with extreme fire rate, long reach & unlimited ammo for 15 seconds.',
   },
 
   // SUPER WEAPON #3: Inferno Cannon (Mystery III Exclusive)
@@ -334,21 +334,21 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     isSuper: true,
     isFlame: true,
     lifetime: 15,
-    damage: 18, // per tick (dramatically stronger than Flame Gun)
+    damage: 18,
     fireRate: 0.06,
-    projectileSpeed: 22,
-    projectileLife: 0.85,
-    range: 650, // Much longer range
+    projectileSpeed: 26,
+    projectileLife: 1.4,
+    range: 1092,
     ammoCapacity: 999,
     recoil: 1.5,
     knockback: 4.0,
-    respawnTime: 180, // Configurable: 180s cooldown
-    spawnScale: 0.7, // Small at spawn
-    heldScale: 2.4,  // Enormous when held
+    respawnTime: 180,
+    spawnScale: 0.7,
+    heldScale: 2.4,
     color: '#DC2626',
     bulletColor: '#F97316',
     icon: '🌋🔥',
-    description: 'Apocalyptic flame cannon unleashing gigantic raging fire streams for 15 seconds.',
+    description: 'Apocalyptic flame cannon unleashing gigantic long-reaching fire streams for 15 seconds.',
   },
 };
 

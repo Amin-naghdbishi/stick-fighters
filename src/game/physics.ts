@@ -811,6 +811,11 @@ export function updateProjectiles(
     p.x += p.vx;
     p.y += p.vy;
 
+    // Cull projectiles that fly far outside map boundaries
+    if (p.x < -400 || p.x > arena.width + 400 || p.y < -500 || p.y > arena.height + 500) {
+      continue;
+    }
+
     // Check platform collision using continuous ray segment
     let hitPlatform = false;
     for (const plat of arena.platforms) {
