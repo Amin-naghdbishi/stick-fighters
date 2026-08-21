@@ -93,17 +93,7 @@ export default function App() {
   // First interaction unlock for browser Web Audio policy
   useEffect(() => {
     const handleFirstInteraction = () => {
-      sound.playTrack(
-        view === 'game'
-          ? isPreviewMode
-            ? 'map_preview'
-            : 'battle'
-          : view === 'studio'
-          ? 'studio'
-          : view === 'lobby'
-          ? 'lobby'
-          : 'menu'
-      );
+      sound.unlockAudio();
     };
 
     window.addEventListener('click', handleFirstInteraction, { once: true });
@@ -115,7 +105,7 @@ export default function App() {
       window.removeEventListener('keydown', handleFirstInteraction);
       window.removeEventListener('touchstart', handleFirstInteraction);
     };
-  }, [view, isPreviewMode]);
+  }, []);
 
   // Setup WebSocket Listeners
   useEffect(() => {

@@ -63,8 +63,17 @@ class SoundEngine {
   }
 
   public unlockAudio() {
+    if (this.userInteracted) return;
     this.userInteracted = true;
     this.initCtx();
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
+    if (this.currentTrack && !this.isMusicRunning && this.settings.musicEnabled) {
+      const track = this.currentTrack;
+      this.currentTrack = null;
+      this.playTrack(track);
+    }
   }
 
   private loadSettings() {
@@ -188,15 +197,19 @@ class SoundEngine {
   // ==========================================
 
   public playTrack(track: MusicTrack) {
-    this.initCtx();
-    if (!this.ctx || !this.musicGainNode) return;
+    this.currentTrack = track;
 
-    // If same track is already playing, keep it going
-    if (this.currentTrack === track && this.isMusicRunning) {
-      return;
+    if (!this.userInteracted) {
+      return; // Defer music startup until first user gesture
     }
 
-    this.currentTrack = track;
+    this.initCtx();
+    if (!this.ctx || this.ctx.state !== 'running' || !this.musicGainNode) return;
+
+    // If same track is already playing, keep it going
+    if (this.isMusicRunning && this.trackGainNode) {
+      return;
+    }
 
     if (!this.settings.musicEnabled) {
       return;
