@@ -1,7 +1,14 @@
 // Procedural Web Audio Sound & Music Engine for Stick Fighters
 // Custom synthesizers for cartoon/epic adventure themes, dynamic battle tracks, and responsive SFX.
 
-export type MusicTrack = 'menu' | 'lobby' | 'map_select' | 'map_preview' | 'studio' | 'battle';
+export type MusicTrack = 'menu' | 'studio' | 'battle' | 'lobby' | 'map_select' | 'map_preview';
+
+// Map screen/alias tracks to the exactly 3 distinct musical identities
+export function getCanonicalTrack(track: MusicTrack): 'menu' | 'studio' | 'battle' {
+  if (track === 'studio') return 'studio';
+  if (track === 'battle') return 'battle';
+  return 'menu'; // 'menu', 'lobby', 'map_select', 'map_preview' map to home/menu identity
+}
 
 interface AudioSettings {
   masterVolume: number;
@@ -30,10 +37,12 @@ class SoundEngine {
   private settings: AudioSettings = { ...DEFAULT_SETTINGS };
 
   private currentTrack: MusicTrack | null = null;
+  private activeTrack: 'menu' | 'studio' | 'battle' | null = null;
   private isMusicRunning: boolean = false;
   private musicInterval: any = null;
   private musicActiveNodes: (AudioNode | number)[] = [];
   private trackGainNode: GainNode | null = null;
+  private fadeTimeout: any = null;
 
   // Battle danger layer
   private isDangerActive: boolean = false;
@@ -64,15 +73,16 @@ class SoundEngine {
   }
 
   public unlockAudio() {
-    if (this.userInteracted) return;
-    this.userInteracted = true;
-    this.initCtx();
+    if (!this.userInteracted) {
+      this.userInteracted = true;
+      this.initCtx();
+    }
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume().catch(() => {});
     }
     if (this.currentTrack && !this.isMusicRunning && this.settings.musicEnabled) {
       const track = this.currentTrack;
-      this.currentTrack = null;
+      this.activeTrack = null;
       this.playTrack(track);
     }
   }
@@ -205,6 +215,7 @@ class SoundEngine {
   // ==========================================
 
   public playTrack(track: MusicTrack) {
+    const canonical = getCanonicalTrack(track);
     this.currentTrack = track;
 
     if (!this.userInteracted) {
@@ -212,44 +223,71 @@ class SoundEngine {
     }
 
     this.initCtx();
-    if (!this.ctx || this.ctx.state !== 'running' || !this.musicGainNode) return;
+    if (!this.ctx || !this.musicGainNode) return;
 
-    // If same track is already playing, keep it going
-    if (this.isMusicRunning && this.trackGainNode) {
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
+
+    // If the same canonical music identity is ALREADY active and running, keep it going smoothly
+    if (this.isMusicRunning && this.activeTrack === canonical && this.trackGainNode) {
       return;
     }
 
     if (!this.settings.musicEnabled) {
+      this.stopMusic(false);
       return;
     }
 
-    // Stop current track with quick fade-out
-    this.stopMusic(true);
+    // Terminate existing note scheduler loops immediately
+    if (this.musicInterval) {
+      clearInterval(this.musicInterval);
+      this.musicInterval = null;
+    }
+    if (this.dangerInterval) {
+      clearInterval(this.dangerInterval);
+      this.dangerInterval = null;
+    }
+    this.isDangerActive = false;
+
+    if (this.fadeTimeout) {
+      clearTimeout(this.fadeTimeout);
+      this.fadeTimeout = null;
+    }
+
+    // Smoothly fade out previous track's gain node (no audio pops/clicks)
+    if (this.trackGainNode && this.ctx) {
+      const oldGain = this.trackGainNode;
+      const now = this.ctx.currentTime;
+      try {
+        oldGain.gain.cancelScheduledValues(now);
+        oldGain.gain.setValueAtTime(oldGain.gain.value, now);
+        oldGain.gain.linearRampToValueAtTime(0.0001, now + 0.25);
+      } catch (e) {}
+      this.fadeTimeout = setTimeout(() => {
+        try {
+          oldGain.disconnect();
+        } catch (e) {}
+      }, 280);
+      this.trackGainNode = null;
+    }
 
     this.isMusicRunning = true;
+    this.activeTrack = canonical;
     this.stepIndex = 0;
 
-    // Create a sub-gain for this track to handle fade-in
+    // Create a sub-gain for the incoming track to handle smooth fade-in
     const trackGain = this.ctx.createGain();
     const now = this.ctx.currentTime;
-    trackGain.gain.setValueAtTime(0, now);
+    trackGain.gain.setValueAtTime(0.0001, now);
     trackGain.gain.linearRampToValueAtTime(1, now + 0.35); // 350ms smooth fade in
     trackGain.connect(this.musicGainNode);
     this.trackGainNode = trackGain;
 
-    // Launch specific procedural track generator
-    switch (track) {
+    // Launch specific procedural track generator for canonical identity
+    switch (canonical) {
       case 'menu':
         this.startMenuTheme(trackGain);
-        break;
-      case 'lobby':
-        this.startLobbyTheme(trackGain);
-        break;
-      case 'map_select':
-        this.startMapSelectTheme(trackGain);
-        break;
-      case 'map_preview':
-        this.startMapPreviewTheme(trackGain);
         break;
       case 'studio':
         this.startStudioTheme(trackGain);
@@ -271,26 +309,30 @@ class SoundEngine {
     }
     this.isDangerActive = false;
 
+    if (this.fadeTimeout) {
+      clearTimeout(this.fadeTimeout);
+      this.fadeTimeout = null;
+    }
+
     if (this.trackGainNode && this.ctx) {
+      const oldGain = this.trackGainNode;
       if (fade) {
         const now = this.ctx.currentTime;
         try {
-          this.trackGainNode.gain.cancelScheduledValues(now);
-          this.trackGainNode.gain.setValueAtTime(this.trackGainNode.gain.value, now);
-          this.trackGainNode.gain.linearRampToValueAtTime(0.001, now + 0.3);
-        } catch (e) {
-          // ignore
-        }
+          oldGain.gain.cancelScheduledValues(now);
+          oldGain.gain.setValueAtTime(oldGain.gain.value, now);
+          oldGain.gain.linearRampToValueAtTime(0.0001, now + 0.25);
+        } catch (e) {}
       }
-      const oldGain = this.trackGainNode;
-      setTimeout(() => {
+      this.fadeTimeout = setTimeout(() => {
         try {
           oldGain.disconnect();
         } catch (e) {}
-      }, fade ? 350 : 50);
+      }, fade ? 280 : 30);
       this.trackGainNode = null;
     }
 
+    this.activeTrack = null;
     this.isMusicRunning = false;
   }
 
@@ -560,66 +602,118 @@ class SoundEngine {
     }, tempoMs);
   }
 
-  // 5. CHARACTER STUDIO: Relaxing, Whimsical, Creative Workshop (Marimba / Kalimba Style)
+  // 1. CHARACTER CUSTOMIZATION: Calm, Relaxing, Cozy, Comfortable Workshop (Acoustic Kalimba & Warm Ambient Pad)
   private startStudioTheme(outputGain: GainNode) {
     if (!this.ctx) return;
 
-    // Playful, cheerful, cute workshop melody
-    const studioNotes = [
-      523.25, 0, 587.33, 659.25, 0, 523.25, 0, 659.25,
-      783.99, 0, 659.25, 0, 587.33, 523.25, 587.33, 0,
-      440.00, 0, 523.25, 659.25, 0, 440.00, 0, 523.25,
-      587.33, 0, 523.25, 0, 440.00, 392.00, 440.00, 0,
+    // Peaceful, serene acoustic melody in C Major 9 / A Minor 9 / F Major 7 / G6
+    const studioKalimbaMelody = [
+      // Measure 1: C Major 9 (Gentle rising & falling arpeggio)
+      523.25, 0, 659.25, 0, 783.99, 987.77, 783.99, 0,
+      // Measure 2: A Minor 9 (Mellow reflective notes)
+      440.00, 0, 523.25, 0, 659.25, 783.99, 659.25, 0,
+      // Measure 3: F Major 7 (Serene comforting warmth)
+      349.23, 0, 440.00, 0, 523.25, 659.25, 523.25, 0,
+      // Measure 4: G6 / G Sus (Sweet resolution back to C)
+      392.00, 0, 493.88, 0, 587.33, 659.25, 493.88, 0,
     ];
 
-    const studioBass = [
-      261.63, 261.63, 329.63, 392.00, // C
-      220.00, 220.00, 261.63, 329.63, // Am
+    const studioChords = [
+      // Cmaj7 (C3, E3, G3, B3)
+      [130.81, 164.81, 196.00, 246.94],
+      // Am9 (A2, C3, E3, G3)
+      [110.00, 130.81, 164.81, 196.00],
+      // Fmaj7 (F2, A2, C3, E3)
+      [87.31, 110.00, 130.81, 164.81],
+      // G6 (G2, B2, D3, E3)
+      [98.00, 123.47, 146.83, 164.81],
     ];
 
-    const tempoMs = 230;
+    const tempoMs = 340; // Relaxed ~70 BPM unhurried tempo
 
     this.musicInterval = setInterval(() => {
       if (!this.ctx || !this.isMusicRunning) return;
       const now = this.ctx.currentTime;
       const step = this.stepIndex;
-      this.stepIndex = (this.stepIndex + 1) % studioNotes.length;
+      this.stepIndex = (this.stepIndex + 1) % studioKalimbaMelody.length;
 
-      const note = studioNotes[step];
-      if (note > 0) {
-        // Warm wooden kalimba pluck (sine + quick triangle harmonic)
+      const barIndex = Math.floor(step / 8) % studioChords.length;
+
+      // 1. Warm Kalimba Pluck (Soft Sine + Triangle with gentle wooden resonance)
+      const noteFreq = studioKalimbaMelody[step];
+      if (noteFreq > 0) {
         const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
+        const noteGain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(note, now);
+        osc.frequency.setValueAtTime(noteFreq, now);
 
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1800, now);
+        filter.frequency.exponentialRampToValueAtTime(450, now + 0.35);
 
-        osc.connect(gain);
-        gain.connect(outputGain);
+        noteGain.gain.setValueAtTime(0.001, now);
+        noteGain.gain.linearRampToValueAtTime(0.09, now + 0.02);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+        osc.connect(filter);
+        filter.connect(noteGain);
+        noteGain.connect(outputGain);
 
         osc.start(now);
-        osc.stop(now + 0.24);
-        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+        osc.stop(now + 0.48);
+        osc.onended = () => { osc.disconnect(); noteGain.disconnect(); if (filter) filter.disconnect(); };
       }
 
-      // Gentle acoustic bass note every 4 beats
-      if (step % 4 === 0) {
-        const bassNote = studioBass[Math.floor(step / 4) % studioBass.length];
+      // 2. Lush, Calm Ambient Chord Pad (Swells softly at the start of each 8-step measure)
+      if (step % 8 === 0) {
+        const chordNotes = studioChords[barIndex];
+        chordNotes.forEach((freq) => {
+          if (!this.ctx) return;
+          const padOsc = this.ctx.createOscillator();
+          const padFilter = this.ctx.createBiquadFilter();
+          const padGain = this.ctx.createGain();
+
+          padOsc.type = 'sine';
+          padOsc.frequency.setValueAtTime(freq * 2, now); // Sweet warm octave
+
+          padFilter.type = 'lowpass';
+          padFilter.frequency.setValueAtTime(900, now);
+
+          padGain.gain.setValueAtTime(0.001, now);
+          padGain.gain.linearRampToValueAtTime(0.035, now + 0.6); // Slow soothing swell
+          padGain.gain.exponentialRampToValueAtTime(0.001, now + 2.6); // Long serene decay
+
+          padOsc.connect(padFilter);
+          padFilter.connect(padGain);
+          padGain.connect(outputGain);
+
+          padOsc.start(now);
+          padOsc.stop(now + 2.7);
+          padOsc.onended = () => { padOsc.disconnect(); padGain.disconnect(); if (padFilter) padFilter.disconnect(); };
+        });
+
+        // 3. Gentle Acoustic Sub-Bass (Anchors the root note with zero harshness)
+        const rootFreq = chordNotes[0];
         const bassOsc = this.ctx.createOscillator();
         const bassGain = this.ctx.createGain();
         bassOsc.type = 'sine';
-        bassOsc.frequency.setValueAtTime(bassNote / 2, now);
+        bassOsc.frequency.setValueAtTime(rootFreq, now);
 
-        bassGain.gain.setValueAtTime(0.14, now);
-        bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        bassGain.gain.setValueAtTime(0.12, now);
+        bassGain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
 
         bassOsc.connect(bassGain);
         bassGain.connect(outputGain);
         bassOsc.start(now);
-        bassOsc.stop(now + 0.42);
+        bassOsc.stop(now + 1.25);
         bassOsc.onended = () => { bassOsc.disconnect(); bassGain.disconnect(); };
+
+        // 4. Subtle, Dreamy Sparkle Chime Accent on bar 1 and bar 3
+        if (step === 0 || step === 16) {
+          this.playSubtleChime(outputGain, step === 0 ? 1046.5 : 1318.51, 0.025);
+        }
       }
     }, tempoMs);
   }
@@ -975,7 +1069,7 @@ class SoundEngine {
       gain.connect(this.sfxGainNode!);
       osc.start(t);
       osc.stop(t + 0.25);
-      osc.onended = () => { osc.disconnect(); };
+      osc.onended = () => { osc.disconnect(); gain.disconnect(); };
     });
   }
 

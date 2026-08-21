@@ -73,22 +73,20 @@ export default function App() {
     network.send({ type: 'update_customization', customization: cust });
   };
 
-  // Context-aware Background Music Track Transitions
+  // Context-aware Background Music Track Transitions for the 3 distinct experiences:
+  // 1. Character Customization ('studio') -> Calm, relaxing, comfortable kalimba & ambient pad
+  // 2. Home / Main Menu ('home' | 'lobby') -> Heroic, inspiring adventure fanfare
+  // 3. Battle / Gameplay ('game') -> Energetic, exciting combat action
   useEffect(() => {
-    if (view === 'home') {
-      sound.playTrack('menu');
-    } else if (view === 'studio') {
+    if (view === 'studio') {
       sound.playTrack('studio');
-    } else if (view === 'lobby') {
-      sound.playTrack('lobby');
     } else if (view === 'game') {
-      if (isPreviewMode) {
-        sound.playTrack('map_preview');
-      } else {
-        sound.playTrack('battle');
-      }
+      sound.playTrack('battle');
+    } else {
+      // 'home' and 'lobby' share the Home/Main-Menu identity
+      sound.playTrack('menu');
     }
-  }, [view, isPreviewMode]);
+  }, [view]);
 
   // First interaction unlock for browser Web Audio policy
   useEffect(() => {
