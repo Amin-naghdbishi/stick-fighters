@@ -22,6 +22,7 @@ import {
 import { WEAPONS_CONFIG } from './weapons';
 
 import { generateRandomBotCustomization } from './customizationCatalog';
+import { sound } from './audio';
 
 export class LocalGameEngine {
   public room: RoomState;

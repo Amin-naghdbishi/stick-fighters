@@ -771,70 +771,15 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
           )}
 
           {/* Center: Synchronized Match Timer & Mode Badge */}
-          <div className="flex flex-col items-center gap-1 shrink-0">
-            <div className="bg-[#FFD700] rounded-2xl border-3 border-black px-4 py-1.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
-              <div className="text-[10px] font-black uppercase tracking-wider text-black flex items-center justify-center gap-1">
-                {room.mode === 'duel'
-                  ? `ROUND ${room.currentDuelRound || 1} / ${room.duelRoundsTotal || 5}`
-                  : `MATCH TIME (${fightersList.length} FIGHTERS)`}
-              </div>
-              <div className="text-xl sm:text-2xl font-black text-black font-mono tracking-wider">
-                {formatTime(room.roundTimer)}
-              </div>
+          <div className="bg-[#FFD700] rounded-2xl border-3 border-black px-4 py-1.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center shrink-0">
+            <div className="text-[10px] font-black uppercase tracking-wider text-black flex items-center justify-center gap-1">
+              {room.mode === 'duel'
+                ? `ROUND ${room.currentDuelRound || 1} / ${room.duelRoundsTotal || 5}`
+                : `MATCH TIME (${fightersList.length} FIGHTERS)`}
             </div>
-
-            {/* Performance HUD (Ping, FPS, Connection Status) */}
-            {showHud && (
-              <div id="performance_hud" className="bg-slate-900/90 text-white backdrop-blur-xs rounded-xl border-2 border-black px-2.5 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-[10px] sm:text-[11px] font-mono font-bold flex items-center gap-2 pointer-events-auto">
-                <div className="flex items-center gap-1">
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      netStatus === 'CONNECTED'
-                        ? 'bg-emerald-400 animate-pulse'
-                        : netStatus === 'RECONNECTING'
-                        ? 'bg-amber-400 animate-ping'
-                        : 'bg-rose-500'
-                    }`}
-                  />
-                  <span className="uppercase text-[9px] sm:text-[10px] tracking-wider text-slate-300">
-                    {netStatus === 'CONNECTED' ? 'ONLINE' : netStatus === 'RECONNECTING' ? 'RECONNECTING' : 'OFFLINE'}
-                  </span>
-                </div>
-
-                <span className="text-slate-600">|</span>
-
-                <div className="flex items-center gap-1">
-                  <span className="text-slate-400">PING:</span>
-                  <span
-                    className={`font-black ${
-                      ping < 70 ? 'text-emerald-400' : ping < 150 ? 'text-amber-400' : 'text-rose-400'
-                    }`}
-                  >
-                    {ping > 0 ? `${ping}ms` : '--'}
-                  </span>
-                </div>
-
-                <span className="text-slate-600">|</span>
-
-                <div className="flex items-center gap-1">
-                  <span className="text-slate-400">FPS:</span>
-                  <span
-                    className={`font-black ${
-                      fps >= 55 ? 'text-emerald-400' : fps >= 30 ? 'text-amber-400' : 'text-rose-400'
-                    }`}
-                  >
-                    {fps}
-                  </span>
-                </div>
-
-                <span className="text-slate-600">|</span>
-
-                <div className="flex items-center gap-1 text-sky-300">
-                  <span className="text-slate-400">TICK:</span>
-                  <span className="font-black">30Hz</span>
-                </div>
-              </div>
-            )}
+            <div className="text-xl sm:text-2xl font-black text-black font-mono tracking-wider">
+              {formatTime(room.roundTimer)}
+            </div>
           </div>
 
           {/* Top Right: Scoreboard Dropdown Trigger, Sound & Leave Buttons */}
@@ -1195,6 +1140,74 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 7. Bottom-Right Comic Connection Status & Performance Badge */}
+      {!isPreviewMode && showHud && (
+        <div
+          id="performance_hud"
+          className="absolute bottom-3 right-3 sm:bottom-4 sm:right-6 z-20 pointer-events-auto bg-white/95 backdrop-blur-xs rounded-2xl border-2 sm:border-3 border-black px-3 py-1.5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2 sm:gap-2.5 font-mono text-[10px] sm:text-xs font-black select-none"
+        >
+          {/* Connection State Dot & Label */}
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`w-2.5 h-2.5 rounded-full border border-black shrink-0 ${
+                netStatus === 'CONNECTED'
+                  ? 'bg-emerald-400 animate-pulse'
+                  : netStatus === 'RECONNECTING'
+                  ? 'bg-amber-400 animate-ping'
+                  : 'bg-rose-500'
+              }`}
+            />
+            <span
+              className={`uppercase tracking-wider font-black ${
+                netStatus === 'CONNECTED'
+                  ? 'text-emerald-700'
+                  : netStatus === 'RECONNECTING'
+                  ? 'text-amber-700'
+                  : 'text-rose-700'
+              }`}
+            >
+              {netStatus === 'CONNECTED' ? 'ONLINE' : netStatus === 'RECONNECTING' ? 'RECONNECTING' : 'OFFLINE'}
+            </span>
+          </div>
+
+          <span className="text-slate-300 font-bold">|</span>
+
+          {/* Ping Latency Metric */}
+          <div className="flex items-center gap-1">
+            <span className="text-slate-500 font-bold">PING:</span>
+            <span
+              className={`font-black ${
+                ping < 70 ? 'text-emerald-600' : ping < 150 ? 'text-amber-600' : 'text-rose-600'
+              }`}
+            >
+              {ping > 0 ? `${ping}ms` : '--'}
+            </span>
+          </div>
+
+          <span className="text-slate-300 font-bold">|</span>
+
+          {/* Client Rendering FPS Metric */}
+          <div className="flex items-center gap-1">
+            <span className="text-slate-500 font-bold">FPS:</span>
+            <span
+              className={`font-black ${
+                fps >= 55 ? 'text-emerald-600' : fps >= 30 ? 'text-amber-600' : 'text-rose-600'
+              }`}
+            >
+              {fps}
+            </span>
+          </div>
+
+          <span className="text-slate-300 font-bold">|</span>
+
+          {/* Server Physics Simulation Tick Rate */}
+          <div className="flex items-center gap-1 text-sky-700">
+            <span className="text-slate-500 font-bold">TICK:</span>
+            <span className="font-black">30Hz</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
