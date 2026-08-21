@@ -1,0 +1,6 @@
+{
+  "name": "Stick Fighters",
+  "description": "A vibrant cartoon multiplayer 2D stickman fighting game inspired by classic European comic style, featuring customizable male and female fighters, real-time physics, fast and heavy combat, and interactive arenas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
