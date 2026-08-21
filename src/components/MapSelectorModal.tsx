@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   MapPin,
@@ -32,20 +32,21 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
 }) => {
   const [selectedId, setSelectedId] = useState<string>(currentMapId);
   const [sizeFilter, setSizeFilter] = useState<'all' | MapSize>('all');
-  const [lastClickTime, setLastClickTime] = useState<{ [key: string]: number }>({});
+  const lastClickTimeRef = useRef<{ [key: string]: number }>({});
 
   const handleCardClick = (arenaId: string) => {
     const now = Date.now();
-    const lastTime = lastClickTime[arenaId] || 0;
+    const lastTime = lastClickTimeRef.current[arenaId] || 0;
 
     // Double click detection (< 380ms)
     if (now - lastTime < 380) {
       sound.playCountdownBeep(true);
+      onClose();
       onPreviewMap(arenaId);
       return;
     }
 
-    setLastClickTime((prev) => ({ ...prev, [arenaId]: now }));
+    lastClickTimeRef.current[arenaId] = now;
     setSelectedId(arenaId);
     sound.playComicPop();
 

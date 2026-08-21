@@ -18,12 +18,17 @@ import {
   Crosshair,
   Sparkles,
   Flame,
+  Activity,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 import { ComicPop, FighterState, Particle, PlayerInput, RoomState } from '../types/game';
 import { ARENAS } from '../game/arenas';
 import { GameRenderer } from '../game/renderer';
 import { sound } from '../game/audio';
 import { WEAPONS_CONFIG, WeaponType } from '../game/weapons';
+import { network, ConnectionStatus } from '../game/network';
+import { getHudEnabled } from './SettingsModal';
 
 interface GameCanvasViewProps {
   room: RoomState;
@@ -83,6 +88,30 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
   const [activeTouch, setActiveTouch] = useState<{ [key: string]: boolean }>({});
   const lastWheelTimeRef = useRef<number>(0);
 
+  // Network & Performance HUD Metrics State
+  const [ping, setPing] = useState<number>(network.ping);
+  const [netStatus, setNetStatus] = useState<ConnectionStatus>(network.connectionStatus);
+  const [fps, setFps] = useState<number>(60);
+  const [showHud, setShowHud] = useState<boolean>(() => getHudEnabled());
+
+  useEffect(() => {
+    const unsubPing = network.onPing((p) => setPing(p));
+    const unsubStatus = network.onStatusChange((s) => setNetStatus(s));
+
+    const handleHudToggle = (e: any) => {
+      if (typeof e?.detail?.enabled === 'boolean') {
+        setShowHud(e.detail.enabled);
+      }
+    };
+    window.addEventListener('sf_hud_toggled', handleHudToggle);
+
+    return () => {
+      unsubPing();
+      unsubStatus();
+      window.removeEventListener('sf_hud_toggled', handleHudToggle);
+    };
+  }, []);
+
   const emitInput = useCallback(() => {
     onSendInput({ ...inputRef.current });
     // Reset transient triggers after emitting
@@ -137,17 +166,23 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
     }
   }, [room.players, room.status, myId, isPreviewMode]);
 
+  const onReturnToLobbyRef = useRef(onReturnToLobby);
+  onReturnToLobbyRef.current = onReturnToLobby;
+  const emitInputRef = useRef(emitInput);
+  emitInputRef.current = emitInput;
+
   // Keyboard Event Listeners (Including Escape, WASD, Aim & Weapon switching)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Escape') {
         sound.playBack();
-        onReturnToLobby();
+        onReturnToLobbyRef.current();
         return;
       }
 
       if (e.code === 'Tab') {
         e.preventDefault();
+        if (e.repeat) return;
         setIsScoreboardOpen((prev) => !prev);
         return;
       }
@@ -230,7 +265,7 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
         }
       }
 
-      if (changed) emitInput();
+      if (changed) emitInputRef.current();
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -262,7 +297,7 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
         if (inp.fire) { inp.fire = false; changed = true; }
       }
 
-      if (changed) emitInput();
+      if (changed) emitInputRef.current();
     };
 
     const handleWeaponFireEvent = (e: any) => {
@@ -288,7 +323,7 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
       window.removeEventListener('keyup', handleKeyUp);
       window.removeEventListener('sf_weapon_fire', handleWeaponFireEvent);
     };
-  }, [emitInput, onReturnToLobby]);
+  }, []);
 
   // Mouse Movement & Aim Angle Calculation
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -338,19 +373,23 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
     }
   }, [emitInput]);
 
-  const handleMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement> | MouseEvent) => {
     if (e.button === 0) {
       inputRef.current.fire = false;
       inputRef.current.fastAttack = false;
       emitInput();
     } else if (e.button === 2) {
-      e.preventDefault();
       if (inputRef.current.heavyAttack) {
         inputRef.current.heavyAttack = false;
         emitInput();
       }
     }
   }, [emitInput]);
+
+  useEffect(() => {
+    window.addEventListener('mouseup', handleMouseUp as any);
+    return () => window.removeEventListener('mouseup', handleMouseUp as any);
+  }, [handleMouseUp]);
 
   // Mouse Wheel = Quick Weapon Cycling (Smoothly throttled to eliminate flicker)
   const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
@@ -427,11 +466,23 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
 
     let animId: number;
     let lastTime = Date.now();
+    let frameCount = 0;
+    let lastFpsCalc = performance.now();
 
     const loop = () => {
       const now = Date.now();
       const dt = Math.min(0.05, (now - lastTime) / 1000);
       lastTime = now;
+
+      // Real client rendering FPS measurement (updated every 500ms)
+      frameCount++;
+      const nowPerf = performance.now();
+      if (nowPerf - lastFpsCalc >= 500) {
+        const measuredFps = Math.round((frameCount * 1000) / (nowPerf - lastFpsCalc));
+        setFps(measuredFps);
+        frameCount = 0;
+        lastFpsCalc = nowPerf;
+      }
 
       const curRoom = roomRef.current;
       const curPops = comicPopsRef.current;
@@ -720,15 +771,70 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
           )}
 
           {/* Center: Synchronized Match Timer & Mode Badge */}
-          <div className="bg-[#FFD700] rounded-2xl border-3 border-black px-4 py-1.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center shrink-0">
-            <div className="text-[10px] font-black uppercase tracking-wider text-black flex items-center justify-center gap-1">
-              {room.mode === 'duel'
-                ? `ROUND ${room.currentDuelRound || 1} / ${room.duelRoundsTotal || 5}`
-                : `MATCH TIME (${fightersList.length} FIGHTERS)`}
+          <div className="flex flex-col items-center gap-1 shrink-0">
+            <div className="bg-[#FFD700] rounded-2xl border-3 border-black px-4 py-1.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
+              <div className="text-[10px] font-black uppercase tracking-wider text-black flex items-center justify-center gap-1">
+                {room.mode === 'duel'
+                  ? `ROUND ${room.currentDuelRound || 1} / ${room.duelRoundsTotal || 5}`
+                  : `MATCH TIME (${fightersList.length} FIGHTERS)`}
+              </div>
+              <div className="text-xl sm:text-2xl font-black text-black font-mono tracking-wider">
+                {formatTime(room.roundTimer)}
+              </div>
             </div>
-            <div className="text-xl sm:text-2xl font-black text-black font-mono tracking-wider">
-              {formatTime(room.roundTimer)}
-            </div>
+
+            {/* Performance HUD (Ping, FPS, Connection Status) */}
+            {showHud && (
+              <div id="performance_hud" className="bg-slate-900/90 text-white backdrop-blur-xs rounded-xl border-2 border-black px-2.5 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-[10px] sm:text-[11px] font-mono font-bold flex items-center gap-2 pointer-events-auto">
+                <div className="flex items-center gap-1">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      netStatus === 'CONNECTED'
+                        ? 'bg-emerald-400 animate-pulse'
+                        : netStatus === 'RECONNECTING'
+                        ? 'bg-amber-400 animate-ping'
+                        : 'bg-rose-500'
+                    }`}
+                  />
+                  <span className="uppercase text-[9px] sm:text-[10px] tracking-wider text-slate-300">
+                    {netStatus === 'CONNECTED' ? 'ONLINE' : netStatus === 'RECONNECTING' ? 'RECONNECTING' : 'OFFLINE'}
+                  </span>
+                </div>
+
+                <span className="text-slate-600">|</span>
+
+                <div className="flex items-center gap-1">
+                  <span className="text-slate-400">PING:</span>
+                  <span
+                    className={`font-black ${
+                      ping < 70 ? 'text-emerald-400' : ping < 150 ? 'text-amber-400' : 'text-rose-400'
+                    }`}
+                  >
+                    {ping > 0 ? `${ping}ms` : '--'}
+                  </span>
+                </div>
+
+                <span className="text-slate-600">|</span>
+
+                <div className="flex items-center gap-1">
+                  <span className="text-slate-400">FPS:</span>
+                  <span
+                    className={`font-black ${
+                      fps >= 55 ? 'text-emerald-400' : fps >= 30 ? 'text-amber-400' : 'text-rose-400'
+                    }`}
+                  >
+                    {fps}
+                  </span>
+                </div>
+
+                <span className="text-slate-600">|</span>
+
+                <div className="flex items-center gap-1 text-sky-300">
+                  <span className="text-slate-400">TICK:</span>
+                  <span className="font-black">30Hz</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Top Right: Scoreboard Dropdown Trigger, Sound & Leave Buttons */}

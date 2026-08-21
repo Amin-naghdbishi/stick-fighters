@@ -1,5 +1,6 @@
 import { WeaponType, WEAPONS_CONFIG } from './weapons';
 import { Arena, FighterState, PlayerInput, ProjectileState, ActiveWeaponSpawn, BotDifficultyLevel } from '../types/game';
+import { FIGHTER_HEIGHT, FIGHTER_WIDTH } from './physics';
 
 export interface BotDifficultyConfig {
   level: BotDifficultyLevel;
@@ -124,9 +125,6 @@ export const BOT_DIFFICULTY_CONFIGS: Record<BotDifficultyLevel, BotDifficultyCon
     weaponSwitchTactics: true,
   },
 };
-
-const FIGHTER_HEIGHT = 65;
-const FIGHTER_WIDTH = 26;
 
 /**
  * Intelligent Bot AI Decision Maker with 5 difficulty levels.

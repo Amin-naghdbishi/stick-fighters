@@ -16,6 +16,24 @@ import {
 } from 'lucide-react';
 import { sound } from '../game/audio';
 
+const HUD_KEY = 'stick_fighters_hud_enabled';
+
+export function getHudEnabled(): boolean {
+  try {
+    const saved = localStorage.getItem(HUD_KEY);
+    return saved !== null ? JSON.parse(saved) : true;
+  } catch (e) {
+    return true;
+  }
+}
+
+export function setHudEnabled(enabled: boolean) {
+  try {
+    localStorage.setItem(HUD_KEY, JSON.stringify(enabled));
+    window.dispatchEvent(new CustomEvent('sf_hud_toggled', { detail: { enabled } }));
+  } catch (e) {}
+}
+
 interface SettingsModalProps {
   onClose: () => void;
 }
@@ -27,6 +45,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const [sfxVol, setSfxVol] = useState(initialSettings.sfxVolume);
   const [musicEnabled, setMusicEnabled] = useState(initialSettings.musicEnabled);
   const [sfxEnabled, setSfxEnabled] = useState(initialSettings.sfxEnabled);
+  const [hudEnabledState, setHudEnabledState] = useState(getHudEnabled());
 
   const handleMasterChange = (val: number) => {
     setMasterVol(val);
@@ -182,6 +201,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
               onChange={(e) => handleSfxChange(parseFloat(e.target.value))}
               className="w-full h-2.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-[#FF5733] disabled:opacity-40"
             />
+          </div>
+
+          {/* Performance HUD Toggle */}
+          <div className="flex items-center justify-between bg-[#F3F4F6] p-3 rounded-xl border-2 border-black">
+            <div>
+              <div className="text-xs font-black text-black uppercase flex items-center gap-1.5">
+                <Sliders className="w-4 h-4 text-emerald-600" />
+                <span>Performance HUD (Ping, FPS, Net Status)</span>
+              </div>
+              <span className="text-[10px] font-bold text-slate-500">Displays real latency & rendering FPS in matches</span>
+            </div>
+
+            <button
+              onClick={() => {
+                const next = !hudEnabledState;
+                setHudEnabled(next);
+                setHudEnabledState(next);
+                sound.playClick();
+              }}
+              className={`px-3 py-1 rounded-lg border-2 border-black text-[11px] font-black cursor-pointer transition-all ${
+                hudEnabledState ? 'bg-[#10B981] text-white' : 'bg-slate-300 text-slate-700'
+              }`}
+            >
+              {hudEnabledState ? 'HUD: ON' : 'HUD: OFF'}
+            </button>
           </div>
         </div>
 

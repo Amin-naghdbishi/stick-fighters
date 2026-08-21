@@ -43,6 +43,7 @@ class SoundEngine {
   // Track step pointers
   private stepIndex: number = 0;
   private userInteracted: boolean = false;
+  private cachedWhiteNoiseBuffer: AudioBuffer | null = null;
 
   constructor() {
     this.loadSettings();
@@ -107,6 +108,13 @@ class SoundEngine {
         this.musicGainNode.connect(this.masterGainNode);
         this.sfxGainNode.connect(this.masterGainNode);
         this.masterGainNode.connect(this.ctx.destination);
+
+        const sampleRate = this.ctx.sampleRate;
+        this.cachedWhiteNoiseBuffer = this.ctx.createBuffer(1, sampleRate, sampleRate);
+        const data = this.cachedWhiteNoiseBuffer.getChannelData(0);
+        for (let i = 0; i < sampleRate; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
 
         this.applyGains();
       }
@@ -356,7 +364,9 @@ class SoundEngine {
         osc.start(now);
         osc2.start(now);
         osc.stop(now + 0.36);
+        osc.onended = () => { osc.disconnect(); noteGain.disconnect(); if (filter) filter.disconnect(); };
         osc2.stop(now + 0.36);
+        osc2.onended = () => { osc2.disconnect(); noteGain.disconnect(); if (filter) filter.disconnect(); };
       }
 
       // Play Orchestral Bass & Timpani Pulse on beat
@@ -373,6 +383,7 @@ class SoundEngine {
         bassGain.connect(outputGain);
         bassOsc.start(now);
         bassOsc.stop(now + 0.48);
+        bassOsc.onended = () => { bassOsc.disconnect(); bassGain.disconnect(); };
       }
 
       // Subtle high sparkle chime on bar start
@@ -426,6 +437,7 @@ class SoundEngine {
 
       bassOsc.start(now);
       bassOsc.stop(now + 0.2);
+      bassOsc.onended = () => { bassOsc.disconnect(); bassGain.disconnect(); if (bassFilter) bassFilter.disconnect(); };
 
       // Bright comic arpeggio synth
       const arpNote = arps[step % arps.length];
@@ -443,6 +455,7 @@ class SoundEngine {
 
         arpOsc.start(now);
         arpOsc.stop(now + 0.18);
+        arpOsc.onended = () => { arpOsc.disconnect(); arpGain.disconnect(); };
       }
 
       // Comic woodblock pulse on every 4th step
@@ -486,6 +499,7 @@ class SoundEngine {
 
         osc.start(now);
         osc.stop(now + 0.45);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
       }
 
       // Warm ambient pad every 8 steps
@@ -503,6 +517,7 @@ class SoundEngine {
         padGain.connect(outputGain);
         padOsc.start(now);
         padOsc.stop(now + 1.9);
+        padOsc.onended = () => { padOsc.disconnect(); padGain.disconnect(); };
       }
     }, tempoMs);
   }
@@ -540,6 +555,7 @@ class SoundEngine {
 
         osc.start(now);
         osc.stop(now + 0.65);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
       }
     }, tempoMs);
   }
@@ -585,6 +601,7 @@ class SoundEngine {
 
         osc.start(now);
         osc.stop(now + 0.24);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
       }
 
       // Gentle acoustic bass note every 4 beats
@@ -602,6 +619,7 @@ class SoundEngine {
         bassGain.connect(outputGain);
         bassOsc.start(now);
         bassOsc.stop(now + 0.42);
+        bassOsc.onended = () => { bassOsc.disconnect(); bassGain.disconnect(); };
       }
     }, tempoMs);
   }
@@ -651,6 +669,7 @@ class SoundEngine {
 
       bassOsc.start(now);
       bassOsc.stop(now + 0.17);
+      bassOsc.onended = () => { bassOsc.disconnect(); bassGain.disconnect(); if (bassFilter) bassFilter.disconnect(); };
 
       // Punchy Drum Kick on 0, 4, 8, 12
       if (step % 4 === 0) {
@@ -681,6 +700,7 @@ class SoundEngine {
 
         leadOsc.start(now);
         leadOsc.stop(now + 0.14);
+        leadOsc.onended = () => { leadOsc.disconnect(); leadGain.disconnect(); };
       }
     }, tempoMs);
   }
@@ -711,6 +731,7 @@ class SoundEngine {
         gain.connect(this.trackGainNode);
         osc.start(now);
         osc.stop(now + 0.12);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
       }, 350);
     } else {
       if (this.dangerInterval) {
@@ -768,7 +789,9 @@ class SoundEngine {
       osc.start(startTime);
       osc2.start(startTime);
       osc.stop(startTime + dur + 0.05);
+      osc.onended = () => { osc.disconnect(); noteGain.disconnect(); if (filter) filter.disconnect(); };
       osc2.stop(startTime + dur + 0.05);
+      osc2.onended = () => { osc2.disconnect(); noteGain.disconnect(); if (filter) filter.disconnect(); };
     });
   }
 
@@ -806,6 +829,7 @@ class SoundEngine {
 
       osc.start(startTime);
       osc.stop(startTime + dur + 0.05);
+      osc.onended = () => { osc.disconnect(); noteGain.disconnect(); };
     });
   }
 
@@ -831,6 +855,7 @@ class SoundEngine {
       gain.connect(this.sfxGainNode!);
       osc.start(rollTime);
       osc.stop(rollTime + 0.07);
+      osc.onended = () => { osc.disconnect(); gain.disconnect(); };
     }
 
     // Bright dual chime strike at the end
@@ -850,6 +875,7 @@ class SoundEngine {
       chimeGain.connect(this.sfxGainNode);
       chime.start(strikeTime);
       chime.stop(strikeTime + 0.38);
+      chime.onended = () => { chime.disconnect(); chimeGain.disconnect(); };
     }, 220);
   }
 
@@ -872,6 +898,7 @@ class SoundEngine {
     gain.connect(this.sfxGainNode!);
     osc.start(now);
     osc.stop(now + 0.65);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   // ==========================================
@@ -899,6 +926,7 @@ class SoundEngine {
     gain.connect(this.sfxGainNode);
     osc.start(now);
     osc.stop(now + 0.04);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   // Crisp satisfying comic click
@@ -922,6 +950,7 @@ class SoundEngine {
     gain.connect(this.sfxGainNode);
     osc.start(now);
     osc.stop(now + 0.07);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   // Map Selection Sparkle Chime
@@ -946,6 +975,7 @@ class SoundEngine {
       gain.connect(this.sfxGainNode!);
       osc.start(t);
       osc.stop(t + 0.25);
+      osc.onended = () => { osc.disconnect(); };
     });
   }
 
@@ -970,6 +1000,7 @@ class SoundEngine {
     gain.connect(this.sfxGainNode);
     osc.start(now);
     osc.stop(now + 0.09);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   // Back / Exit Soft Whoosh
@@ -993,6 +1024,7 @@ class SoundEngine {
     gain.connect(this.sfxGainNode);
     osc.start(now);
     osc.stop(now + 0.14);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   // Error / Alert Gentle Double Tap
@@ -1017,6 +1049,7 @@ class SoundEngine {
       gain.connect(this.sfxGainNode!);
       osc.start(t);
       osc.stop(t + 0.1);
+      osc.onended = () => { osc.disconnect(); };
     });
   }
 
@@ -1052,6 +1085,7 @@ class SoundEngine {
 
     osc.start(now);
     osc.stop(now + 0.6);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); if (filter) filter.disconnect(); };
   }
 
   // ==========================================
@@ -1084,6 +1118,7 @@ class SoundEngine {
 
     osc.start();
     osc.stop(now + 0.14);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); if (filter) filter.disconnect(); };
   }
 
   public playHeavyHit() {
@@ -1106,6 +1141,7 @@ class SoundEngine {
     gain.connect(this.sfxGainNode);
     osc.start();
     osc.stop(now + 0.3);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
 
     // Comic slap layer
     const slap = this.ctx.createOscillator();
@@ -1120,6 +1156,7 @@ class SoundEngine {
     slapGain.connect(this.sfxGainNode);
     slap.start();
     slap.stop(now + 0.16);
+    slap.onended = () => { slap.disconnect(); slapGain.disconnect(); };
   }
 
   public playJump() {
@@ -1143,6 +1180,7 @@ class SoundEngine {
 
     osc.start();
     osc.stop(now + 0.18);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   public playDoubleJump() {
@@ -1166,6 +1204,7 @@ class SoundEngine {
 
     osc.start();
     osc.stop(now + 0.16);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   public playShieldBlock() {
@@ -1189,6 +1228,7 @@ class SoundEngine {
 
     osc.start();
     osc.stop(now + 0.2);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   public playCountdownBeep(highPitch: boolean = false) {
@@ -1234,6 +1274,7 @@ class SoundEngine {
 
     osc.start();
     osc.stop(now + 0.09);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   public playExplosion() {
@@ -1263,6 +1304,7 @@ class SoundEngine {
 
     osc.start();
     osc.stop(now + 0.6);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); if (filter) filter.disconnect(); };
   }
 
   public playWeaponPickup() {
@@ -1285,6 +1327,7 @@ class SoundEngine {
     gain.connect(this.sfxGainNode);
     osc.start();
     osc.stop(now + 0.16);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   public playWeaponFire(weaponType?: string) {
@@ -1307,6 +1350,7 @@ class SoundEngine {
         gain.connect(this.sfxGainNode);
         osc.start();
         osc.stop(now + 0.09);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
         break;
       }
       case 'pistol': {
@@ -1321,6 +1365,7 @@ class SoundEngine {
         gain.connect(this.sfxGainNode);
         osc.start();
         osc.stop(now + 0.13);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
         break;
       }
       case 'burst_smg': {
@@ -1335,6 +1380,7 @@ class SoundEngine {
         gain.connect(this.sfxGainNode);
         osc.start();
         osc.stop(now + 0.07);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
         break;
       }
       case 'shotgun': {
@@ -1353,20 +1399,18 @@ class SoundEngine {
         gain.connect(this.sfxGainNode);
         osc.start();
         osc.stop(now + 0.22);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
         break;
       }
       case 'flame_gun':
       case 'inferno_cannon': {
         // Massive Roaring Flamethrower / Fire Combustion Blast (Real Noise + Sub-Bass Roar)
         const duration = weaponType === 'inferno_cannon' ? 0.35 : 0.18;
-        const bufferSize = Math.floor(this.ctx.sampleRate * duration);
-        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          data[i] = Math.random() * 2 - 1; // White Noise for turbulent flames
-        }
         const noise = this.ctx.createBufferSource();
-        noise.buffer = buffer;
+        if (this.cachedWhiteNoiseBuffer) {
+          noise.buffer = this.cachedWhiteNoiseBuffer;
+          noise.loop = true;
+        }
 
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'lowpass';
@@ -1381,6 +1425,8 @@ class SoundEngine {
         filter.connect(gain);
         gain.connect(this.sfxGainNode);
         noise.start(now);
+        noise.stop(now + duration);
+        noise.onended = () => { noise.disconnect(); gain.disconnect(); filter.disconnect(); };
 
         // Deep Sub-Bass Combustion Pulse Layer
         const thud = this.ctx.createOscillator();
@@ -1395,6 +1441,7 @@ class SoundEngine {
         thudGain.connect(this.sfxGainNode);
         thud.start(now);
         thud.stop(now + duration);
+        thud.onended = () => { thud.disconnect(); thudGain.disconnect(); };
         break;
       }
       case 'thunder_sword': {
@@ -1402,13 +1449,11 @@ class SoundEngine {
         const duration = 0.45;
         // 1. Supersonic High-Pitch Lightning Snap / Crack (Filtered Noise Transient)
         const snapLen = 0.05;
-        const snapBuf = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * snapLen), this.ctx.sampleRate);
-        const snapData = snapBuf.getChannelData(0);
-        for (let i = 0; i < snapBuf.length; i++) {
-          snapData[i] = Math.random() * 2 - 1;
-        }
         const snap = this.ctx.createBufferSource();
-        snap.buffer = snapBuf;
+        if (this.cachedWhiteNoiseBuffer) {
+          snap.buffer = this.cachedWhiteNoiseBuffer;
+          snap.loop = true;
+        }
 
         const snapFilter = this.ctx.createBiquadFilter();
         snapFilter.type = 'highpass';
@@ -1422,6 +1467,8 @@ class SoundEngine {
         snapFilter.connect(snapGain);
         snapGain.connect(this.sfxGainNode);
         snap.start(now);
+        snap.stop(now + snapLen);
+        snap.onended = () => { snap.disconnect(); snapGain.disconnect(); snapFilter.disconnect(); };
 
         // 2. Deep Atmospheric Thunder Boom Impact
         const thunder = this.ctx.createOscillator();
@@ -1444,6 +1491,7 @@ class SoundEngine {
         thunderGain.connect(this.sfxGainNode);
         thunder.start(now);
         thunder.stop(now + duration);
+        thunder.onended = () => { thunder.disconnect(); thunderGain.disconnect(); if (thunderFilter) thunderFilter.disconnect(); };
 
         // 3. Electric Spark Zing Modulation
         const spark = this.ctx.createOscillator();
@@ -1458,6 +1506,7 @@ class SoundEngine {
         sparkGain.connect(this.sfxGainNode);
         spark.start(now);
         spark.stop(now + 0.16);
+        spark.onended = () => { spark.disconnect(); sparkGain.disconnect(); };
         break;
       }
       default: {
@@ -1480,6 +1529,7 @@ class SoundEngine {
     gain.connect(output);
     osc.start(now);
     osc.stop(now + 0.32);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   private playWoodblockTick(output: GainNode, vol: number) {
@@ -1495,6 +1545,7 @@ class SoundEngine {
     gain.connect(output);
     osc.start(now);
     osc.stop(now + 0.06);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   private playPunchyDrumKick(output: GainNode, vol: number) {
@@ -1513,6 +1564,7 @@ class SoundEngine {
     gain.connect(output);
     osc.start(now);
     osc.stop(now + 0.15);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   private playComicSnare(output: GainNode, vol: number) {
@@ -1531,6 +1583,7 @@ class SoundEngine {
     gain.connect(output);
     osc.start(now);
     osc.stop(now + 0.11);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
   }
 
   private playHiHatTick(output: GainNode, vol: number) {
@@ -1554,6 +1607,7 @@ class SoundEngine {
     gain.connect(output);
     osc.start(now);
     osc.stop(now + 0.035);
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); if (filter) filter.disconnect(); };
   }
 }
 

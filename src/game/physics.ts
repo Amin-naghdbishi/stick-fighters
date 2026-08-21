@@ -160,8 +160,8 @@ export function updateFighterPhysics(
     fighter.burningTimer = 0; // Clear any residual burn state on death
     fighter.vx *= 0.85;
     fighter.vy += GRAVITY;
-    fighter.x += fighter.vx;
-    fighter.y += fighter.vy;
+    fighter.x += fighter.vx * (dt * 60);
+    fighter.y += fighter.vy * (dt * 60);
     return;
   }
 
@@ -190,10 +190,6 @@ export function updateFighterPhysics(
     fighter.burningTimer -= dt;
     if (fighter.invincibleTimer <= 0 && !fighter.isDead) {
       fighter.hp = Math.max(0, fighter.hp - dt * 12); // Burn tick damage
-      if (fighter.hp <= 0) {
-        fighter.isDead = true;
-        fighter.burningTimer = 0; // Instantly remove fire on death
-      }
     }
     if (fighter.burningTimer <= 0) {
       fighter.burningTimer = 0;
@@ -237,8 +233,8 @@ export function updateFighterPhysics(
   if (fighter.hitStunTimer > 0) {
     fighter.vy += GRAVITY;
     fighter.vx *= fighter.isGrounded ? FRICTION_GROUND : FRICTION_AIR;
-    fighter.x += fighter.vx;
-    fighter.y += fighter.vy;
+    fighter.x += fighter.vx * (dt * 60);
+    fighter.y += fighter.vy * (dt * 60);
     resolvePlatformCollisions(fighter, arena.platforms, input.down);
     return;
   }
@@ -295,8 +291,8 @@ export function updateFighterPhysics(
   fighter.vy = Math.min(fighter.vy + GRAVITY, MAX_FALL_SPEED);
 
   // Apply Velocities
-  fighter.x += fighter.vx;
-  fighter.y += fighter.vy;
+  fighter.x += fighter.vx * (dt * 60);
+  fighter.y += fighter.vy * (dt * 60);
 
   // Resolve Arena Platform Collisions
   fighter.isGrounded = false;
@@ -764,6 +760,8 @@ export class SpatialGrid<T extends { x: number; y: number }> {
 /**
  * Update active projectiles, resolve collisions with platforms and fighters
  */
+const sharedFighterSpatialGrid = new SpatialGrid<FighterState>(220);
+
 export function updateProjectiles(
   projectiles: ProjectileState[],
   fighters: FighterState[],
@@ -784,7 +782,8 @@ export function updateProjectiles(
   const useSpatialGrid = projectiles.length > 6 || arena.width > 2000;
   let spatialGrid: SpatialGrid<FighterState> | null = null;
   if (useSpatialGrid) {
-    spatialGrid = new SpatialGrid<FighterState>(220);
+    spatialGrid = sharedFighterSpatialGrid;
+    spatialGrid.clear();
     for (const f of fighters) {
       if (!f.isDead && f.invincibleTimer <= 0) {
         spatialGrid.insert(f);
@@ -867,7 +866,6 @@ export function updateProjectiles(
       const damage = isBlocked ? Math.round(p.damage * 0.25) : p.damage;
       hitFighter.hp = Math.max(0, hitFighter.hp - damage);
       hitFighter.lastAttackerId = p.shooterId;
-      hitFighter.invincibleTimer = 0.08;
 
       const isHeavyHit = p.damage >= 25;
       const popText = getRandomComicWord(isHeavyHit, isBlocked);

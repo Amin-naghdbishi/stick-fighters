@@ -17,15 +17,21 @@ export type ConnectionStatus =
 
 type MessageCallback = (msg: ServerMessage) => void;
 type StatusCallback = (status: ConnectionStatus) => void;
+type PingCallback = (ping: number) => void;
 
 export class NetworkClient {
   private ws: WebSocket | null = null;
   private listeners: Set<MessageCallback> = new Set();
   private statusListeners: Set<StatusCallback> = new Set();
+  private pingListeners: Set<PingCallback> = new Set();
+
   public myId: string | null = null;
   public isConnected: boolean = false;
   public connectionStatus: ConnectionStatus = 'DISCONNECTED';
+  public ping: number = 0;
+
   private reconnectTimer: any = null;
+  private pingInterval: any = null;
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 12;
   private pendingCustomization: FighterCustomization | null = null;
@@ -42,6 +48,7 @@ export class NetworkClient {
   }
 
   private cleanSocket() {
+    this.stopPingLoop();
     if (this.ws) {
       this.ws.onopen = null;
       this.ws.onmessage = null;
@@ -54,10 +61,34 @@ export class NetworkClient {
     }
   }
 
+  private startPingLoop() {
+    this.stopPingLoop();
+    this.sendPing();
+    this.pingInterval = setInterval(() => {
+      this.sendPing();
+    }, 2000);
+  }
+
+  private stopPingLoop() {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
+  }
+
+  private sendPing() {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.send({ type: 'ping', timestamp: Date.now() });
+    }
+  }
+
   private getWsUrl(): string {
-    const customServerUrl = (import.meta as any).env?.VITE_GAME_SERVER_URL;
+    let customServerUrl = (import.meta as any).env?.VITE_GAME_SERVER_URL;
     if (customServerUrl && typeof customServerUrl === 'string' && customServerUrl.trim() !== '') {
-      return customServerUrl.trim();
+      customServerUrl = customServerUrl.trim();
+      if (customServerUrl.startsWith('http://')) customServerUrl = customServerUrl.replace('http://', 'ws://');
+      if (customServerUrl.startsWith('https://')) customServerUrl = customServerUrl.replace('https://', 'wss://');
+      return customServerUrl;
     }
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${protocol}//${window.location.host}/ws`;
@@ -83,6 +114,8 @@ export class NetworkClient {
         this.setStatus('CONNECTED');
         console.log('[NetworkClient] Connected cleanly to Stick Fighters server.');
 
+        this.startPingLoop();
+
         if (this.pendingCustomization) {
           this.send({ type: 'update_customization', customization: this.pendingCustomization });
         }
@@ -91,6 +124,14 @@ export class NetworkClient {
       socket.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data) as ServerMessage;
+
+          if (msg.type === 'pong') {
+            const rtt = Math.max(1, Math.round(Date.now() - msg.timestamp));
+            this.ping = rtt;
+            this.notifyPing(rtt);
+            return;
+          }
+
           if (msg.type === 'room_joined') {
             this.myId = msg.yourId;
           }
@@ -148,6 +189,12 @@ export class NetworkClient {
     return () => this.statusListeners.delete(cb);
   }
 
+  public onPing(cb: PingCallback): () => void {
+    this.pingListeners.add(cb);
+    cb(this.ping);
+    return () => this.pingListeners.delete(cb);
+  }
+
   private notify(msg: ServerMessage) {
     for (const cb of this.listeners) {
       cb(msg);
@@ -157,6 +204,12 @@ export class NetworkClient {
   private notifyStatus(status: ConnectionStatus) {
     for (const cb of this.statusListeners) {
       cb(status);
+    }
+  }
+
+  private notifyPing(ping: number) {
+    for (const cb of this.pingListeners) {
+      cb(ping);
     }
   }
 

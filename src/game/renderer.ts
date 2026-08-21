@@ -31,6 +31,8 @@ export class GameRenderer {
   private width: number = 1000;
   private height: number = 600;
   private initialized: boolean = false;
+  private lastRenderTime: number = 0;
+  private textWidthCache: Map<string, number> = new Map();
   public camera: CameraState = {
     x: 700,
     y: 450,
@@ -46,6 +48,13 @@ export class GameRenderer {
   public setDimensions(w: number, h: number) {
     this.width = w;
     this.height = h;
+  }
+
+  private isInView(x: number, y: number, w: number, h: number, margin: number = 100): boolean {
+    const halfW = (this.width / 2) / this.camera.zoom + margin;
+    const halfH = (this.height / 2) / this.camera.zoom + margin;
+    return !(x + w < this.camera.x - halfW || x > this.camera.x + halfW ||
+             y + h < this.camera.y - halfH || y > this.camera.y + halfH);
   }
 
   public triggerShake(intensity: number = 8, duration: number = 0.25) {
@@ -188,7 +197,9 @@ export class GameRenderer {
   ) {
     const ctx = this.ctx;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const dt = 1 / 60;
+    let dt = this.lastRenderTime ? (time - this.lastRenderTime) / 1000 : 1 / 60;
+    if (dt <= 0 || dt > 0.1) dt = 1 / 60;
+    this.lastRenderTime = time;
 
     // 1. HARD RESET matrix and wipe the entire physical canvas buffer to completely eliminate any ghost trails/unrendered pixels
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -271,6 +282,7 @@ export class GameRenderer {
     ctx.save();
 
     for (const bg of burningGround) {
+      if (!this.isInView(bg.x - bg.width / 2, bg.y - 20, bg.width, 24)) continue;
       const alpha = Math.min(1, bg.life / 0.5);
       ctx.globalAlpha = alpha;
 
@@ -603,6 +615,8 @@ export class GameRenderer {
       const pw = plat.width;
       const ph = plat.height;
 
+      if (!this.isInView(px, py, pw, ph)) continue;
+
       if (plat.type === 'bounce') {
         ctx.fillStyle = '#FF5252';
         this.roundRect(ctx, px, py, pw, ph, 8);
@@ -663,6 +677,7 @@ export class GameRenderer {
 
     for (const sp of spawns) {
       if (!sp.isAvailable) continue; // When picked up / during cooldown: COMPLETELY EMPTY!
+      if (!this.isInView(sp.x - 24, sp.y - 24, 48, 48)) continue;
 
       const config = WEAPONS_CONFIG[sp.weaponType];
       if (!config) continue;
@@ -700,6 +715,7 @@ export class GameRenderer {
     ctx.save();
 
     for (const p of projectiles) {
+      if (!this.isInView(p.x - 20, p.y - 20, 40, 40)) continue;
       const angle = Math.atan2(p.vy, p.vx);
       ctx.save();
       ctx.translate(p.x, p.y);
@@ -859,6 +875,9 @@ export class GameRenderer {
 
     // 1. Draw Name Badge & Health Bar above head
     this.drawFighterHUD(f, cx, cy);
+
+    // 1.5 Cosmetic Effects (Auras/Trails)
+    this.drawFighterCosmeticEffects(cx, cy, f, time);
 
     // 2. Shield Bubble
     if (f.isBlocking) {
@@ -2174,8 +2193,12 @@ export class GameRenderer {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    const nameMetrics = ctx.measureText(f.name);
-    const badgeW = Math.max(56, nameMetrics.width + 20);
+    let nameWidth = this.textWidthCache.get(f.name);
+    if (nameWidth === undefined) {
+      nameWidth = ctx.measureText(f.name).width;
+      this.textWidthCache.set(f.name, nameWidth);
+    }
+    const badgeW = Math.max(56, nameWidth + 20);
     const badgeH = 18;
     const nameY = cy - 122;
 
@@ -2233,7 +2256,7 @@ export class GameRenderer {
     time: number
   ) {
     ctx.save();
-    const isBlinking = !f.isDead && f.state !== 'hit' && Math.sin(time * 0.003 + parseInt(f.id, 36) || 0) > 0.96;
+    const isBlinking = !f.isDead && f.state !== 'hit' && Math.sin(time * 0.003 + (parseInt(f.id, 36) || 0)) > 0.96;
 
     if (f.isDead) {
       ctx.strokeStyle = '#0F172A';
@@ -2487,6 +2510,7 @@ export class GameRenderer {
     ctx.save();
 
     for (const p of particles) {
+      if (!this.isInView(p.x - (p.size || 20), p.y - (p.size || 20), (p.size || 20) * 2, (p.size || 20) * 2)) continue;
       ctx.globalAlpha = Math.max(0, p.alpha);
 
       if (p.shape === 'dust') {

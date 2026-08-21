@@ -40,6 +40,7 @@ interface ReconnectSession {
 }
 
 export class GameServer {
+  private cleanupInterval: NodeJS.Timeout;
   private clients: Map<string, ConnectedClient> = new Map();
   private rooms: Map<string, RoomState> = new Map();
   private roomClients: Map<string, Set<ConnectedClient>> = new Map();
@@ -48,7 +49,7 @@ export class GameServer {
 
   constructor() {
     // Regular cleanup for dead rooms & inactive sessions
-    setInterval(() => this.cleanupDeadRooms(), 15000);
+    this.cleanupInterval = setInterval(() => this.cleanupDeadRooms(), 15000);
   }
 
   public handleConnection(ws: WebSocket) {
@@ -152,6 +153,10 @@ export class GameServer {
   }
 
   private expireReconnectSession(clientId: string, roomId: string) {
+    const session = this.reconnectSessions.get(clientId);
+    if (session) {
+      clearTimeout(session.timeout);
+    }
     this.reconnectSessions.delete(clientId);
 
     const room = this.rooms.get(roomId);
@@ -165,6 +170,7 @@ export class GameServer {
         this.stopRoomLoop(roomId);
         this.rooms.delete(roomId);
         this.roomClients.delete(roomId);
+        this.purgeRoomSessions(roomId);
       } else {
         if (room.hostId === clientId) {
           room.hostId = remainingHumanIds[0];
@@ -183,8 +189,8 @@ export class GameServer {
     }
     client.packetCountWindow++;
 
-    // Max 65 packets/sec per socket
-    if (client.packetCountWindow > 65 && msg.type === 'input') {
+    // Max 100 packets/sec per socket for all types
+    if (client.packetCountWindow > 100) {
       return; // Reject excessive packet flooding
     }
 
@@ -283,9 +289,12 @@ export class GameServer {
   private generateRoomCode(): string {
     const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
-    for (let i = 0; i < 4; i++) {
-      code += letters[Math.floor(Math.random() * letters.length)];
-    }
+    do {
+      code = '';
+      for (let i = 0; i < 4; i++) {
+        code += letters[Math.floor(Math.random() * letters.length)];
+      }
+    } while (this.rooms.has(code));
     return code;
   }
 
@@ -453,14 +462,14 @@ export class GameServer {
       }
     }
 
-    if (client.roomId) {
-      this.leaveRoom(client);
-    }
-
     const currentCount = Object.keys(room.players).length;
     if (currentCount >= room.maxPlayers || currentCount >= 10) {
       this.send(client, { type: 'error', message: 'Room is full (Maximum players reached)!' });
       return;
+    }
+
+    if (client.roomId) {
+      this.leaveRoom(client);
     }
 
     client.customization = playerCust;
@@ -512,6 +521,7 @@ export class GameServer {
         this.stopRoomLoop(roomId);
         this.rooms.delete(roomId);
         this.roomClients.delete(roomId);
+        this.purgeRoomSessions(roomId);
       } else {
         if (room.hostId === client.id) {
           room.hostId = remainingHumanIds[0];
@@ -536,7 +546,14 @@ export class GameServer {
     const room = this.rooms.get(client.roomId);
     if (!room || !room.players[client.id]) return;
 
-    Object.assign(room.players[client.id], cust);
+    const allowedKeys: (keyof import('../src/types/game.js').FighterCustomization)[] = [
+      'name', 'gender', 'color', 'hat', 'hair', 'skin', 'face', 'outfit', 'cape', 'shoes', 'accessory', 'effect'
+    ];
+    for (const key of allowedKeys) {
+      if (cust[key] !== undefined) {
+        (room.players[client.id] as any)[key] = cust[key];
+      }
+    }
 
     this.broadcastRoom(room);
   }
@@ -585,6 +602,7 @@ export class GameServer {
     if (!client.roomId) return;
     const room = this.rooms.get(client.roomId);
     if (!room || room.hostId !== client.id) return;
+    if (room.status !== 'lobby' && room.status !== 'round_end') return;
 
     const otherHumans = Object.values(room.players).filter(
       (p) => p.id !== room.hostId && !p.isBot
@@ -704,6 +722,7 @@ export class GameServer {
     if (!client.roomId) return;
     const room = this.rooms.get(client.roomId);
     if (!room) return;
+    if (room.hostId !== client.id) return;
 
     this.stopRoomLoop(room.roomId);
     room.status = 'lobby';
@@ -946,6 +965,7 @@ export class GameServer {
           }
 
           if (room.matchDuration > 0 && room.matchTimeRemaining <= 0) {
+            this.stopRoomLoop(room.roomId);
             room.status = 'round_end';
             const sorted = Object.values(room.players).sort(
               (a, b) =>
@@ -975,6 +995,7 @@ export class GameServer {
           // Duel Mode
           const livingFighters = fighters.filter((f) => !f.isDead);
           const roundEnded =
+            fighters.length <= 1 ||
             (fighters.length >= 2 && livingFighters.length <= 1) ||
             (room.matchDuration > 0 && room.matchTimeRemaining <= 0);
 
@@ -1029,6 +1050,7 @@ export class GameServer {
                 spIdx++;
               }
             } else {
+              this.stopRoomLoop(room.roomId);
               room.status = 'round_end';
               const sorted = Object.values(room.players).sort(
                 (a, b) =>
@@ -1117,7 +1139,7 @@ export class GameServer {
   }
 
   private send(client: ConnectedClient, msg: ServerMessage) {
-    if (client.ws.readyState === WebSocket.OPEN) {
+    if (client.ws.readyState === WebSocket.OPEN && client.ws.bufferedAmount < 65536) {
       client.ws.send(JSON.stringify(msg));
     }
   }
@@ -1133,8 +1155,17 @@ export class GameServer {
 
     const payload = JSON.stringify(msg);
     for (const client of clients) {
-      if (client.ws.readyState === WebSocket.OPEN) {
+      if (client.ws.readyState === WebSocket.OPEN && client.ws.bufferedAmount < 65536) {
         client.ws.send(payload);
+      }
+    }
+  }
+
+  private purgeRoomSessions(roomId: string) {
+    for (const [clientId, session] of this.reconnectSessions.entries()) {
+      if (session.roomId === roomId) {
+        clearTimeout(session.timeout);
+        this.reconnectSessions.delete(clientId);
       }
     }
   }
@@ -1144,25 +1175,40 @@ export class GameServer {
       const activeHumanPlayers = Object.keys(room.players).filter(
         (id) => !room.players[id].isBot && this.clients.has(id)
       );
-      if (activeHumanPlayers.length === 0) {
+      let hasReconnectSession = false;
+      for (const session of this.reconnectSessions.values()) {
+        if (session.roomId === roomId) {
+          hasReconnectSession = true;
+          break;
+        }
+      }
+      if (activeHumanPlayers.length === 0 && !hasReconnectSession) {
         this.stopRoomLoop(roomId);
         this.rooms.delete(roomId);
         this.roomClients.delete(roomId);
+        this.purgeRoomSessions(roomId);
       }
     }
   }
 
   public shutdown() {
     console.log('Shutting down GameServer...');
+    clearInterval(this.cleanupInterval);
     for (const roomId of Array.from(this.roomLoops.keys())) {
       this.stopRoomLoop(roomId);
     }
     for (const session of this.reconnectSessions.values()) {
       clearTimeout(session.timeout);
     }
+    for (const client of this.clients.values()) {
+      try {
+        client.ws.close(1001, 'Server Shutting Down');
+      } catch (e) {}
+    }
     this.reconnectSessions.clear();
     this.rooms.clear();
     this.roomClients.clear();
     this.clients.clear();
+    setTimeout(() => process.exit(0), 3000);
   }
 }

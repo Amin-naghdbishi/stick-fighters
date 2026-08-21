@@ -399,6 +399,7 @@ export class LocalGameEngine {
             this.room.countdown = 3;
 
             this.room.projectiles = [];
+            this.room.burningGround = [];
             this.room.weaponSpawns = (arena.weaponSpawns || []).map((sp) => ({
               id: sp.id,
               weaponType: sp.weaponType,

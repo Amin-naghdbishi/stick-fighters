@@ -18,7 +18,7 @@ async function startServer() {
   });
 
   // Attach WebSocket Server
-  const wss = new WebSocketServer({ server, path: '/ws' });
+  const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 16384 });
   const gameServer = new GameServer();
 
   wss.on('connection', (ws) => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   BotDifficultyLevel,
@@ -195,7 +195,7 @@ export default function App() {
           break;
 
         case 'error':
-          alert(msg.message);
+          console.warn('Server Error:', msg.message);
           break;
       }
     });
@@ -286,13 +286,13 @@ export default function App() {
     setView('game');
   };
 
-  const handleSendInput = (input: PlayerInput) => {
+  const handleSendInput = useCallback((input: PlayerInput) => {
     if (isLocalMode) {
       localInputRef.current = input;
     } else {
       network.sendInput(input);
     }
-  };
+  }, [isLocalMode]);
 
   const handleReadyToggle = (isReady: boolean) => {
     network.setReady(isReady);
@@ -335,7 +335,7 @@ export default function App() {
     network.sendChat(message);
   };
 
-  const handleReturnFromGame = () => {
+  const handleReturnFromGame = useCallback(() => {
     if (isPreviewMode) {
       localEngineRef.current = null;
       setIsPreviewMode(false);
@@ -358,7 +358,7 @@ export default function App() {
       network.returnToLobby();
       setView('lobby');
     }
-  };
+  }, [isPreviewMode, isLocalMode, previousView]);
 
   return (
     <div className="min-h-screen bg-[#FFFBEB] text-black flex flex-col justify-between selection:bg-[#FFD700] font-sans">

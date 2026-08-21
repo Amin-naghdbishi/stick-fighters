@@ -626,6 +626,10 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                         max={120}
                         value={room.matchDuration === 0 ? 0 : Math.floor((room.matchDuration || 300) / 60)}
                         onChange={(e) => {
+                          if (e.target.value === '') {
+                            onUpdateSettings({ matchDuration: 0 });
+                            return;
+                          }
                           const val = parseInt(e.target.value, 10);
                           if (!isNaN(val) && val >= 0 && val <= 120) {
                             onUpdateSettings({ matchDuration: val * 60 });
@@ -711,6 +715,12 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                           max={100}
                           value={room.duelRoundsTotal || 5}
                           onChange={(e) => {
+                            if (e.target.value === '') {
+                              // We use 1 as a fallback for empty state to allow clearing
+                              // Without it, the user can't backspace the last digit if it's controlled.
+                              onUpdateSettings({ duelRoundsTotal: 1 });
+                              return;
+                            }
                             const val = parseInt(e.target.value, 10);
                             if (!isNaN(val) && val >= 1 && val <= 100) {
                               onUpdateSettings({ duelRoundsTotal: val });
