@@ -155,19 +155,26 @@ export const MapEditor: React.FC<MapEditorProps> = ({
   // Center & fit map on load
   const fitMapToScreen = useCallback(() => {
     if (!canvasRef.current) return;
-    const cw = canvasRef.current.parentElement?.clientWidth || window.innerWidth;
-    const ch = canvasRef.current.parentElement?.clientHeight || window.innerHeight;
-    const scaleX = (cw - 120) / map.width;
-    const scaleY = (ch - 120) / map.height;
-    const newZoom = Math.max(0.2, Math.min(1.2, Math.min(scaleX, scaleY)));
+    const parent = canvasRef.current.parentElement;
+    const cw = parent && parent.clientWidth > 100 ? parent.clientWidth : window.innerWidth - 320;
+    const ch = parent && parent.clientHeight > 100 ? parent.clientHeight : window.innerHeight - 80;
+    const scaleX = (cw - 80) / map.width;
+    const scaleY = (ch - 80) / map.height;
+    const newZoom = Math.max(0.15, Math.min(1.2, Math.min(scaleX, scaleY)));
     setZoom(newZoom);
-    setPanX((cw - map.width * newZoom) / 2);
-    setPanY((ch - map.height * newZoom) / 2);
+    setPanX(Math.max(20, (cw - map.width * newZoom) / 2));
+    setPanY(Math.max(20, (ch - map.height * newZoom) / 2));
   }, [map.width, map.height]);
 
   useEffect(() => {
     fitMapToScreen();
-  }, []);
+    const t = setTimeout(fitMapToScreen, 60);
+    window.addEventListener('resize', fitMapToScreen);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener('resize', fitMapToScreen);
+    };
+  }, [fitMapToScreen]);
 
   // Save map to storage
   const handleSave = useCallback(() => {
@@ -422,8 +429,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     }
 
     // Temporary renderer instance for drawing rich objects
-    const dummyRenderer = new GameRenderer(canvas);
-    dummyRenderer.setContext(ctx);
+    const dummyRenderer = new GameRenderer(ctx);
 
     // 3. Draw Background Layer Decorations
     dummyRenderer.drawCustomDecorations(map, 'background', 0);
@@ -575,8 +581,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
       ctx.strokeStyle = '#000000';
       ctx.lineWidth = 3;
 
-      ctx.beginPath();
-      ctx.roundRect(-24, -16, 48, 32, 8);
+      dummyRenderer.roundRect(ctx, -24, -16, 48, 32, 8);
       ctx.fill();
       ctx.stroke();
 

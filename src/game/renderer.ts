@@ -45,6 +45,10 @@ export class GameRenderer {
     this.ctx = ctx;
   }
 
+  public setContext(ctx: CanvasRenderingContext2D) {
+    this.ctx = ctx;
+  }
+
   public setDimensions(w: number, h: number) {
     this.width = w;
     this.height = h;
@@ -3558,7 +3562,7 @@ export class GameRenderer {
     ctx.restore();
   }
 
-  private roundRect(
+  public roundRect(
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
@@ -3566,7 +3570,21 @@ export class GameRenderer {
     h: number,
     r: number
   ) {
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, r);
+    if (typeof (ctx as any).roundRect === 'function') {
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, r);
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
   }
 }
