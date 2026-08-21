@@ -2,75 +2,190 @@ import { WeaponType } from '../game/weapons';
 
 export type Gender = 'male' | 'female';
 
-export type HatType = 
+export type SkinType =
+  | 'classic'
+  | 'light'
+  | 'tan'
+  | 'dark'
+  | 'shadow'
+  | 'alien'
+  | 'cyber'
+  | 'golden'
+  | 'neon'
+  | 'cartoon';
+
+export type HairType =
   | 'none'
-  | 'headband'
-  | 'cowboy'
+  | 'short'
+  | 'long'
+  | 'spiky'
+  | 'messy'
+  | 'curly'
+  | 'mohawk'
+  | 'ponytail'
+  | 'anime'
+  | 'military'
+  | 'wild'
+  | 'large_cartoon'
+  | 'afro'
+  | 'dreads'
+  | 'bob';
+
+export type HeadwearType =
+  | 'none'
   | 'cap'
+  | 'military_helmet'
+  | 'army_hat'
+  | 'jungle_hat'
+  | 'cowboy'
+  | 'wizard'
+  | 'cone'
+  | 'helmet'
+  | 'space_helmet'
   | 'crown'
-  | 'ninja'
-  | 'ribbon'
+  | 'pirate'
+  | 'beanie'
+  | 'samurai'
+  | 'ninja_headband'
+  | 'cat_ears'
+  | 'rabbit_ears'
+  | 'devil_horns'
+  | 'angel_halo'
+  | 'robot_antennas'
+  | 'headband'
   | 'horns'
-  | 'boxing';
+  | 'ribbon'
+  | 'boxing'
+  | 'ninja';
 
-export type FighterActionState =
-  | 'idle'
-  | 'run'
-  | 'jump'
-  | 'fall'
-  | 'fast_attack'
-  | 'heavy_attack'
-  | 'block'
-  | 'hit'
-  | 'knocked'
-  | 'dead'
-  | 'victory';
+export type HatType = HeadwearType;
 
-export interface PlayerInput {
-  left: boolean;
-  right: boolean;
-  up: boolean; // Jump
-  down: boolean; // Drop through platforms
-  fastAttack: boolean;
-  heavyAttack: boolean;
-  block: boolean;
-  // Weapon & Aim Controls
-  fire?: boolean;
-  aimAngle?: number; // radians
-  switchWeapon?: 'next' | 'prev' | WeaponType;
-}
+export type FaceType =
+  | 'none'
+  | 'sunglasses'
+  | 'round_glasses'
+  | 'pilot_glasses'
+  | 'eye_patch'
+  | 'ninja_mask'
+  | 'bandit_mask'
+  | 'gas_mask'
+  | 'samurai_mask'
+  | 'face_mask'
+  | 'cute_blush'
+  | 'scar';
+
+export type OutfitType =
+  | 'none'
+  | 'cute_tshirt'
+  | 'cute_hoodie'
+  | 'cartoon'
+  | 'animal'
+  | 'colorful'
+  | 'combat'
+  | 'heavy_jacket'
+  | 'tactical'
+  | 'dark_warrior'
+  | 'soldier'
+  | 'military_jacket'
+  | 'hoodie'
+  | 'tshirt'
+  | 'jacket'
+  | 'coat'
+  | 'sports'
+  | 'winter'
+  | 'ninja'
+  | 'samurai'
+  | 'pirate'
+  | 'space_suit'
+  | 'explorer'
+  | 'royal'
+  | 'wizard'
+  | 'robot';
+
+export type CapeBackType =
+  | 'none'
+  | 'short_cape'
+  | 'long_cape'
+  | 'torn_cape'
+  | 'royal_cape'
+  | 'ninja_cape'
+  | 'superhero_cape'
+  | 'small_backpack'
+  | 'large_backpack'
+  | 'military_backpack'
+  | 'jetpack'
+  | 'angel_wings'
+  | 'demon_wings'
+  | 'small_wings'
+  | 'large_wings';
+
+export type ShoeType =
+  | 'none'
+  | 'sneakers'
+  | 'boots'
+  | 'military_boots'
+  | 'ninja_shoes'
+  | 'samurai_sandals'
+  | 'cartoon_shoes'
+  | 'sport_shoes'
+  | 'winter_boots'
+  | 'casual'
+  | 'cute_shoes'
+  | 'futuristic';
+
+export type AccessoryType =
+  | 'none'
+  | 'earrings'
+  | 'piercings'
+  | 'necklace'
+  | 'bracelet'
+  | 'watch'
+  | 'chain'
+  | 'tie'
+  | 'scarf'
+  | 'neck_band'
+  | 'shoulder_pad'
+  | 'badge'
+  | 'flower'
+  | 'ammo_belt'
+  | 'pins';
+
+export type EffectType =
+  | 'none'
+  | 'hearts'
+  | 'stars'
+  | 'electric'
+  | 'smoke'
+  | 'sparkles'
+  | 'aura'
+  | 'cute_particles'
+  | 'dark_smoke'
+  | 'light_glow';
 
 export interface FighterCustomization {
   name: string;
   gender: Gender;
   color: string;
-  hat: HatType;
+  secondaryColor?: string;
+  accentColor?: string;
+  skin?: SkinType;
+  hair?: HairType;
+  hairColor?: string;
+  hat?: HeadwearType;
+  hatColor?: string;
+  face?: FaceType;
+  outfit?: OutfitType;
+  outfitColor?: string;
+  cape?: CapeBackType;
+  capeColor?: string;
+  shoes?: ShoeType;
+  shoeColor?: string;
+  accessory?: AccessoryType;
+  effect?: EffectType;
 }
 
-export type ArenaTheme =
-  | 'dojo'
-  | 'cyber'
-  | 'park'
-  | 'town'
-  | 'island'
-  | 'castle'
-  | 'volcano'
-  | 'forest'
-  | 'ruins'
-  | 'canyon'
-  | 'metropolis'
-  | 'mystery_jungle'
-  | 'mystery_mountain'
-  | 'mystery_volcanic';
-
-export type MapSize = 'small' | 'medium' | 'large' | 'xlarge' | 'mystery';
-
-export interface FighterState {
+export interface FighterState extends FighterCustomization {
   id: string;
-  name: string;
-  gender: 'male' | 'female';
-  color: string;
-  hat: 'none' | 'cap' | 'crown' | 'ninja' | 'headband' | 'viking' | 'boxing' | 'halo';
   x: number;
   y: number;
   vx: number;

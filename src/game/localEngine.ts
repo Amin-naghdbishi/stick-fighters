@@ -21,6 +21,8 @@ import {
 } from '../types/game';
 import { WEAPONS_CONFIG } from './weapons';
 
+import { generateRandomBotCustomization } from './customizationCatalog';
+
 export class LocalGameEngine {
   public room: RoomState;
   public comicPops: ComicPop[] = [];
@@ -40,13 +42,10 @@ export class LocalGameEngine {
 
     const p1 = createInitialFighter(
       'local_player',
-      playerCust.name,
-      playerCust.gender,
-      playerCust.color,
-      playerCust.hat,
-      p1Spawn.x,
-      p1Spawn.y,
-      false
+      playerCust,
+      p1Spawn.x as any,
+      p1Spawn.y as any,
+      false as any
     );
 
     const players: Record<string, FighterState> = {
@@ -54,22 +53,18 @@ export class LocalGameEngine {
     };
 
     const botNames = ['Rival Tintin', 'Captain Boxer', 'Ninja Snowy', 'Speedy Spike', 'Brawler Betty', 'Titan', 'Viper', 'Echo', 'Blaze'];
-    const botColors = ['#2563EB', '#DC2626', '#059669', '#7C3AED', '#D97706', '#DB2777', '#0891B2', '#4F46E5', '#65A30D'];
-    const botHats = ['cap', 'boxing', 'ninja', 'horns', 'headband', 'crown', 'ribbon', 'cowboy'] as const;
 
     const count = Math.max(0, Math.min(9, botCount));
     for (let i = 0; i < count; i++) {
       const bId = `bot_${i + 1}`;
       const spawn = arena.spawnPoints[(i + 1) % arena.spawnPoints.length];
+      const botCust = generateRandomBotCustomization(botNames[i % botNames.length]);
       players[bId] = createInitialFighter(
         bId,
-        botNames[i % botNames.length],
-        i % 2 === 0 ? 'male' : 'female',
-        botColors[i % botColors.length],
-        botHats[i % botHats.length],
-        spawn.x,
-        spawn.y,
-        true
+        botCust,
+        spawn.x as any,
+        spawn.y as any,
+        true as any
       );
     }
 

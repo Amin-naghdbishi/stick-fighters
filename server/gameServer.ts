@@ -9,6 +9,7 @@ import {
   updateFighterPhysics,
   updateProjectiles,
 } from '../src/game/physics.js';
+import { generateRandomBotCustomization } from '../src/game/customizationCatalog.js';
 import {
   ClientMessage,
   ComicPop,
@@ -380,11 +381,7 @@ export class GameServer {
     const room = this.rooms.get(client.roomId);
     if (!room || !room.players[client.id]) return;
 
-    const f = room.players[client.id];
-    f.name = cust.name;
-    f.gender = cust.gender;
-    f.color = cust.color;
-    f.hat = cust.hat;
+    Object.assign(room.players[client.id], cust);
 
     this.broadcastRoom(room);
   }
@@ -406,7 +403,9 @@ export class GameServer {
         respawnTimer: 0,
       }));
     }
-    if (msg.mode && (msg.mode === 'duel' || msg.mode === 'ffa')) room.mode = msg.mode;
+    if (typeof msg.mode === 'string' && ['duel', 'ffa'].includes(msg.mode)) {
+      room.mode = msg.mode;
+    }
     if (typeof msg.fillWithBots === 'boolean') room.fillWithBots = msg.fillWithBots;
     if (typeof msg.botCount === 'number') room.botCount = Math.max(0, Math.min(9, msg.botCount));
     if (typeof msg.botDifficulty === 'number' && msg.botDifficulty >= 1 && msg.botDifficulty <= 5) {
@@ -478,23 +477,19 @@ export class GameServer {
 
     if (desiredBots > 0) {
       const botNames = ['NinjaBot', 'Rex', 'Blaze', 'Valkyrie', 'Shadow', 'Punchy', 'Titan', 'Viper', 'Echo'];
-      const botColors = ['#E11D48', '#2563EB', '#059669', '#D97706', '#7C3AED', '#0891B2', '#DB2777', '#4F46E5', '#65A30D'];
-      const botHats = ['ninja', 'headband', 'horns', 'crown', 'cap', 'boxing', 'ribbon', 'cowboy'];
 
       for (let i = 0; i < desiredBots; i++) {
         const botId = `bot_${i + 1}`;
         const spawnIdx = (Object.keys(room.players).length) % arena.spawnPoints.length;
         const spawn = arena.spawnPoints[spawnIdx];
+        const botCust = generateRandomBotCustomization(botNames[i % botNames.length]);
 
         room.players[botId] = createInitialFighter(
           botId,
-          botNames[i % botNames.length],
-          i % 2 === 0 ? 'male' : 'female',
-          botColors[i % botColors.length],
-          botHats[i % botHats.length] as any,
-          spawn.x,
-          spawn.y,
-          true
+          botCust,
+          spawn.x as any,
+          spawn.y as any,
+          true as any
         );
       }
     }

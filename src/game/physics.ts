@@ -63,20 +63,57 @@ export function getRandomComicWord(isHeavy: boolean, blocked: boolean): string {
 
 export function createInitialFighter(
   id: string,
-  name: string,
-  gender: 'male' | 'female',
-  color: string,
-  hat: any,
-  x: number,
-  y: number,
-  isBot: boolean = false
+  nameOrCust: string | FighterCustomization,
+  genderArg?: 'male' | 'female',
+  colorArg?: string,
+  hatArg?: any,
+  xArg?: number,
+  yArg?: number,
+  isBotArg: boolean = false
 ): FighterState {
+  let cust: FighterCustomization;
+  let x: number;
+  let y: number;
+  let isBot: boolean;
+
+  if (typeof nameOrCust === 'object' && nameOrCust !== null) {
+    cust = nameOrCust;
+    x = (genderArg as any) ?? 300;
+    y = (colorArg as any) ?? 300;
+    isBot = !!hatArg;
+  } else {
+    cust = {
+      name: nameOrCust || (isBotArg ? `Bot-${id.slice(0, 4)}` : 'Fighter'),
+      gender: genderArg || 'male',
+      color: colorArg || '#FF5733',
+      hat: hatArg || 'none',
+    };
+    x = xArg ?? 300;
+    y = yArg ?? 300;
+    isBot = isBotArg;
+  }
+
   return {
     id,
-    name: name || (isBot ? `Bot-${id.slice(0, 4)}` : 'Fighter'),
-    gender: gender || 'male',
-    color: color || '#FF5733',
-    hat: hat || 'none',
+    name: cust.name || (isBot ? `Bot-${id.slice(0, 4)}` : 'Fighter'),
+    gender: cust.gender || 'male',
+    color: cust.color || '#FF5733',
+    secondaryColor: cust.secondaryColor,
+    accentColor: cust.accentColor,
+    skin: cust.skin || 'classic',
+    hair: cust.hair || 'none',
+    hairColor: cust.hairColor,
+    hat: cust.hat || 'none',
+    hatColor: cust.hatColor,
+    face: cust.face || 'none',
+    outfit: cust.outfit || 'none',
+    outfitColor: cust.outfitColor,
+    cape: cust.cape || 'none',
+    capeColor: cust.capeColor,
+    shoes: cust.shoes || 'none',
+    shoeColor: cust.shoeColor,
+    accessory: cust.accessory || 'none',
+    effect: cust.effect || 'none',
     x,
     y,
     vx: 0,
