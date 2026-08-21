@@ -1,5 +1,6 @@
 import { WebSocket } from 'ws';
 import { ARENAS } from '../src/game/arenas.js';
+import { validateAndSanitizeMap } from '../src/game/customMaps.js';
 import {
   checkAttackCollisions,
   checkWeaponPickups,
@@ -11,6 +12,7 @@ import {
 } from '../src/game/physics.js';
 import { generateRandomBotCustomization } from '../src/game/customizationCatalog.js';
 import {
+  Arena,
   ClientMessage,
   ComicPop,
   FighterCustomization,
@@ -219,7 +221,11 @@ export class GameServer {
           msg.fillWithBots,
           msg.maxPlayers,
           msg.botCount,
-          msg.roomName
+          msg.roomName,
+          msg.matchDuration,
+          msg.duelRoundsTotal,
+          msg.botDifficulty,
+          msg.customArena
         );
         break;
 
@@ -309,6 +315,13 @@ export class GameServer {
     return code;
   }
 
+  private getArenaForRoom(room: RoomState): Arena {
+    if (room.customArena && room.customArena.isCustom) {
+      return room.customArena;
+    }
+    return ARENAS[room.mapId] || ARENAS.park;
+  }
+
   private createRoom(
     client: ConnectedClient,
     playerCust: FighterCustomization,
@@ -320,16 +333,25 @@ export class GameServer {
     roomName?: string,
     matchDuration: number = 300,
     duelRoundsTotal: number = 5,
-    botDifficulty: any = 3
+    botDifficulty: any = 3,
+    customArenaPayload?: any
   ) {
     if (client.roomId) {
       this.leaveRoom(client);
     }
 
     const roomId = this.generateRoomCode();
-    const arena = ARENAS[mapId] || ARENAS.park;
-    const spawn = arena.spawnPoints[0] || { x: 400, y: 550 };
+    let arena: Arena;
+    let validatedCustomArena: Arena | undefined;
 
+    if (customArenaPayload && (customArenaPayload.isCustom || customArenaPayload.size === 'custom')) {
+      validatedCustomArena = validateAndSanitizeMap(customArenaPayload);
+      arena = validatedCustomArena;
+    } else {
+      arena = ARENAS[mapId] || ARENAS.park;
+    }
+
+    const spawn = arena.spawnPoints[0] || { x: 400, y: 550 };
     const enforcedMaxPlayers = Math.min(10, Math.max(1, maxPlayers || (mode === 'duel' ? 2 : 4)));
 
     client.customization = playerCust;
@@ -377,6 +399,7 @@ export class GameServer {
       botDifficulty: botDifficulty || 3,
       weaponSpawns: initialWeaponSpawns,
       projectiles: [],
+      customArena: validatedCustomArena,
     };
 
     this.rooms.set(roomId, room);
@@ -496,7 +519,7 @@ export class GameServer {
     }
     clientsSet.add(client);
 
-    const arena = ARENAS[room.mapId] || ARENAS.park;
+    const arena = this.getArenaForRoom(room);
     const spawnIdx = currentCount % arena.spawnPoints.length;
     const spawn = arena.spawnPoints[spawnIdx];
 
@@ -577,8 +600,21 @@ export class GameServer {
     const room = this.rooms.get(client.roomId);
     if (!room || room.hostId !== client.id || room.status !== 'lobby') return;
 
-    if (msg.mapId && ARENAS[msg.mapId]) {
+    if (msg.customArena && (msg.customArena.isCustom || msg.customArena.size === 'custom')) {
+      const sanitized = validateAndSanitizeMap(msg.customArena);
+      room.mapId = sanitized.id;
+      room.customArena = sanitized;
+      room.weaponSpawns = (sanitized.weaponSpawns || []).map((sp) => ({
+        id: sp.id,
+        weaponType: sp.weaponType,
+        x: sp.x,
+        y: sp.y,
+        isAvailable: true,
+        respawnTimer: 0,
+      }));
+    } else if (msg.mapId && ARENAS[msg.mapId]) {
       room.mapId = msg.mapId;
+      room.customArena = undefined;
       const arena = ARENAS[msg.mapId];
       room.weaponSpawns = (arena.weaponSpawns || []).map((sp) => ({
         id: sp.id,
@@ -630,7 +666,7 @@ export class GameServer {
       return;
     }
 
-    const arena = ARENAS[room.mapId] || ARENAS.park;
+    const arena = this.getArenaForRoom(room);
 
     // Reset Weapon Spawns & Projectiles
     room.weaponSpawns = (arena.weaponSpawns || []).map((sp) => ({
@@ -769,7 +805,7 @@ export class GameServer {
   }
 
   private tickRoomSimulation(room: RoomState, dt: number) {
-    const arena = ARENAS[room.mapId] || ARENAS.park;
+    const arena = this.getArenaForRoom(room);
     const fighters = Object.values(room.players);
 
     if (!room.weaponSpawns) room.weaponSpawns = [];

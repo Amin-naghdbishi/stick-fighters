@@ -13,6 +13,7 @@ import {
   Shield,
   Volume2,
   VolumeX,
+  Compass,
 } from 'lucide-react';
 import { BotDifficultyLevel, FighterCustomization, GameMode } from '../types/game';
 import { sound } from '../game/audio';
@@ -26,6 +27,7 @@ interface HomeScreenProps {
   onJoinRoom: (roomId: string) => void;
   onPracticeBots: (botCount?: number, botDifficulty?: BotDifficultyLevel) => void;
   onOpenCustomizer: () => void;
+  onOpenMapEditor: () => void;
   onOpenSettings: () => void;
 }
 
@@ -37,6 +39,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onJoinRoom,
   onPracticeBots,
   onOpenCustomizer,
+  onOpenMapEditor,
   onOpenSettings,
 }) => {
   const [showJoinModal, setShowJoinModal] = useState(false);
@@ -161,17 +164,32 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
 
-        <button
-          id="btn_home_customize"
-          onClick={() => {
-            sound.playJump();
-            onOpenCustomizer();
-          }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#FFD700] hover:bg-[#ffe234] text-black font-black text-sm rounded-xl border-3 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer"
-        >
-          <Palette className="w-4 h-4" />
-          <span>Customize 🎨</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            id="btn_home_map_editor_top"
+            onClick={() => {
+              sound.playJump();
+              onOpenMapEditor();
+            }}
+            className="flex items-center gap-2 px-3.5 py-2.5 bg-[#FDE047] hover:bg-[#ffe666] text-black font-black text-sm rounded-xl border-3 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer"
+            title="Create and edit custom maps"
+          >
+            <Compass className="w-4 h-4" />
+            <span>Map Editor 🗺️</span>
+          </button>
+
+          <button
+            id="btn_home_customize"
+            onClick={() => {
+              sound.playJump();
+              onOpenCustomizer();
+            }}
+            className="flex items-center gap-2 px-3.5 py-2.5 bg-[#FFD700] hover:bg-[#ffe234] text-black font-black text-sm rounded-xl border-3 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer"
+          >
+            <Palette className="w-4 h-4" />
+            <span>Customize 🎨</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Action Menu Grid */}
@@ -238,7 +256,30 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <span className="font-black text-base uppercase">Join with Code</span>
         </button>
 
-        {/* 5. Practice vs AI Bots (Instant Offline/Solo test) */}
+        {/* 5. Custom Map Editor (Main Feature Card) */}
+        <button
+          id="btn_home_map_editor"
+          onClick={() => {
+            sound.playJump();
+            onOpenMapEditor();
+          }}
+          className="sm:col-span-2 p-4 bg-gradient-to-r from-[#FDE047] via-[#F59E0B] to-[#FDE047] hover:brightness-105 text-black rounded-2xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer flex items-center justify-center gap-3 group"
+        >
+          <div className="p-2.5 bg-black text-[#FFD700] rounded-xl border-2 border-black group-hover:rotate-6 transition-transform shadow-xs">
+            <Compass className="w-6 h-6" />
+          </div>
+          <div className="text-left">
+            <div className="font-black text-lg uppercase tracking-tight text-black flex items-center gap-2">
+              <span>MAP EDITOR</span>
+              <span className="text-[10px] bg-black text-white px-2 py-0.5 rounded-full font-black">NEW 🗺️</span>
+            </div>
+            <div className="text-xs font-bold text-amber-950">
+              Build custom arenas, place platforms, scenery, and 1-hit kill Super Weapons!
+            </div>
+          </div>
+        </button>
+
+        {/* 6. Practice vs AI Bots (Instant Offline/Solo test) */}
         <button
           id="btn_practice_vs_bots"
           onClick={() => {

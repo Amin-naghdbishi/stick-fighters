@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
+  Arena,
   BotDifficultyLevel,
   FighterCustomization,
   GameMode,
@@ -17,6 +18,7 @@ import { CharacterStudio } from './components/CharacterStudio';
 import { LobbyScreen } from './components/LobbyScreen';
 import { GameCanvasView } from './components/GameCanvasView';
 import { SettingsModal } from './components/SettingsModal';
+import { MapEditor } from './components/MapEditor';
 
 const STORAGE_KEY = 'stick_fighters_player_v1';
 
@@ -28,8 +30,9 @@ const DEFAULT_CUSTOMIZATION: FighterCustomization = {
 };
 
 export default function App() {
-  const [view, setView] = useState<'home' | 'studio' | 'lobby' | 'game'>('home');
-  const [previousView, setPreviousView] = useState<'home' | 'lobby'>('home');
+  const [view, setView] = useState<'home' | 'studio' | 'editor' | 'lobby' | 'game'>('home');
+  const [previousView, setPreviousView] = useState<'home' | 'lobby' | 'editor'>('home');
+  const [editingMapId, setEditingMapId] = useState<string | undefined>(undefined);
   const [customization, setCustomization] = useState<FighterCustomization>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -74,11 +77,11 @@ export default function App() {
   };
 
   // Context-aware Background Music Track Transitions for the 3 distinct experiences:
-  // 1. Character Customization ('studio') -> Calm, relaxing, comfortable kalimba & ambient pad
+  // 1. Character Customization ('studio') & Map Editor ('editor') -> Calm, relaxing, comfortable kalimba & ambient pad
   // 2. Home / Main Menu ('home' | 'lobby') -> Heroic, inspiring adventure fanfare
   // 3. Battle / Gameplay ('game') -> Energetic, exciting combat action
   useEffect(() => {
-    if (view === 'studio') {
+    if (view === 'studio' || view === 'editor') {
       sound.playTrack('studio');
     } else if (view === 'game') {
       sound.playTrack('battle');
@@ -384,11 +387,26 @@ export default function App() {
     network.sendChat(message);
   };
 
+  const handleTestCustomMap = (arena: Arena) => {
+    setIsLocalMode(true);
+    setIsPreviewMode(true);
+    setPreviousView('editor');
+    setMyId('local_player');
+    const engine = new LocalGameEngine(customization, 'duel', arena.id, 0, 3, true, arena);
+    localEngineRef.current = engine;
+    setRoom(engine.room);
+    setView('game');
+  };
+
   const handleReturnFromGame = useCallback(() => {
     if (isPreviewMode) {
       localEngineRef.current = null;
       setIsPreviewMode(false);
-      if (previousView === 'lobby' && savedLobbyRoomRef.current) {
+      if (previousView === 'editor') {
+        setIsLocalMode(false);
+        setRoom(null);
+        setView('editor');
+      } else if (previousView === 'lobby' && savedLobbyRoomRef.current) {
         setRoom(savedLobbyRoomRef.current);
         setMyId(savedLobbyMyIdRef.current);
         setIsLocalMode(false);
@@ -443,6 +461,12 @@ export default function App() {
                   setPreviousView('home');
                   setView('studio');
                 }}
+                onOpenMapEditor={() => {
+                  sound.playJump();
+                  setPreviousView('home');
+                  setEditingMapId(undefined);
+                  setView('editor');
+                }}
                 onOpenSettings={() => setShowSettings(true)}
               />
             </motion.div>
@@ -458,7 +482,7 @@ export default function App() {
             >
               <CharacterStudio
                 customization={customization}
-                previousView={previousView}
+                previousView={previousView === 'editor' ? 'home' : previousView}
                 onSave={handleSaveCustomization}
                 onBack={() => {
                   if (previousView === 'lobby' && room) {
@@ -467,6 +491,29 @@ export default function App() {
                     setView('home');
                   }
                 }}
+              />
+            </motion.div>
+          )}
+
+          {view === 'editor' && (
+            <motion.div
+              key="editor"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-50 bg-[#0F172A]"
+            >
+              <MapEditor
+                initialMapId={editingMapId}
+                onExit={() => {
+                  if (previousView === 'lobby' && room) {
+                    setView('lobby');
+                  } else {
+                    setView('home');
+                  }
+                }}
+                onTestMap={handleTestCustomMap}
               />
             </motion.div>
           )}
@@ -526,7 +573,7 @@ export default function App() {
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
 
       {/* Comic Footer (Visible on Home, Studio, Lobby) */}
-      {view !== 'game' && (
+      {view !== 'game' && view !== 'editor' && (
         <footer className="relative z-10 text-center py-2 text-xs font-bold text-black flex flex-wrap items-center justify-between max-w-5xl w-full mx-auto px-4 gap-3">
           <div className="flex items-center space-x-2">
             <span className="bg-black text-white px-2 py-0.5 text-[11px] font-black uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">

@@ -1,15 +1,18 @@
 import { ARENAS } from './arenas';
+import { getCustomMapById } from './customMaps';
 import {
   checkAttackCollisions,
   checkWeaponPickups,
   createInitialFighter,
   fireFighterWeapon,
+  handleWeaponSwitch,
   updateBotAI,
   updateFighterPhysics,
   updateProjectiles,
 } from './physics';
 import {
   ActiveWeaponSpawn,
+  Arena,
   BotDifficultyLevel,
   ComicPop,
   FighterCustomization,
@@ -30,16 +33,27 @@ export class LocalGameEngine {
   public hits: { x: number; y: number; isHeavy: boolean; damage: number; targetId: string; attackerId: string; popText: string }[] = [];
   private lastTime: number = Date.now();
   private countdownTimer: number = 3;
+  private isPreview: boolean = false;
+
+  private getArena(): Arena {
+    if (this.room.customArena) {
+      return this.room.customArena;
+    }
+    return getCustomMapById(this.room.mapId) || ARENAS[this.room.mapId] || ARENAS.park;
+  }
 
   constructor(
     playerCust: FighterCustomization,
     mode: GameMode = 'duel',
     mapId: string = 'park',
     botCount: number = 1,
-    botDifficulty: BotDifficultyLevel = 3
+    botDifficulty: BotDifficultyLevel = 3,
+    isPreview: boolean = false,
+    customArena?: Arena
   ) {
-    const arena = ARENAS[mapId] || ARENAS.park;
-    const p1Spawn = arena.spawnPoints[0];
+    this.isPreview = isPreview;
+    const arena = customArena || getCustomMapById(mapId) || ARENAS[mapId] || ARENAS.park;
+    const p1Spawn = arena.spawnPoints[0] || { x: 400, y: 550 };
 
     const p1 = createInitialFighter(
       'local_player',
@@ -69,8 +83,9 @@ export class LocalGameEngine {
       );
     }
 
-    const isPreview = count === 0;
-    const defaultDuration = isPreview ? 0 : 300; // 5 mins default
+    const isSoloPreview = isPreview || count === 0;
+    this.isPreview = isSoloPreview;
+    const defaultDuration = isSoloPreview ? 0 : 300; // 5 mins default
 
     const initialWeaponSpawns: ActiveWeaponSpawn[] = (arena.weaponSpawns || []).map((sp) => ({
       id: sp.id,
@@ -83,13 +98,13 @@ export class LocalGameEngine {
 
     this.room = {
       roomId: 'local_practice',
-      roomName: isPreview ? 'Map Solo Exploration' : 'Practice Ring',
+      roomName: isSoloPreview ? 'Map Solo Exploration' : 'Practice Ring',
       mode,
       maxPlayers: Math.max(2, count + 1),
-      status: isPreview ? 'in_game' : 'countdown', // If solo map preview, start immediately without countdown
+      status: isSoloPreview ? 'in_game' : 'countdown', // If solo map preview, start immediately without countdown
       hostId: 'local_player',
       mapId,
-      countdown: isPreview ? 0 : 3,
+      countdown: isSoloPreview ? 0 : 3,
       roundTimer: defaultDuration > 0 ? defaultDuration : 999,
       matchDuration: defaultDuration,
       matchTimeRemaining: defaultDuration > 0 ? defaultDuration : 999,
@@ -106,6 +121,7 @@ export class LocalGameEngine {
       weaponSpawns: initialWeaponSpawns,
       projectiles: [],
       burningGround: [],
+      customArena: arena.isCustom ? arena : customArena,
     };
     if (isPreview) {
       this.countdownTimer = 0;
@@ -117,7 +133,7 @@ export class LocalGameEngine {
     const dt = Math.min(0.05, (now - this.lastTime) / 1000);
     this.lastTime = now;
 
-    const arena = ARENAS[this.room.mapId] || ARENAS.park;
+    const arena = this.getArena();
     const fighters = Object.values(this.room.players);
     const newHits: any[] = [];
 
@@ -460,7 +476,7 @@ export class LocalGameEngine {
   }
 
   public restart(playerCust: FighterCustomization) {
-    const arena = ARENAS[this.room.mapId] || ARENAS.park;
+    const arena = this.getArena();
     let idx = 0;
     for (const f of Object.values(this.room.players)) {
       const spawn = arena.spawnPoints[idx % arena.spawnPoints.length];

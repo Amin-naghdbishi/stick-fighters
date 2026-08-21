@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Arena, BotDifficultyLevel, FighterCustomization, FighterState, GameMode, RoomState } from '../types/game';
 import { ARENAS } from '../game/arenas';
+import { getCustomMapById } from '../game/customMaps';
 import { sound } from '../game/audio';
 import { BOT_DIFFICULTY_CONFIGS } from '../game/botDifficulty';
 import { MapSelectorModal } from './MapSelectorModal';
@@ -34,6 +35,7 @@ interface LobbyScreenProps {
   onStartGame: () => void;
   onUpdateSettings: (settings: {
     mapId?: string;
+    customArena?: Arena;
     mode?: GameMode;
     fillWithBots?: boolean;
     botCount?: number;
@@ -69,7 +71,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
   const isHost = room.hostId === myId;
   const me = room.players[myId];
   const isReady = me?.isReady ?? false;
-  const currentArena = ARENAS[room.mapId] || ARENAS.park;
+  const currentArena = room.customArena || getCustomMapById(room.mapId) || ARENAS[room.mapId] || ARENAS.park;
   const playersList: FighterState[] = Object.values(room.players) as FighterState[];
   const currentBotCount = typeof room.botCount === 'number' ? room.botCount : 0;
   const ownerPlayer = room.players[room.hostId];
@@ -871,7 +873,8 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
           currentMapId={room.mapId}
           isHost={isHost}
           onSelectMap={(mapId) => {
-            onUpdateSettings({ mapId });
+            const custom = getCustomMapById(mapId);
+            onUpdateSettings({ mapId, customArena: custom || undefined });
           }}
           onPreviewMap={(mapId) => {
             setShowMapModal(false);

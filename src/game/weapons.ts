@@ -458,3 +458,15 @@ export const ORDERED_WEAPON_KEYS: WeaponType[] = [
   'chrono_blaster',
 ];
 
+export const SUPER_WEAPONS: WeaponType[] = [
+  'thunder_sword',
+  'infinite_gun',
+  'inferno_cannon',
+  'plasma_vortex',
+  'solar_hammer',
+  'chrono_blaster',
+];
+
+export const ALL_WEAPON_CONFIGS: WeaponConfig[] = Object.values(WEAPONS_CONFIG);
+
+

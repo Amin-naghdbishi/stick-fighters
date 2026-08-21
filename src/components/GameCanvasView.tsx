@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { ComicPop, FighterState, Particle, PlayerInput, RoomState } from '../types/game';
 import { ARENAS } from '../game/arenas';
+import { getCustomMapById } from '../game/customMaps';
 import { GameRenderer } from '../game/renderer';
 import { sound } from '../game/audio';
 import { WEAPONS_CONFIG, WeaponType } from '../game/weapons';
@@ -486,7 +487,7 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
 
       const curRoom = roomRef.current;
       const curPops = comicPopsRef.current;
-      const arena = ARENAS[curRoom.mapId] || ARENAS.park;
+      const arena = curRoom.customArena || getCustomMapById(curRoom.mapId) || ARENAS[curRoom.mapId] || ARENAS.park;
       const rawFighters: FighterState[] = Object.values(curRoom.players) as FighterState[];
 
       // Network Smoothing & Interpolation (Removes Player Position Jitter & Stutter)
@@ -576,7 +577,7 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
   const fightersList: FighterState[] = Object.values(room.players) as FighterState[];
   const myFighter = room.players[myId];
   const winnerFighter = room.winnerId ? room.players[room.winnerId] : null;
-  const currentArena = ARENAS[room.mapId] || ARENAS.park;
+  const currentArena = room.customArena || getCustomMapById(room.mapId) || ARENAS[room.mapId] || ARENAS.park;
 
   const activeWeaponConfig = myFighter?.activeWeapon ? WEAPONS_CONFIG[myFighter.activeWeapon] : null;
   const activeAmmo = myFighter?.activeWeapon ? (myFighter.weapons[myFighter.activeWeapon] || 0) : 0;

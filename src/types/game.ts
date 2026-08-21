@@ -312,7 +312,41 @@ export type ArenaTheme =
   | 'mystery_crystal'
   | 'mystery_celestial'
   | 'mystery_chrono';
-export type MapSize = 'small' | 'medium' | 'large' | 'xlarge' | 'mystery';
+export type MapSize = 'small' | 'medium' | 'large' | 'xlarge' | 'mystery' | 'custom';
+
+export type DecorationType =
+  | 'tree'
+  | 'pine_tree'
+  | 'palm_tree'
+  | 'cloud'
+  | 'rock'
+  | 'torii_gate'
+  | 'ancient_column'
+  | 'crystal_cluster'
+  | 'lantern_post'
+  | 'gear'
+  | 'balloon'
+  | 'rect'
+  | 'circle'
+  | 'triangle'
+  | 'star';
+
+export interface CustomDecoration {
+  id: string;
+  type: DecorationType;
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  scale?: number;
+  rotation?: number;
+  color?: string;
+  color2?: string;
+  color3?: string;
+  layer?: 'background' | 'gameplay' | 'foreground';
+  flipH?: boolean;
+  flipV?: boolean;
+}
 
 export interface Arena {
   id: string;
@@ -327,6 +361,12 @@ export interface Arena {
   platforms: Platform[];
   bgColor: string;
   features?: string[];
+  decorations?: CustomDecoration[];
+  isCustom?: boolean;
+  author?: string;
+  createdAt?: number;
+  updatedAt?: number;
+  version?: number;
 }
 
 export interface ComicPop {
@@ -404,6 +444,7 @@ export interface RoomState {
   weaponSpawns?: ActiveWeaponSpawn[];
   projectiles?: ProjectileState[];
   burningGround?: BurningGroundState[];
+  customArena?: Arena;
 }
 
 export interface TickFighterDelta {
@@ -446,13 +487,13 @@ export interface TickSnapshot {
 
 // Client to Server Messages
 export type ClientMessage =
-  | { type: 'join_room'; roomId: string; player: FighterCustomization; sessionToken?: string; reconnectId?: string; mode?: GameMode; mapId?: string; fillWithBots?: boolean; botCount?: number; botDifficulty?: BotDifficultyLevel; matchDuration?: number; duelRoundsTotal?: number }
+  | { type: 'join_room'; roomId: string; player: FighterCustomization; sessionToken?: string; reconnectId?: string; mode?: GameMode; mapId?: string; customArena?: Arena; fillWithBots?: boolean; botCount?: number; botDifficulty?: BotDifficultyLevel; matchDuration?: number; duelRoundsTotal?: number }
   | { type: 'quick_match'; player: FighterCustomization; mode: GameMode }
-  | { type: 'create_room'; player: FighterCustomization; mode: GameMode; mapId: string; fillWithBots: boolean; maxPlayers: number; botCount?: number; botDifficulty?: BotDifficultyLevel; roomName?: string; matchDuration?: number; duelRoundsTotal?: number }
+  | { type: 'create_room'; player: FighterCustomization; mode: GameMode; mapId: string; customArena?: Arena; fillWithBots: boolean; maxPlayers: number; botCount?: number; botDifficulty?: BotDifficultyLevel; roomName?: string; matchDuration?: number; duelRoundsTotal?: number }
   | { type: 'leave_room' }
   | { type: 'set_ready'; isReady: boolean }
   | { type: 'update_customization'; customization: FighterCustomization }
-  | { type: 'update_room_settings'; mapId?: string; mode?: GameMode; fillWithBots?: boolean; botCount?: number; botDifficulty?: BotDifficultyLevel; maxPlayers?: number; matchDuration?: number; duelRoundsTotal?: number }
+  | { type: 'update_room_settings'; mapId?: string; customArena?: Arena; mode?: GameMode; fillWithBots?: boolean; botCount?: number; botDifficulty?: BotDifficultyLevel; maxPlayers?: number; matchDuration?: number; duelRoundsTotal?: number }
   | { type: 'start_game' }
   | { type: 'input'; input: PlayerInput }
   | { type: 'chat'; message: string }

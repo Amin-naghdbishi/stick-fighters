@@ -226,9 +226,11 @@ export class GameRenderer {
 
       // 1. Draw Arena Background & Scenery
       this.drawArenaBackdrop(arena, time);
+      this.drawCustomDecorations(arena, 'background', time);
 
       // 2. Draw Arena Platforms
       this.drawPlatforms(arena);
+      this.drawCustomDecorations(arena, 'gameplay', time);
 
       // 3. Draw Burning Ground Flames
       if (burningGround && burningGround.length > 0) {
@@ -249,7 +251,10 @@ export class GameRenderer {
         this.drawFighter(f, time);
       }
 
-      // 8. Draw Comic Pops ("POW!", "BAM!", "KABOOM!")
+      // 8. Draw Foreground Custom Decorations (in front of fighters)
+      this.drawCustomDecorations(arena, 'foreground', time);
+
+      // 9. Draw Comic Pops ("POW!", "BAM!", "KABOOM!")
       this.drawComicPops(comicPops);
     } finally {
       ctx.restore();
@@ -850,6 +855,111 @@ export class GameRenderer {
     }
 
     ctx.restore();
+  }
+
+  /**
+   * Draw custom decorations placed in the Map Editor on a specific layer
+   */
+  public drawCustomDecorations(
+    arena: Arena,
+    targetLayer: 'background' | 'gameplay' | 'foreground',
+    time: number
+  ) {
+    if (!arena.decorations || arena.decorations.length === 0) return;
+    const ctx = this.ctx;
+
+    for (const dec of arena.decorations) {
+      const layer = dec.layer || 'background';
+      if (layer !== targetLayer) continue;
+
+      const scale = dec.scale || 1.0;
+      const rotation = dec.rotation || 0;
+      const color = dec.color;
+
+      ctx.save();
+      ctx.translate(dec.x, dec.y);
+      if (rotation !== 0) ctx.rotate(rotation);
+      if (dec.flipH || dec.flipV) {
+        ctx.scale(dec.flipH ? -1 : 1, dec.flipV ? -1 : 1);
+      }
+
+      switch (dec.type) {
+        case 'tree':
+          this.drawCartoonTree(0, 0, 55 * scale);
+          break;
+        case 'pine_tree':
+          this.drawPineTree(0, 0, 90 * scale, color || '#15803D');
+          break;
+        case 'palm_tree':
+          this.drawPalmTree(0, 0, 60 * scale, time);
+          break;
+        case 'cloud':
+          this.drawComicCloud(0, 0, 65 * scale, color || '#FFFFFF', dec.color2 || '#334155');
+          break;
+        case 'rock':
+          this.drawFloatingMiniRock(0, 0, 60 * scale, time);
+          break;
+        case 'torii_gate':
+          this.drawToriiGate(0, 0, 160 * scale, 220 * scale);
+          break;
+        case 'ancient_column':
+          this.drawAncientColumn(0, 0, 44 * scale, 200 * scale, color || '#E2E8F0');
+          break;
+        case 'crystal_cluster':
+          this.drawCrystalCluster(0, 0, 55 * scale, color || '#38BDF8', time);
+          break;
+        case 'lantern_post':
+          this.drawLanternPost(0, 0, time);
+          break;
+        case 'gear':
+          this.drawClockworkGear(0, 0, 50 * scale, 10, color || '#D97706', 0.001, time);
+          break;
+        case 'balloon':
+          this.drawHotAirBalloon(0, 0, 50 * scale, time, color || '#FF4081', dec.color2 || '#FFD54F');
+          break;
+        case 'rect': {
+          const w = (dec.width || 100) * scale;
+          const h = (dec.height || 60) * scale;
+          ctx.fillStyle = color || '#3B82F6';
+          ctx.strokeStyle = dec.color2 || '#1E293B';
+          ctx.lineWidth = 3;
+          ctx.fillRect(-w / 2, -h / 2, w, h);
+          ctx.strokeRect(-w / 2, -h / 2, w, h);
+          break;
+        }
+        case 'circle': {
+          const r = ((dec.width || 60) / 2) * scale;
+          ctx.fillStyle = color || '#EC4899';
+          ctx.strokeStyle = dec.color2 || '#1E293B';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          break;
+        }
+        case 'triangle': {
+          const size = (dec.width || 70) * scale;
+          ctx.fillStyle = color || '#F59E0B';
+          ctx.strokeStyle = dec.color2 || '#1E293B';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(0, -size / 2);
+          ctx.lineTo(size / 2, size / 2);
+          ctx.lineTo(-size / 2, size / 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          break;
+        }
+        case 'star': {
+          this.drawStarburst(ctx, 0, 0, 36 * scale, 18 * scale, 5, color || '#FDE047');
+          break;
+        }
+      }
+
+      ctx.restore();
+    }
   }
 
   /**

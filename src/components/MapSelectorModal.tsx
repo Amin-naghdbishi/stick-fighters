@@ -12,6 +12,7 @@ import {
   Search,
 } from 'lucide-react';
 import { ARENAS } from '../game/arenas';
+import { getCustomMaps } from '../game/customMaps';
 import { Arena, MapSize } from '../types/game';
 import { sound } from '../game/audio';
 
@@ -20,6 +21,7 @@ interface MapSelectorModalProps {
   isHost: boolean;
   onSelectMap: (mapId: string) => void;
   onPreviewMap: (mapId: string) => void;
+  onOpenEditor?: (mapId?: string) => void;
   onClose: () => void;
 }
 
@@ -28,11 +30,19 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
   isHost,
   onSelectMap,
   onPreviewMap,
+  onOpenEditor,
   onClose,
 }) => {
   const [selectedId, setSelectedId] = useState<string>(currentMapId);
   const [sizeFilter, setSizeFilter] = useState<'all' | MapSize>('all');
   const lastClickTimeRef = useRef<{ [key: string]: number }>({});
+
+  const customMaps = getCustomMaps();
+  const allArenas = [...Object.values(ARENAS), ...customMaps];
+  const filteredArenas = allArenas.filter((a) => {
+    if (sizeFilter === 'all') return true;
+    return a.size === sizeFilter;
+  });
 
   const handleCardClick = (arenaId: string) => {
     const now = Date.now();
@@ -60,12 +70,6 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
     sound.playCountdownBeep(true);
     onPreviewMap(arenaId);
   };
-
-  const allArenas = Object.values(ARENAS);
-  const filteredArenas = allArenas.filter((a) => {
-    if (sizeFilter === 'all') return true;
-    return a.size === sizeFilter;
-  });
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
@@ -112,6 +116,7 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
               { id: 'large', label: 'Large' },
               { id: 'xlarge', label: '⭐ Extra Large (XL)' },
               { id: 'mystery', label: '🌌 Mystery Maps ⚡' },
+              { id: 'custom', label: `🎨 Custom (${customMaps.length})` },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -138,6 +143,8 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
               const isSelected = selectedId === arena.id;
               const isMystery = arena.size === 'mystery';
 
+              const isCustom = arena.isCustom;
+
               return (
                 <div
                   key={arena.id}
@@ -147,9 +154,13 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
                     isSelected
                       ? isMystery
                         ? 'bg-gradient-to-br from-indigo-50 to-purple-50 ring-4 ring-purple-600 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
+                        : isCustom
+                        ? 'bg-gradient-to-br from-emerald-50 to-teal-50 ring-4 ring-emerald-500 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
                         : 'bg-white ring-4 ring-[#FFD700] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
                       : isMystery
                       ? 'bg-gradient-to-br from-purple-50/90 to-indigo-50/90 hover:from-purple-100 hover:to-indigo-100 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-purple-900'
+                      : isCustom
+                      ? 'bg-gradient-to-br from-emerald-50/90 to-teal-50/90 hover:from-emerald-100 hover:to-teal-100 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-emerald-800'
                       : 'bg-white/90 hover:bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]'
                   }`}
                 >
@@ -162,7 +173,9 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
                         </h3>
                         <span
                           className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md border border-black shadow-xs ${
-                            arena.size === 'small'
+                            arena.isCustom
+                              ? 'bg-emerald-400 text-black font-black'
+                              : arena.size === 'small'
                               ? 'bg-amber-200 text-amber-900'
                               : arena.size === 'medium'
                               ? 'bg-sky-200 text-sky-900'
@@ -173,7 +186,7 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
                               : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md font-black animate-pulse'
                           }`}
                         >
-                          {arena.size === 'xlarge' ? 'EXTRA LARGE (XL)' : arena.size === 'mystery' ? '🌌 MYSTERY MAP' : arena.size}
+                          {arena.isCustom ? '🎨 CUSTOM MAP' : arena.size === 'xlarge' ? 'EXTRA LARGE (XL)' : arena.size === 'mystery' ? '🌌 MYSTERY MAP' : arena.size}
                         </span>
                       </div>
                       <p className="text-xs font-bold text-slate-600 mt-1 leading-snug">
@@ -215,14 +228,30 @@ export const MapSelectorModal: React.FC<MapSelectorModalProps> = ({
                       💡 Double-click to explore
                     </span>
 
-                    <button
-                      id={`btn_preview_${arena.id}`}
-                      onClick={(e) => handlePreviewDirect(e, arena.id)}
-                      className="px-3.5 py-1.5 bg-[#3498DB] hover:bg-sky-400 text-white font-black text-xs rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Maximize2 className="w-3.5 h-3.5" />
-                      <span>Explore Solo 🧭</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {isCustom && onOpenEditor && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            sound.playJump();
+                            onClose();
+                            onOpenEditor(arena.id);
+                          }}
+                          className="px-3 py-1.5 bg-[#F59E0B] hover:bg-amber-400 text-black font-black text-xs rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer flex items-center gap-1"
+                        >
+                          <span>Edit ✏️</span>
+                        </button>
+                      )}
+
+                      <button
+                        id={`btn_preview_${arena.id}`}
+                        onClick={(e) => handlePreviewDirect(e, arena.id)}
+                        className="px-3.5 py-1.5 bg-[#3498DB] hover:bg-sky-400 text-white font-black text-xs rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Maximize2 className="w-3.5 h-3.5" />
+                        <span>Explore Solo 🧭</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
