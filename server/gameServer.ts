@@ -28,15 +28,26 @@ interface ConnectedClient {
   customization: FighterCustomization;
   input: PlayerInput;
   lastPing: number;
+  packetCountWindow: number;
+  packetWindowResetTime: number;
+}
+
+interface ReconnectSession {
+  clientId: string;
+  roomId: string;
+  customization: FighterCustomization;
+  timeout: NodeJS.Timeout;
 }
 
 export class GameServer {
   private clients: Map<string, ConnectedClient> = new Map();
   private rooms: Map<string, RoomState> = new Map();
+  private roomClients: Map<string, Set<ConnectedClient>> = new Map();
   private roomLoops: Map<string, any> = new Map();
+  private reconnectSessions: Map<string, ReconnectSession> = new Map();
 
   constructor() {
-    // Initial cleanup interval
+    // Regular cleanup for dead rooms & inactive sessions
     setInterval(() => this.cleanupDeadRooms(), 15000);
   }
 
@@ -66,6 +77,8 @@ export class GameServer {
       },
       input: defaultInput,
       lastPing: Date.now(),
+      packetCountWindow: 0,
+      packetWindowResetTime: Date.now(),
     };
 
     this.clients.set(clientId, client);
@@ -75,7 +88,7 @@ export class GameServer {
         const msg = JSON.parse(data.toString()) as ClientMessage;
         this.handleClientMessage(client, msg);
       } catch (err) {
-        console.error('Failed to parse client message:', err);
+        // Silently swallow malformed JSON
       }
     });
 
@@ -84,18 +97,97 @@ export class GameServer {
     });
 
     ws.on('error', (err) => {
-      console.error(`Socket error on client ${clientId}:`, err);
+      console.error(`Socket error on client ${client.id}:`, err);
     });
   }
 
   private handleDisconnect(client: ConnectedClient) {
-    if (client.roomId) {
+    const roomId = client.roomId;
+    if (!roomId) {
+      this.clients.delete(client.id);
+      return;
+    }
+
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      this.clients.delete(client.id);
+      return;
+    }
+
+    // Direct Room Client Indexing: Remove client socket from room's active socket set
+    const clientsSet = this.roomClients.get(roomId);
+    if (clientsSet) {
+      clientsSet.delete(client);
+    }
+
+    const fighter = room.players[client.id];
+
+    // If match is active or in lobby, start 15-second Reconnection Window
+    if (fighter && (room.status === 'in_game' || room.status === 'countdown' || room.status === 'lobby')) {
+      fighter.isDisconnected = true;
+      fighter.reconnectTimer = 15.0;
+
+      // Clear any existing reconnect session timer for this client ID
+      if (this.reconnectSessions.has(client.id)) {
+        clearTimeout(this.reconnectSessions.get(client.id)!.timeout);
+      }
+
+      const timeout = setTimeout(() => {
+        this.expireReconnectSession(client.id, roomId);
+      }, 15000);
+
+      this.reconnectSessions.set(client.id, {
+        clientId: client.id,
+        roomId,
+        customization: client.customization,
+        timeout,
+      });
+
+      this.broadcastRoom(room);
+    } else {
       this.leaveRoom(client);
     }
+
     this.clients.delete(client.id);
   }
 
+  private expireReconnectSession(clientId: string, roomId: string) {
+    this.reconnectSessions.delete(clientId);
+
+    const room = this.rooms.get(roomId);
+    if (room && room.players[clientId]) {
+      delete room.players[clientId];
+      const remainingHumanIds = Object.keys(room.players).filter(
+        (id) => !room.players[id].isBot && this.clients.has(id)
+      );
+
+      if (remainingHumanIds.length === 0) {
+        this.stopRoomLoop(roomId);
+        this.rooms.delete(roomId);
+        this.roomClients.delete(roomId);
+      } else {
+        if (room.hostId === clientId) {
+          room.hostId = remainingHumanIds[0];
+        }
+        this.broadcastRoom(room);
+      }
+    }
+  }
+
   private handleClientMessage(client: ConnectedClient, msg: ClientMessage) {
+    // 3. Client Input Validation & Rate Limiting
+    const now = Date.now();
+    if (now - client.packetWindowResetTime > 1000) {
+      client.packetWindowResetTime = now;
+      client.packetCountWindow = 0;
+    }
+    client.packetCountWindow++;
+
+    // Max 65 packets/sec per socket
+    if (client.packetCountWindow > 65 && msg.type === 'input') {
+      return; // Reject excessive packet flooding
+    }
+
     switch (msg.type) {
       case 'ping':
         this.send(client, { type: 'pong', timestamp: msg.timestamp, serverTime: Date.now() });
@@ -115,7 +207,7 @@ export class GameServer {
         break;
 
       case 'join_room':
-        this.joinRoom(client, msg.roomId, msg.player, msg.mode, msg.mapId, msg.fillWithBots, msg.botCount);
+        this.joinRoom(client, msg.roomId, msg.player, (msg as any).reconnectId);
         break;
 
       case 'quick_match':
@@ -143,8 +235,31 @@ export class GameServer {
         break;
 
       case 'input':
-        if (msg.input) {
-          client.input = msg.input;
+        if (msg.input && typeof msg.input === 'object') {
+          const raw = msg.input;
+          let aimAngle = typeof raw.aimAngle === 'number' && isFinite(raw.aimAngle) ? raw.aimAngle : 0;
+
+          // Normalize angle to [-PI, PI]
+          while (aimAngle > Math.PI) aimAngle -= Math.PI * 2;
+          while (aimAngle < -Math.PI) aimAngle += Math.PI * 2;
+
+          const validSwitch =
+            typeof raw.switchWeapon === 'string' && raw.switchWeapon.length < 35
+              ? (raw.switchWeapon as any)
+              : undefined;
+
+          client.input = {
+            left: Boolean(raw.left),
+            right: Boolean(raw.right),
+            up: Boolean(raw.up),
+            down: Boolean(raw.down),
+            fastAttack: Boolean(raw.fastAttack),
+            heavyAttack: Boolean(raw.heavyAttack),
+            block: Boolean(raw.block),
+            fire: Boolean(raw.fire),
+            aimAngle,
+            switchWeapon: validSwitch,
+          };
         }
         break;
 
@@ -245,6 +360,7 @@ export class GameServer {
     };
 
     this.rooms.set(roomId, room);
+    this.roomClients.set(roomId, new Set([client]));
     client.roomId = roomId;
 
     this.send(client, { type: 'room_joined', room, yourId: client.id });
@@ -280,10 +396,7 @@ export class GameServer {
     client: ConnectedClient,
     rawRoomCode: string,
     playerCust: FighterCustomization,
-    modeFallback?: GameMode,
-    mapFallback?: string,
-    botFillFallback?: boolean,
-    botCountFallback?: number
+    reconnectId?: string
   ) {
     if (!rawRoomCode || !rawRoomCode.trim()) {
       this.send(client, { type: 'error', message: 'Invalid Room Code' });
@@ -307,6 +420,39 @@ export class GameServer {
       return;
     }
 
+    // 5. Server Reconnection Window: Check if client is reconnecting to existing session
+    if (reconnectId && this.reconnectSessions.has(reconnectId)) {
+      const session = this.reconnectSessions.get(reconnectId)!;
+      if (session.roomId === room.roomId && room.players[reconnectId]) {
+        clearTimeout(session.timeout);
+        this.reconnectSessions.delete(reconnectId);
+
+        // Re-bind client ID to existing player slot
+        const oldId = client.id;
+        this.clients.delete(oldId);
+
+        client.id = reconnectId;
+        client.roomId = room.roomId;
+        client.customization = playerCust;
+        this.clients.set(reconnectId, client);
+
+        const fighter = room.players[reconnectId];
+        fighter.isDisconnected = false;
+        fighter.reconnectTimer = 0;
+
+        let clientsSet = this.roomClients.get(room.roomId);
+        if (!clientsSet) {
+          clientsSet = new Set();
+          this.roomClients.set(room.roomId, clientsSet);
+        }
+        clientsSet.add(client);
+
+        this.send(client, { type: 'room_joined', room, yourId: client.id });
+        this.broadcastRoom(room);
+        return;
+      }
+    }
+
     if (client.roomId) {
       this.leaveRoom(client);
     }
@@ -319,6 +465,13 @@ export class GameServer {
 
     client.customization = playerCust;
     client.roomId = room.roomId;
+
+    let clientsSet = this.roomClients.get(room.roomId);
+    if (!clientsSet) {
+      clientsSet = new Set();
+      this.roomClients.set(room.roomId, clientsSet);
+    }
+    clientsSet.add(client);
 
     const arena = ARENAS[room.mapId] || ARENAS.park;
     const spawnIdx = currentCount % arena.spawnPoints.length;
@@ -344,13 +497,21 @@ export class GameServer {
     const roomId = client.roomId;
     client.roomId = null;
 
+    const clientsSet = this.roomClients.get(roomId);
+    if (clientsSet) {
+      clientsSet.delete(client);
+    }
+
     if (room) {
       delete room.players[client.id];
-      const remainingHumanIds = Object.keys(room.players).filter((id) => !room.players[id].isBot && this.clients.has(id));
+      const remainingHumanIds = Object.keys(room.players).filter(
+        (id) => !room.players[id].isBot && this.clients.has(id)
+      );
 
       if (remainingHumanIds.length === 0) {
         this.stopRoomLoop(roomId);
         this.rooms.delete(roomId);
+        this.roomClients.delete(roomId);
       } else {
         if (room.hostId === client.id) {
           room.hostId = remainingHumanIds[0];
@@ -406,13 +567,13 @@ export class GameServer {
       room.botDifficulty = msg.botDifficulty;
     }
     if (typeof msg.maxPlayers === 'number') room.maxPlayers = Math.min(10, Math.max(1, msg.maxPlayers));
-    
+
     if (typeof msg.matchDuration === 'number' && msg.matchDuration >= 0 && msg.matchDuration <= 7200) {
       room.matchDuration = Math.round(msg.matchDuration);
       room.matchTimeRemaining = room.matchDuration > 0 ? room.matchDuration : 999;
       room.roundTimer = room.matchTimeRemaining;
     }
-    
+
     if (typeof msg.duelRoundsTotal === 'number' && msg.duelRoundsTotal >= 1 && msg.duelRoundsTotal <= 100) {
       room.duelRoundsTotal = Math.round(msg.duelRoundsTotal);
     }
@@ -568,6 +729,7 @@ export class GameServer {
     let lastTick = Date.now();
     let countdownTimer = 3;
 
+    // 30Hz Simulation & Tick Loop (~33.3ms)
     const interval = setInterval(() => {
       const now = Date.now();
       const dt = Math.min(0.05, (now - lastTick) / 1000);
@@ -593,6 +755,16 @@ export class GameServer {
           room.roundTimer = room.matchTimeRemaining;
         } else {
           room.roundTimer = 999;
+        }
+
+        // Handle Reconnection Timers for Disconnected Players
+        for (const f of fighters) {
+          if (f.isDisconnected && typeof f.reconnectTimer === 'number') {
+            f.reconnectTimer -= dt;
+            if (f.reconnectTimer <= 0) {
+              this.expireReconnectSession(f.id, room.roomId);
+            }
+          }
         }
 
         // 1. Update Weapon Spawns Respawn Timers
@@ -662,7 +834,7 @@ export class GameServer {
           }
         }
 
-        // 4. Update Projectiles & Check Collisions
+        // 4. Update Projectiles & Check Collisions with Spatial Grid
         const projResult = updateProjectiles(room.projectiles, fighters, arena, dt);
         room.projectiles = projResult.activeProjectiles;
 
@@ -700,23 +872,8 @@ export class GameServer {
         // 5. Check Melee Attack Collisions
         const meleeHits = checkAttackCollisions(fighters, arena);
         const allHits = [...meleeHits, ...projResult.hits, ...extraHits];
-        const pops: ComicPop[] = [];
 
         for (const hit of allHits) {
-          const pop: ComicPop = {
-            id: 'pop_' + Math.random().toString(36).substring(2, 7),
-            text: hit.popText,
-            x: hit.x,
-            y: hit.y,
-            color: hit.blocked ? '#38BDF8' : hit.isHeavy ? '#EF4444' : '#F59E0B',
-            bgHex: hit.blocked ? '#FFFFFF' : '#FEF08A',
-            size: hit.isHeavy ? 28 : 22,
-            rotation: (Math.random() - 0.5) * 0.4,
-            createdAt: now,
-            duration: 700,
-          };
-          pops.push(pop);
-
           this.broadcastToRoom(room.roomId, {
             type: 'hit_event',
             attackerId: hit.attackerId,
@@ -741,9 +898,9 @@ export class GameServer {
             if (f.lastAttackerId && room.players[f.lastAttackerId] && f.lastAttackerId !== f.id) {
               const killer = room.players[f.lastAttackerId];
               killer.kills += 1;
-              killer.score = (killer.kills * 2) - killer.deaths;
+              killer.score = killer.kills * 2 - killer.deaths;
             }
-            f.score = (f.kills * 2) - f.deaths;
+            f.score = f.kills * 2 - f.deaths;
             f.lastAttackerId = null;
           }
         }
@@ -791,7 +948,10 @@ export class GameServer {
           if (room.matchDuration > 0 && room.matchTimeRemaining <= 0) {
             room.status = 'round_end';
             const sorted = Object.values(room.players).sort(
-              (a, b) => (b.score || 0) - (a.score || 0) || (b.kills || 0) - (a.kills || 0) || (a.deaths || 0) - (b.deaths || 0)
+              (a, b) =>
+                (b.score || 0) - (a.score || 0) ||
+                (b.kills || 0) - (a.kills || 0) ||
+                (a.deaths || 0) - (b.deaths || 0)
             );
             room.winnerId = sorted[0]?.id || null;
             room.finalLeaderboard = sorted.map((p, idx) => ({
@@ -814,7 +974,9 @@ export class GameServer {
         } else {
           // Duel Mode
           const livingFighters = fighters.filter((f) => !f.isDead);
-          const roundEnded = (fighters.length >= 2 && livingFighters.length <= 1) || (room.matchDuration > 0 && room.matchTimeRemaining <= 0);
+          const roundEnded =
+            (fighters.length >= 2 && livingFighters.length <= 1) ||
+            (room.matchDuration > 0 && room.matchTimeRemaining <= 0);
 
           if (roundEnded) {
             const roundWinner = livingFighters[0] || fighters.slice().sort((a, b) => b.hp - a.hp)[0] || null;
@@ -869,7 +1031,10 @@ export class GameServer {
             } else {
               room.status = 'round_end';
               const sorted = Object.values(room.players).sort(
-                (a, b) => (b.score || 0) - (a.score || 0) || (b.kills || 0) - (a.kills || 0) || (a.deaths || 0) - (b.deaths || 0)
+                (a, b) =>
+                  (b.score || 0) - (a.score || 0) ||
+                  (b.kills || 0) - (a.kills || 0) ||
+                  (a.deaths || 0) - (b.deaths || 0)
               );
               room.winnerId = sorted[0]?.id || null;
               room.finalLeaderboard = sorted.map((p, idx) => ({
@@ -893,12 +1058,39 @@ export class GameServer {
         }
       }
 
-      // Broadcast game tick at ~45hz
+      // 2. Delta / Lightweight Snapshots: Broadcast high-frequency snapshot
+      const tickSnapshot: RoomState = {
+        roomId: room.roomId,
+        roomName: room.roomName,
+        mode: room.mode,
+        maxPlayers: room.maxPlayers,
+        status: room.status,
+        hostId: room.hostId,
+        mapId: room.mapId,
+        countdown: room.countdown,
+        roundTimer: room.roundTimer,
+        matchDuration: room.matchDuration,
+        matchTimeRemaining: room.matchTimeRemaining,
+        duelRoundsTotal: room.duelRoundsTotal,
+        currentDuelRound: room.currentDuelRound,
+        duelRoundWinner: room.duelRoundWinner,
+        duelRoundHistory: room.duelRoundHistory,
+        finalLeaderboard: room.finalLeaderboard,
+        winnerId: room.winnerId,
+        players: room.players,
+        fillWithBots: room.fillWithBots,
+        botCount: room.botCount,
+        botDifficulty: room.botDifficulty,
+        weaponSpawns: room.weaponSpawns,
+        projectiles: room.projectiles,
+        burningGround: room.burningGround,
+      };
+
       this.broadcastToRoom(room.roomId, {
         type: 'game_tick',
-        room,
+        room: tickSnapshot,
       });
-    }, 1000 / 45);
+    }, 1000 / 30); // 30Hz physics & network tick
 
     this.roomLoops.set(room.roomId, interval);
   }
@@ -934,10 +1126,14 @@ export class GameServer {
     this.broadcastToRoom(room.roomId, { type: 'room_state', room });
   }
 
+  // 1. Direct Room WebSocket Client Indexing: O(clients in room) complexity
   private broadcastToRoom(roomId: string, msg: ServerMessage) {
+    const clients = this.roomClients.get(roomId);
+    if (!clients || clients.size === 0) return;
+
     const payload = JSON.stringify(msg);
-    for (const client of this.clients.values()) {
-      if (client.roomId === roomId && client.ws.readyState === WebSocket.OPEN) {
+    for (const client of clients) {
+      if (client.ws.readyState === WebSocket.OPEN) {
         client.ws.send(payload);
       }
     }
@@ -945,10 +1141,13 @@ export class GameServer {
 
   private cleanupDeadRooms() {
     for (const [roomId, room] of this.rooms.entries()) {
-      const activePlayers = Object.keys(room.players).filter((id) => this.clients.has(id));
-      if (activePlayers.length === 0) {
+      const activeHumanPlayers = Object.keys(room.players).filter(
+        (id) => !room.players[id].isBot && this.clients.has(id)
+      );
+      if (activeHumanPlayers.length === 0) {
         this.stopRoomLoop(roomId);
         this.rooms.delete(roomId);
+        this.roomClients.delete(roomId);
       }
     }
   }

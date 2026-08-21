@@ -708,6 +708,59 @@ export function fireFighterWeapon(
   return true;
 }
 
+export class SpatialGrid<T extends { x: number; y: number }> {
+  private cellSize: number;
+  private cells: Map<string, T[]> = new Map();
+
+  constructor(cellSize: number = 200) {
+    this.cellSize = cellSize;
+  }
+
+  public clear() {
+    this.cells.clear();
+  }
+
+  public insert(entity: T, width: number = FIGHTER_WIDTH, height: number = FIGHTER_HEIGHT) {
+    const minCellX = Math.floor((entity.x - width / 2) / this.cellSize);
+    const maxCellX = Math.floor((entity.x + width / 2) / this.cellSize);
+    const minCellY = Math.floor((entity.y - height) / this.cellSize);
+    const maxCellY = Math.floor(entity.y / this.cellSize);
+
+    for (let cx = minCellX; cx <= maxCellX; cx++) {
+      for (let cy = minCellY; cy <= maxCellY; cy++) {
+        const key = `${cx}_${cy}`;
+        let list = this.cells.get(key);
+        if (!list) {
+          list = [];
+          this.cells.set(key, list);
+        }
+        list.push(entity);
+      }
+    }
+  }
+
+  public getNearby(x1: number, y1: number, x2: number, y2: number): T[] {
+    const minCellX = Math.floor(Math.min(x1, x2) / this.cellSize);
+    const maxCellX = Math.floor(Math.max(x1, x2) / this.cellSize);
+    const minCellY = Math.floor(Math.min(y1, y2) / this.cellSize);
+    const maxCellY = Math.floor(Math.max(y1, y2) / this.cellSize);
+
+    const candidates = new Set<T>();
+    for (let cx = minCellX; cx <= maxCellX; cx++) {
+      for (let cy = minCellY; cy <= maxCellY; cy++) {
+        const key = `${cx}_${cy}`;
+        const list = this.cells.get(key);
+        if (list) {
+          for (const item of list) {
+            candidates.add(item);
+          }
+        }
+      }
+    }
+    return Array.from(candidates);
+  }
+}
+
 /**
  * Update active projectiles, resolve collisions with platforms and fighters
  */
@@ -726,6 +779,18 @@ export function updateProjectiles(
   const hits: HitResult[] = [];
   const explosions: { x: number; y: number; radius: number; color: string }[] = [];
   const burningGround: BurningGroundState[] = [];
+
+  // Use spatial partitioning if projectile count is larger or arena is large/mystery
+  const useSpatialGrid = projectiles.length > 6 || arena.width > 2000;
+  let spatialGrid: SpatialGrid<FighterState> | null = null;
+  if (useSpatialGrid) {
+    spatialGrid = new SpatialGrid<FighterState>(220);
+    for (const f of fighters) {
+      if (!f.isDead && f.invincibleTimer <= 0) {
+        spatialGrid.insert(f);
+      }
+    }
+  }
 
   for (const p of projectiles) {
     p.life -= dt;
@@ -776,9 +841,13 @@ export function updateProjectiles(
       continue; // Projectile destroyed
     }
 
-    // Check fighter collision using continuous ray segment
+    // Check fighter collision using spatial grid or direct candidate list
     let hitFighter: FighterState | null = null;
-    for (const f of fighters) {
+    const candidateFighters = spatialGrid
+      ? spatialGrid.getNearby(prevX, prevY, p.x, p.y)
+      : fighters;
+
+    for (const f of candidateFighters) {
       if (f.id === p.shooterId || f.isDead || f.invincibleTimer > 0) continue;
 
       const fLeft = f.x - FIGHTER_WIDTH / 2;

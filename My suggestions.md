@@ -2,43 +2,37 @@
 
 ## Critical Improvements
 
-- **WebSocket Direct Room Indexing**:
-  - *Recommendation*: Store an active client set (`Set<ConnectedClient>`) inside room objects on the server.
-  - *Rationale*: Broadcasting physics state tick snapshots by iterating through all global connected clients across the entire server creates an \(O(N_{\text{total}} \times K_{\text{room}})\) bottleneck. Direct room client indexing reduces iteration complexity to \(O(K_{\text{room}})\), preventing event loop stalls at scale (50+ rooms, 500+ clients).
+- **WebSocket Direct Room Indexing**: `[IMPLEMENTED]`
+  - *Details*: Each room maintains a `Set<ConnectedClient>` in `roomClients`. Room broadcasts now iterate only through socket connections belonging to that specific room ($O(K_{\text{room}})$ complexity instead of $O(N_{\text{total}})$ server scan across 500+ clients).
   - *Priority*: **CRITICAL**
 
-- **Delta Snapshot Compression**:
-  - *Recommendation*: Separate static metadata (map configuration, player cosmetic catalogs, duel round history) from high-frequency (30Hz) physics snapshots.
-  - *Rationale*: Transmitting full room configuration objects on every 33ms server tick wastes over 80% of WebSocket bandwidth. A lightweight snapshot payload containing only position, velocity, action state, health, active weapon, and projectiles reduces per-client bandwidth from ~3.5 KB/s to ~0.4 KB/s.
+- **Delta Snapshot Compression**: `[IMPLEMENTED]`
+  - *Details*: High-frequency (30Hz) physics tick payloads send compact dynamic state (`players`, `projectiles`, `weaponSpawns`, `burningGround`, `matchTimeRemaining`, `roundTimer`, `status`, `countdown`, `winnerId`) while static arena layouts and metadata are transmitted only on state transitions.
   - *Priority*: **CRITICAL**
 
 ---
 
 ## Multiplayer Improvements
 
-- **Client-Side Input Rate Limiting & Validation**:
-  - *Recommendation*: Validate input payloads on the server to ensure `aimAngle` is a finite number between \(-\pi\) and \(\pi\), clamp movement flags to booleans, and enforce a maximum input packet rate of 60 packets/sec per socket connection.
-  - *Rationale*: Prevents malicious or malformed client messages (e.g. sending `NaN` aim angles or packet flooding) from throwing server exceptions or causing state desynchronization.
+- **Client-Side Input Rate Limiting & Validation**: `[IMPLEMENTED]`
+  - *Details*: Input payloads are sanitized on the server. `aimAngle` is normalized to $[-\pi, \pi]$, movement controls are coerced to booleans, and packet rates are capped at 65 packets/sec per socket to prevent malformed data or spam attacks.
   - *Priority*: **HIGH**
 
-- **Server-Side Reconnection Window**:
-  - *Recommendation*: Allow disconnected players 15 seconds to reconnect to their active room session before marking them as left.
-  - *Rationale*: Improves user experience during transient mobile or Wi-Fi network drops without losing player scores, kills, or active round progress.
-  - *Priority*: **MEDIUM**
+- **Server-Side Reconnection Window**: `[IMPLEMENTED]`
+  - *Details*: When a player's WebSocket drops during a match, a 15-second grace window is granted (`reconnectTimer = 15.0`). Reconnecting players resume their exact player slot, score, health, position, and active inventory without losing progress or spawning duplicate ghost fighters.
+  - *Priority*: **HIGH**
 
 ---
 
 ## Performance Improvements
 
-- **Spatial Partitioning for Projectile & Melee Collisions**:
-  - *Recommendation*: Implement a simple grid-based spatial partition (e.g. 100x100px cells) for projectile collision detection in large Mystery Maps.
-  - *Rationale*: Reduces projectile-to-player collision checks from \(O(P \times N)\) to local cell checks, improving simulation framerates when dozens of projectiles are active simultaneously (e.g. Infinite Machine Gun or Flame Gun bursts).
+- **Spatial Partitioning for Projectile & Melee Collisions**: `[IMPLEMENTED]`
+  - *Details*: Added a 220px cell `SpatialGrid` in `src/game/physics.ts`. In high-projectile scenarios or large Mystery Maps, projectile collision candidate checks are evaluated against local grid cells ($O(P \times K_{\text{cell}})$) instead of testing all fighters.
   - *Priority*: **HIGH**
 
-- **Canvas Viewport Resize Throttle**:
-  - *Recommendation*: Avoid calling `container.getBoundingClientRect()` inside the 60Hz `requestAnimationFrame` loop.
-  - *Rationale*: Calling layout-measuring DOM methods per frame triggers browser layout recalculations (reflows). Binding canvas resizing strictly to `ResizeObserver` and window `resize`/`fullscreenchange` events saves significant client CPU time.
-  - *Priority*: **HIGH** (Already fixed in current release).
+- **Canvas Viewport Resize Throttle**: `[IMPLEMENTED]`
+  - *Details*: Removed `updateSize()` layout-measuring calls from the 60Hz animation loop in `GameCanvasView.tsx`. Viewport bounds are measured on initial load and updated asynchronously via `ResizeObserver` and window resize listeners.
+  - *Priority*: **HIGH**
 
 ---
 

@@ -316,7 +316,7 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
     }
   }, [emitInput]);
 
-  // Mouse Click & Shooting
+  // Mouse Click & Shooting / Heavy Attack (Right Mouse Button = K Action)
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (e.button === 0) {
       // Left click = Primary Fire / Attack
@@ -327,6 +327,14 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
         sound.playFastPunch();
       }
       emitInput();
+    } else if (e.button === 2) {
+      // Right click = K Action (Heavy Attack / Dropkick)
+      e.preventDefault();
+      if (!inputRef.current.heavyAttack) {
+        inputRef.current.heavyAttack = true;
+        sound.playHeavyHit();
+        emitInput();
+      }
     }
   }, [emitInput]);
 
@@ -335,6 +343,12 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
       inputRef.current.fire = false;
       inputRef.current.fastAttack = false;
       emitInput();
+    } else if (e.button === 2) {
+      e.preventDefault();
+      if (inputRef.current.heavyAttack) {
+        inputRef.current.heavyAttack = false;
+        emitInput();
+      }
     }
   }, [emitInput]);
 
@@ -1075,97 +1089,6 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* 7. Action Controls (Right Side Action Pad + Mobile Shoot & Weapon Swap) */}
-      <div className="absolute right-3 sm:right-6 bottom-4 sm:bottom-6 pointer-events-none z-20">
-        <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto bg-white/90 backdrop-blur-xs p-2.5 rounded-2xl border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          {/* Jump Button */}
-          <button
-            onTouchStart={(e) => { e.preventDefault(); setTouchInput('up', true); }}
-            onTouchEnd={(e) => { e.preventDefault(); setTouchInput('up', false); }}
-            onMouseDown={() => setTouchInput('up', true)}
-            onMouseUp={() => setTouchInput('up', false)}
-            className={`w-11 h-11 sm:w-13 sm:h-13 rounded-xl border-3 border-black flex flex-col items-center justify-center transition-all cursor-pointer ${
-              activeTouch.up
-                ? 'bg-[#10B981] scale-95 shadow-none'
-                : 'bg-emerald-300 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-            }`}
-            title="Jump (W / Space)"
-          >
-            <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
-            <span className="text-[8px] sm:text-[9px] font-black text-black uppercase leading-tight">JUMP</span>
-          </button>
-
-          {/* Fire / Shoot Button (Primary Weapon Action) */}
-          <button
-            onTouchStart={(e) => { e.preventDefault(); setTouchInput('fire', true); }}
-            onTouchEnd={(e) => { e.preventDefault(); setTouchInput('fire', false); }}
-            onMouseDown={() => setTouchInput('fire', true)}
-            onMouseUp={() => setTouchInput('fire', false)}
-            className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl border-3 border-black flex flex-col items-center justify-center transition-all cursor-pointer ${
-              activeTouch.fire
-                ? 'bg-amber-500 scale-95 shadow-none'
-                : 'bg-amber-400 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]'
-            }`}
-            title="Shoot / Fire Weapon (Click / F)"
-          >
-            <span className="text-base leading-none">
-              {activeWeaponConfig ? activeWeaponConfig.icon : '🎯'}
-            </span>
-            <span className="text-[8px] sm:text-[9px] font-black text-black uppercase leading-tight mt-0.5">
-              {activeWeaponConfig ? 'FIRE' : 'PUNCH'}
-            </span>
-          </button>
-
-          {/* Quick Swap Weapon Button */}
-          {collectedWeaponsList.length > 1 && (
-            <button
-              onClick={() => switchWeaponDirectly('next')}
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border-3 border-black bg-purple-300 hover:bg-purple-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center transition-all cursor-pointer"
-              title="Next Weapon (Q / E / Wheel)"
-            >
-              <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-900" />
-              <span className="text-[7px] sm:text-[8px] font-black text-purple-950 uppercase leading-tight">
-                SWAP
-              </span>
-            </button>
-          )}
-
-          {/* Melee Punch Button */}
-          <button
-            onTouchStart={(e) => { e.preventDefault(); setTouchInput('fastAttack', true); }}
-            onTouchEnd={(e) => { e.preventDefault(); setTouchInput('fastAttack', false); }}
-            onMouseDown={() => setTouchInput('fastAttack', true)}
-            onMouseUp={() => setTouchInput('fastAttack', false)}
-            className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl border-3 border-black flex flex-col items-center justify-center transition-all cursor-pointer ${
-              activeTouch.fastAttack
-                ? 'bg-rose-500 scale-95 shadow-none'
-                : 'bg-rose-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-            }`}
-            title="Punch (J / Z)"
-          >
-            <Zap className="w-4 h-4 text-white" />
-            <span className="text-[8px] font-black text-white uppercase leading-tight">PUNCH</span>
-          </button>
-
-          {/* Guard / Shield Button */}
-          <button
-            onTouchStart={(e) => { e.preventDefault(); setTouchInput('block', true); }}
-            onTouchEnd={(e) => { e.preventDefault(); setTouchInput('block', false); }}
-            onMouseDown={() => setTouchInput('block', true)}
-            onMouseUp={() => setTouchInput('block', false)}
-            className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl border-3 border-black flex flex-col items-center justify-center transition-all cursor-pointer ${
-              activeTouch.block
-                ? 'bg-[#3498DB] scale-95 shadow-none'
-                : 'bg-sky-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-            }`}
-            title="Guard (L / C / Shift)"
-          >
-            <Shield className="w-4 h-4 text-white" />
-            <span className="text-[8px] font-black text-white uppercase leading-tight">GUARD</span>
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
