@@ -279,7 +279,39 @@ export interface ProjectileState {
   createdAt: number;
 }
 
-export type ArenaTheme = 'park' | 'town' | 'island' | 'castle' | 'dojo' | 'volcano' | 'cyber' | 'forest' | 'ruins' | 'canyon' | 'metropolis' | 'mystery_sky' | 'mystery_depths' | 'mystery_void';
+export type ArenaTheme =
+  | 'park'
+  | 'town'
+  | 'island'
+  | 'castle'
+  | 'dojo'
+  | 'volcano'
+  | 'cyber'
+  | 'forest'
+  | 'ruins'
+  | 'canyon'
+  | 'metropolis'
+  | 'mystery_sky'
+  | 'mystery_depths'
+  | 'mystery_void'
+  | 'mystery_mountain'
+  | 'mystery_jungle'
+  | 'mystery_volcanic'
+  | 'bamboo'
+  | 'arcade'
+  | 'glacier'
+  | 'desert'
+  | 'pirate'
+  | 'circus'
+  | 'steampunk'
+  | 'space'
+  | 'temple'
+  | 'atlantis'
+  | 'cyber_megacity'
+  | 'dragon_valley'
+  | 'mystery_crystal'
+  | 'mystery_celestial'
+  | 'mystery_chrono';
 export type MapSize = 'small' | 'medium' | 'large' | 'xlarge' | 'mystery';
 
 export interface Arena {

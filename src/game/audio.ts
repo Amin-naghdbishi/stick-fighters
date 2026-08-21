@@ -1603,6 +1603,66 @@ class SoundEngine {
         spark.onended = () => { spark.disconnect(); sparkGain.disconnect(); };
         break;
       }
+      case 'grenade_launcher':
+      case 'rocket_launcher':
+      case 'heavy_cannon': {
+        this.playHeavyHit();
+        break;
+      }
+      case 'infinite_gun': {
+        // High-tempo heavy ballistic rotary burst
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(500, now);
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.07);
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
+        osc.connect(gain);
+        gain.connect(this.sfxGainNode);
+        osc.start();
+        osc.stop(now + 0.08);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+        break;
+      }
+      case 'railgun':
+      case 'chrono_blaster': {
+        // High-frequency energy laser accelerator discharge
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(1400, now);
+        osc.frequency.exponentialRampToValueAtTime(220, now + 0.25);
+        gain.gain.setValueAtTime(0.55, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.connect(gain);
+        gain.connect(this.sfxGainNode);
+        osc.start();
+        osc.stop(now + 0.27);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+        break;
+      }
+      case 'plasma_vortex': {
+        // Singularity vortex warble & cosmic detonation
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.linearRampToValueAtTime(780, now + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.35);
+        gain.gain.setValueAtTime(0.65, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.sfxGainNode);
+        osc.start();
+        osc.stop(now + 0.37);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+        break;
+      }
+      case 'solar_hammer': {
+        this.playHeavyHit();
+        break;
+      }
       default: {
         this.playFastPunch();
       }

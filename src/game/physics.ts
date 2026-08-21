@@ -559,27 +559,27 @@ export function fireFighterWeapon(
   }
   fighter.weaponCooldown = config.fireRate;
 
-  // Thunder Sword / Melee Super Weapon Special Area Attack
-  if (config.id === 'thunder_sword') {
-    const reach = 100;
+  // Melee Super Weapons Special Area Attack (Thunder Sword & Solar Hammer)
+  if (config.isMelee && config.isSuper) {
+    const reach = 110;
     const strikeX = fighter.x + Math.cos(fighter.aimAngle) * reach;
     const strikeY = (fighter.y - FIGHTER_HEIGHT * 0.55) + Math.sin(fighter.aimAngle) * reach;
-    const areaRadius = 120; // 120px instant kill area
+    const areaRadius = config.areaDamageRadius || 140;
 
-    // Create a visible lightning bolt projectile originating from sword tip
+    // Create a visible energy burst projectile originating from weapon tip
     projectiles.push({
-      id: `proj_${fighter.id}_${now}_thunder`,
+      id: `proj_${fighter.id}_${now}_${config.id}`,
       shooterId: fighter.id,
-      weaponType: 'thunder_sword',
+      weaponType: config.id,
       x: strikeX,
       y: strikeY,
       vx: Math.cos(fighter.aimAngle) * 45,
       vy: Math.sin(fighter.aimAngle) * 45,
-      life: 0.15,
-      maxLife: 0.15,
+      life: 0.18,
+      maxLife: 0.18,
       damage: 999,
       knockback: config.knockback,
-      color: '#38BDF8',
+      color: config.bulletColor,
       createdAt: now,
     });
 
@@ -605,7 +605,7 @@ export function fireFighterWeapon(
               isHeavy: true,
               x: target.x,
               y: target.y - FIGHTER_HEIGHT / 2,
-              popText: 'THUNDER SLAM!',
+              popText: config.id === 'solar_hammer' ? 'SOLAR SMASH!' : 'THUNDER SLAM!',
               blocked: false,
             });
           }

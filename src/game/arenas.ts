@@ -827,6 +827,701 @@ export const ARENAS: Record<string, Arena> = {
       { id: 'mv_pad_4', x: 6900, y: 1780, width: 120, height: 24, color: '#EF4444', type: 'bounce', isPassableDown: true },
     ],
   },
+
+  // ==========================================
+  // 3 NEW SMALL MAPS
+  // ==========================================
+
+  // SMALL MAP 1: Bamboo Grove Sanctuary
+  bamboo: {
+    id: 'bamboo',
+    name: 'Bamboo Grove Sanctuary',
+    description: 'Serene Zen bamboo forest with hanging bridges, lantern balconies, and swift close-quarters combat.',
+    theme: 'bamboo',
+    size: 'small',
+    width: 1240,
+    height: 740,
+    bgColor: '#F0FDF4',
+    features: ['Zen Forest', 'Bamboo Bridges', 'Lantern Perch', 'Close Quarters'],
+    spawnPoints: [
+      { x: 300, y: 550 },
+      { x: 940, y: 550 },
+      { x: 310, y: 400 },
+      { x: 930, y: 400 },
+      { x: 620, y: 270 },
+      { x: 500, y: 550 },
+      { x: 740, y: 550 },
+      { x: 620, y: 150 },
+      { x: 200, y: 480 },
+      { x: 1040, y: 480 },
+    ],
+    weaponSpawns: [
+      { id: 'bam_wpn_1', weaponType: 'pebble_blaster', x: 310, y: 430, respawnTime: 5 },
+      { id: 'bam_wpn_2', weaponType: 'burst_smg', x: 930, y: 430, respawnTime: 8 },
+      { id: 'bam_wpn_3', weaponType: 'pistol', x: 620, y: 180, respawnTime: 7 },
+    ],
+    platforms: [
+      { id: 'bam_ground', x: 160, y: 610, width: 920, height: 100, color: '#15803D', type: 'ground', isPassableDown: false },
+      { id: 'bam_bridge_l', x: 200, y: 450, width: 220, height: 24, color: '#84CC16', type: 'wood', isPassableDown: true },
+      { id: 'bam_bridge_r', x: 820, y: 450, width: 220, height: 24, color: '#84CC16', type: 'wood', isPassableDown: true },
+      { id: 'bam_pagoda', x: 470, y: 320, width: 300, height: 24, color: '#DC2626', type: 'wood', isPassableDown: true },
+      { id: 'bam_perch', x: 530, y: 200, width: 180, height: 22, color: '#F59E0B', type: 'wood', isPassableDown: true },
+      { id: 'bam_bounce_l', x: 110, y: 360, width: 70, height: 22, color: '#FFD700', type: 'bounce', isPassableDown: true },
+      { id: 'bam_bounce_r', x: 1060, y: 360, width: 70, height: 22, color: '#FFD700', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // SMALL MAP 2: Pixel Arcade Arena
+  arcade: {
+    id: 'arcade',
+    name: 'Pixel Arcade Arena',
+    description: 'Retro 80s arcade neon chamber with pinball launch bumpers and rapid vertical hopping routes.',
+    theme: 'arcade',
+    size: 'small',
+    width: 1260,
+    height: 750,
+    bgColor: '#FDF4FF',
+    features: ['Pinball Bumpers', 'Neon Cabinets', 'Fast Action', 'Retro Vibes'],
+    spawnPoints: [
+      { x: 320, y: 560 },
+      { x: 940, y: 560 },
+      { x: 320, y: 410 },
+      { x: 940, y: 410 },
+      { x: 630, y: 280 },
+      { x: 520, y: 560 },
+      { x: 740, y: 560 },
+      { x: 630, y: 160 },
+      { x: 220, y: 490 },
+      { x: 1040, y: 490 },
+    ],
+    weaponSpawns: [
+      { id: 'arc_wpn_1', weaponType: 'pistol', x: 320, y: 440, respawnTime: 6 },
+      { id: 'arc_wpn_2', weaponType: 'burst_smg', x: 940, y: 440, respawnTime: 8 },
+      { id: 'arc_wpn_3', weaponType: 'shotgun', x: 630, y: 310, respawnTime: 12 },
+    ],
+    platforms: [
+      { id: 'arc_ground', x: 180, y: 620, width: 900, height: 110, color: '#A855F7', type: 'ground', isPassableDown: false },
+      { id: 'arc_cab_l', x: 220, y: 460, width: 200, height: 24, color: '#EC4899', type: 'stone', isPassableDown: true },
+      { id: 'arc_cab_r', x: 840, y: 460, width: 200, height: 24, color: '#06B6D4', type: 'stone', isPassableDown: true },
+      { id: 'arc_marquee', x: 480, y: 330, width: 300, height: 24, color: '#EAB308', type: 'wood', isPassableDown: true },
+      { id: 'arc_joystick', x: 540, y: 210, width: 180, height: 22, color: '#10B981', type: 'wood', isPassableDown: true },
+      { id: 'arc_bumper_1', x: 130, y: 480, width: 75, height: 22, color: '#FF007A', type: 'bounce', isPassableDown: true },
+      { id: 'arc_bumper_2', x: 1055, y: 480, width: 75, height: 22, color: '#FF007A', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // SMALL MAP 3: Frozen Glacier Cavern
+  glacier: {
+    id: 'glacier',
+    name: 'Frozen Glacier Cavern',
+    description: 'Crisp crystalline ice cavern with high-speed slippery floes and high-launch snow geysers.',
+    theme: 'glacier',
+    size: 'small',
+    width: 1300,
+    height: 760,
+    bgColor: '#F0F9FF',
+    features: ['Ice Stalactites', 'Snow Geysers', 'High Speed Floes', 'Crystal Ice'],
+    spawnPoints: [
+      { x: 330, y: 570 },
+      { x: 970, y: 570 },
+      { x: 335, y: 420 },
+      { x: 965, y: 420 },
+      { x: 650, y: 300 },
+      { x: 530, y: 570 },
+      { x: 770, y: 570 },
+      { x: 230, y: 500 },
+      { x: 1070, y: 500 },
+      { x: 650, y: 570 },
+    ],
+    weaponSpawns: [
+      { id: 'glac_wpn_1', weaponType: 'shotgun', x: 335, y: 450, respawnTime: 12 },
+      { id: 'glac_wpn_2', weaponType: 'pebble_blaster', x: 965, y: 450, respawnTime: 5 },
+      { id: 'glac_wpn_3', weaponType: 'rifle', x: 650, y: 330, respawnTime: 15 },
+    ],
+    platforms: [
+      { id: 'glac_shelf', x: 190, y: 630, width: 920, height: 110, color: '#38BDF8', type: 'ground', isPassableDown: false },
+      { id: 'glac_floe_l', x: 230, y: 470, width: 210, height: 24, color: '#BAE6FD', type: 'stone', isPassableDown: true },
+      { id: 'glac_floe_r', x: 860, y: 470, width: 210, height: 24, color: '#BAE6FD', type: 'stone', isPassableDown: true },
+      { id: 'glac_pillar', x: 500, y: 350, width: 300, height: 24, color: '#0284C7', type: 'stone', isPassableDown: true },
+      { id: 'glac_geyser_l', x: 120, y: 400, width: 80, height: 22, color: '#00E5FF', type: 'bounce', isPassableDown: true },
+      { id: 'glac_geyser_r', x: 1090, y: 400, width: 80, height: 22, color: '#00E5FF', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // ==========================================
+  // 3 NEW MEDIUM MAPS
+  // ==========================================
+
+  // MEDIUM MAP 1: Sunken Oasis Ruins
+  desert: {
+    id: 'desert',
+    name: 'Sunken Oasis Ruins',
+    description: 'Golden sandstone temple terraces nestled around crystal oasis springs and lush date palms.',
+    theme: 'desert',
+    size: 'medium',
+    width: 1520,
+    height: 860,
+    bgColor: '#FFFBEB',
+    features: ['Sandstone Terraces', 'Spring Dunes', 'Ancient Pillars', 'Palm Canopy'],
+    spawnPoints: [
+      { x: 390, y: 600 },
+      { x: 1130, y: 600 },
+      { x: 390, y: 440 },
+      { x: 1130, y: 440 },
+      { x: 760, y: 310 },
+      { x: 760, y: 170 },
+      { x: 560, y: 600 },
+      { x: 960, y: 600 },
+      { x: 260, y: 520 },
+      { x: 1260, y: 520 },
+    ],
+    weaponSpawns: [
+      { id: 'des_wpn_1', weaponType: 'shotgun', x: 390, y: 470, respawnTime: 12 },
+      { id: 'des_wpn_2', weaponType: 'pistol', x: 1130, y: 470, respawnTime: 7 },
+      { id: 'des_wpn_3', weaponType: 'flame_gun', x: 760, y: 340, respawnTime: 18 },
+      { id: 'des_wpn_4', weaponType: 'rifle', x: 760, y: 200, respawnTime: 15 },
+    ],
+    platforms: [
+      { id: 'des_ground', x: 200, y: 660, width: 1120, height: 140, color: '#D97706', type: 'ground', isPassableDown: false },
+      { id: 'des_terrace_l', x: 260, y: 490, width: 260, height: 26, color: '#F59E0B', type: 'stone', isPassableDown: true },
+      { id: 'des_terrace_r', x: 1000, y: 490, width: 260, height: 26, color: '#F59E0B', type: 'stone', isPassableDown: true },
+      { id: 'des_arch', x: 610, y: 360, width: 300, height: 26, color: '#B45309', type: 'stone', isPassableDown: true },
+      { id: 'des_obelisk', x: 670, y: 220, width: 180, height: 24, color: '#FDE047', type: 'wood', isPassableDown: true },
+      { id: 'des_spring_l', x: 130, y: 390, width: 85, height: 22, color: '#F59E0B', type: 'bounce', isPassableDown: true },
+      { id: 'des_spring_r', x: 1300, y: 390, width: 85, height: 22, color: '#F59E0B', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // MEDIUM MAP 2: Buccaneer Pirate Cove
+  pirate: {
+    id: 'pirate',
+    name: 'Buccaneer Pirate Cove',
+    description: 'Twin-masted pirate galleon with swaying rigging platforms, cannon decks, and high crow’s nests.',
+    theme: 'pirate',
+    size: 'medium',
+    width: 1560,
+    height: 880,
+    bgColor: '#ECFEFF',
+    features: ['Galleon Decks', 'Rigging Platforms', 'Crow’s Nest', 'Cannon Launchers'],
+    spawnPoints: [
+      { x: 370, y: 610 },
+      { x: 1190, y: 610 },
+      { x: 370, y: 450 },
+      { x: 1190, y: 450 },
+      { x: 780, y: 330 },
+      { x: 780, y: 180 },
+      { x: 580, y: 610 },
+      { x: 980, y: 610 },
+      { x: 270, y: 530 },
+      { x: 1290, y: 530 },
+    ],
+    weaponSpawns: [
+      { id: 'pir_wpn_1', weaponType: 'burst_smg', x: 370, y: 480, respawnTime: 8 },
+      { id: 'pir_wpn_2', weaponType: 'shotgun', x: 1190, y: 480, respawnTime: 12 },
+      { id: 'pir_wpn_3', weaponType: 'heavy_cannon', x: 780, y: 360, respawnTime: 25 },
+      { id: 'pir_wpn_4', weaponType: 'grenade_launcher', x: 780, y: 210, respawnTime: 22 },
+    ],
+    platforms: [
+      { id: 'pir_deck', x: 220, y: 670, width: 1120, height: 140, color: '#78350F', type: 'wood', isPassableDown: false },
+      { id: 'pir_forecastle', x: 240, y: 500, width: 260, height: 26, color: '#92400E', type: 'wood', isPassableDown: true },
+      { id: 'pir_quarterdeck', x: 1060, y: 500, width: 260, height: 26, color: '#92400E', type: 'wood', isPassableDown: true },
+      { id: 'pir_rigging', x: 630, y: 380, width: 300, height: 26, color: '#B45309', type: 'wood', isPassableDown: true },
+      { id: 'pir_crows_nest', x: 700, y: 230, width: 160, height: 22, color: '#D97706', type: 'wood', isPassableDown: true },
+      { id: 'pir_spring_l', x: 140, y: 420, width: 85, height: 22, color: '#DC2626', type: 'bounce', isPassableDown: true },
+      { id: 'pir_spring_r', x: 1340, y: 420, width: 85, height: 22, color: '#DC2626', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // MEDIUM MAP 3: Carnival Big Top
+  circus: {
+    id: 'circus',
+    name: 'Carnival Big Top',
+    description: 'Vibrant circus tent arena with springy trampolines, high-wire trapezes, and festive pennants.',
+    theme: 'circus',
+    size: 'medium',
+    width: 1540,
+    height: 870,
+    bgColor: '#FFF1F2',
+    features: ['High-Wire Trapeze', 'Trampoline Bounce', 'Festive Pennants', 'Spotlight Deck'],
+    spawnPoints: [
+      { x: 405, y: 600 },
+      { x: 1135, y: 600 },
+      { x: 405, y: 440 },
+      { x: 1135, y: 440 },
+      { x: 770, y: 310 },
+      { x: 770, y: 170 },
+      { x: 580, y: 600 },
+      { x: 960, y: 600 },
+      { x: 280, y: 520 },
+      { x: 1260, y: 520 },
+    ],
+    weaponSpawns: [
+      { id: 'cir_wpn_1', weaponType: 'pistol', x: 405, y: 470, respawnTime: 7 },
+      { id: 'cir_wpn_2', weaponType: 'burst_smg', x: 1135, y: 470, respawnTime: 8 },
+      { id: 'cir_wpn_3', weaponType: 'rocket_launcher', x: 770, y: 340, respawnTime: 30 },
+      { id: 'cir_wpn_4', weaponType: 'flame_gun', x: 770, y: 200, respawnTime: 18 },
+    ],
+    platforms: [
+      { id: 'cir_ring', x: 210, y: 660, width: 1120, height: 140, color: '#E11D48', type: 'ground', isPassableDown: false },
+      { id: 'cir_deck_l', x: 280, y: 490, width: 250, height: 26, color: '#FACC15', type: 'wood', isPassableDown: true },
+      { id: 'cir_deck_r', x: 1010, y: 490, width: 250, height: 26, color: '#FACC15', type: 'wood', isPassableDown: true },
+      { id: 'cir_wire', x: 620, y: 360, width: 300, height: 26, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'cir_trapeze', x: 680, y: 220, width: 180, height: 22, color: '#A855F7', type: 'wood', isPassableDown: true },
+      { id: 'cir_trampoline_l', x: 130, y: 410, width: 85, height: 22, color: '#F43F5E', type: 'bounce', isPassableDown: true },
+      { id: 'cir_trampoline_r', x: 1320, y: 410, width: 85, height: 22, color: '#F43F5E', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // ==========================================
+  // 3 NEW LARGE MAPS
+  // ==========================================
+
+  // LARGE MAP 1: Clockwork Airship Zeppelin
+  steampunk: {
+    id: 'steampunk',
+    name: 'Clockwork Airship Zeppelin',
+    description: 'Gigantic flying brass zeppelin with spinning cog elevators, pressure steam pistons, and long runways.',
+    theme: 'steampunk',
+    size: 'large',
+    width: 2600,
+    height: 1200,
+    bgColor: '#FFFBEB',
+    features: ['Clockwork Gears', 'Steam Piston Launchers', 'Long Deck Runway', 'Captain Bridge'],
+    spawnPoints: [
+      { x: 560, y: 820 },
+      { x: 2040, y: 820 },
+      { x: 560, y: 620 },
+      { x: 2040, y: 620 },
+      { x: 1300, y: 500 },
+      { x: 1300, y: 320 },
+      { x: 1300, y: 160 },
+      { x: 900, y: 820 },
+      { x: 1700, y: 820 },
+      { x: 1300, y: 820 },
+    ],
+    weaponSpawns: [
+      { id: 'stm_wpn_1', weaponType: 'shotgun', x: 900, y: 860, respawnTime: 12 },
+      { id: 'stm_wpn_2', weaponType: 'burst_smg', x: 1700, y: 860, respawnTime: 8 },
+      { id: 'stm_wpn_3', weaponType: 'rifle', x: 560, y: 660, respawnTime: 15 },
+      { id: 'stm_wpn_4', weaponType: 'grenade_launcher', x: 2040, y: 660, respawnTime: 22 },
+      { id: 'stm_wpn_5', weaponType: 'rocket_launcher', x: 1300, y: 540, respawnTime: 30 },
+      { id: 'stm_wpn_6', weaponType: 'heavy_cannon', x: 1300, y: 360, respawnTime: 25 },
+      { id: 'stm_wpn_7', weaponType: 'railgun', x: 1300, y: 200, respawnTime: 45 },
+    ],
+    platforms: [
+      { id: 'stm_runway', x: 300, y: 880, width: 2000, height: 180, color: '#92400E', type: 'wood', isPassableDown: false },
+      { id: 'stm_wing_l', x: 350, y: 680, width: 420, height: 32, color: '#B45309', type: 'stone', isPassableDown: true },
+      { id: 'stm_wing_r', x: 1830, y: 680, width: 420, height: 32, color: '#B45309', type: 'stone', isPassableDown: true },
+      { id: 'stm_bridge', x: 950, y: 560, width: 700, height: 30, color: '#D97706', type: 'wood', isPassableDown: true },
+      { id: 'stm_captain', x: 1120, y: 380, width: 360, height: 28, color: '#F59E0B', type: 'stone', isPassableDown: true },
+      { id: 'stm_nest', x: 1200, y: 220, width: 200, height: 24, color: '#EAB308', type: 'wood', isPassableDown: true },
+      { id: 'stm_piston_l', x: 240, y: 550, width: 90, height: 24, color: '#D97706', type: 'bounce', isPassableDown: true },
+      { id: 'stm_piston_r', x: 2280, y: 550, width: 90, height: 24, color: '#D97706', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // LARGE MAP 2: Orbital Star Station
+  space: {
+    id: 'space',
+    name: 'Orbital Star Station',
+    description: 'High-tech orbital docking station featuring graviton jump pads, solar arrays, and deep space combat.',
+    theme: 'space',
+    size: 'large',
+    width: 2800,
+    height: 1300,
+    bgColor: '#F8FAFC',
+    features: ['Graviton Jump Pads', 'Solar Arrays', 'Command Bay', 'Orbital Vista'],
+    spawnPoints: [
+      { x: 650, y: 900 },
+      { x: 2150, y: 900 },
+      { x: 650, y: 680 },
+      { x: 2150, y: 680 },
+      { x: 1400, y: 560 },
+      { x: 1400, y: 380 },
+      { x: 1400, y: 200 },
+      { x: 1000, y: 900 },
+      { x: 1800, y: 900 },
+      { x: 1400, y: 900 },
+    ],
+    weaponSpawns: [
+      { id: 'spc_wpn_1', weaponType: 'shotgun', x: 1000, y: 940, respawnTime: 12 },
+      { id: 'spc_wpn_2', weaponType: 'pistol', x: 1800, y: 940, respawnTime: 7 },
+      { id: 'spc_wpn_3', weaponType: 'rifle', x: 650, y: 720, respawnTime: 15 },
+      { id: 'spc_wpn_4', weaponType: 'burst_smg', x: 2150, y: 720, respawnTime: 8 },
+      { id: 'spc_wpn_5', weaponType: 'grenade_launcher', x: 1400, y: 600, respawnTime: 22 },
+      { id: 'spc_wpn_6', weaponType: 'rocket_launcher', x: 1400, y: 420, respawnTime: 30 },
+      { id: 'spc_wpn_7', weaponType: 'railgun', x: 1400, y: 240, respawnTime: 45 },
+    ],
+    platforms: [
+      { id: 'spc_runway', x: 350, y: 960, width: 2100, height: 180, color: '#3B82F6', type: 'ground', isPassableDown: false },
+      { id: 'spc_solar_l', x: 420, y: 740, width: 460, height: 30, color: '#06B6D4', type: 'stone', isPassableDown: true },
+      { id: 'spc_solar_r', x: 1920, y: 740, width: 460, height: 30, color: '#06B6D4', type: 'stone', isPassableDown: true },
+      { id: 'spc_command', x: 1050, y: 620, width: 700, height: 30, color: '#8B5CF6', type: 'stone', isPassableDown: true },
+      { id: 'spc_dome', x: 1200, y: 440, width: 400, height: 28, color: '#EC4899', type: 'wood', isPassableDown: true },
+      { id: 'spc_antenna', x: 1300, y: 260, width: 200, height: 24, color: '#FACC15', type: 'stone', isPassableDown: true },
+      { id: 'spc_grav_l', x: 260, y: 600, width: 95, height: 24, color: '#8B5CF6', type: 'bounce', isPassableDown: true },
+      { id: 'spc_grav_r', x: 2460, y: 600, width: 95, height: 24, color: '#8B5CF6', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // LARGE MAP 3: Celestial Sky Sanctuary
+  temple: {
+    id: 'temple',
+    name: 'Celestial Sky Sanctuary',
+    description: 'Floating jade pagodas and sacred torii gates connected by rainbow bridges high in the clouds.',
+    theme: 'temple',
+    size: 'large',
+    width: 2700,
+    height: 1250,
+    bgColor: '#FFFBEB',
+    features: ['Jade Pagodas', 'Lotus Bouncers', 'Rainbow Bridges', 'Torii Shrines'],
+    spawnPoints: [
+      { x: 600, y: 860 },
+      { x: 2100, y: 860 },
+      { x: 600, y: 660 },
+      { x: 2100, y: 660 },
+      { x: 1350, y: 520 },
+      { x: 1350, y: 340 },
+      { x: 1350, y: 180 },
+      { x: 950, y: 860 },
+      { x: 1750, y: 860 },
+      { x: 1350, y: 860 },
+    ],
+    weaponSpawns: [
+      { id: 'tmp_wpn_1', weaponType: 'shotgun', x: 950, y: 900, respawnTime: 12 },
+      { id: 'tmp_wpn_2', weaponType: 'burst_smg', x: 1750, y: 900, respawnTime: 8 },
+      { id: 'tmp_wpn_3', weaponType: 'rifle', x: 600, y: 700, respawnTime: 15 },
+      { id: 'tmp_wpn_4', weaponType: 'flame_gun', x: 2100, y: 700, respawnTime: 18 },
+      { id: 'tmp_wpn_5', weaponType: 'grenade_launcher', x: 1350, y: 560, respawnTime: 22 },
+      { id: 'tmp_wpn_6', weaponType: 'heavy_cannon', x: 1350, y: 380, respawnTime: 25 },
+      { id: 'tmp_wpn_7', weaponType: 'railgun', x: 1350, y: 220, respawnTime: 45 },
+    ],
+    platforms: [
+      { id: 'tmp_court', x: 320, y: 920, width: 2060, height: 180, color: '#059669', type: 'ground', isPassableDown: false },
+      { id: 'tmp_terrace_l', x: 380, y: 720, width: 440, height: 30, color: '#DC2626', type: 'wood', isPassableDown: true },
+      { id: 'tmp_terrace_r', x: 1880, y: 720, width: 440, height: 30, color: '#DC2626', type: 'wood', isPassableDown: true },
+      { id: 'tmp_grand_deck', x: 1000, y: 580, width: 700, height: 30, color: '#F59E0B', type: 'wood', isPassableDown: true },
+      { id: 'tmp_balcony', x: 1150, y: 400, width: 400, height: 28, color: '#EF4444', type: 'wood', isPassableDown: true },
+      { id: 'tmp_pinnacle', x: 1250, y: 240, width: 200, height: 24, color: '#FBBF24', type: 'stone', isPassableDown: true },
+      { id: 'tmp_lotus_l', x: 220, y: 580, width: 90, height: 24, color: '#EC4899', type: 'bounce', isPassableDown: true },
+      { id: 'tmp_lotus_r', x: 2400, y: 580, width: 90, height: 24, color: '#EC4899', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // ==========================================
+  // 3 NEW EXTRA LARGE MAPS
+  // ==========================================
+
+  // EXTRA LARGE MAP 1: Sunken Atlantis Palace
+  atlantis: {
+    id: 'atlantis',
+    name: 'Sunken Atlantis Palace',
+    description: 'Vast submerged oceanic palace featuring glowing pearl fountains, ancient marble ruins, and coral reefs.',
+    theme: 'atlantis',
+    size: 'xlarge',
+    width: 3600,
+    height: 1500,
+    bgColor: '#F0FDFA',
+    features: ['Oceanic Plaza', 'Poseidon Throne', 'Coral Terraces', 'Pearl Fountains'],
+    spawnPoints: [
+      { x: 725, y: 1100 },
+      { x: 2875, y: 1100 },
+      { x: 725, y: 860 },
+      { x: 2875, y: 860 },
+      { x: 1800, y: 700 },
+      { x: 1800, y: 520 },
+      { x: 1800, y: 320 },
+      { x: 1800, y: 160 },
+      { x: 1330, y: 700 },
+      { x: 2270, y: 700 },
+    ],
+    weaponSpawns: [
+      { id: 'atl_wpn_1', weaponType: 'shotgun', x: 1100, y: 1140, respawnTime: 12 },
+      { id: 'atl_wpn_2', weaponType: 'burst_smg', x: 2500, y: 1140, respawnTime: 8 },
+      { id: 'atl_wpn_3', weaponType: 'rifle', x: 725, y: 900, respawnTime: 15 },
+      { id: 'atl_wpn_4', weaponType: 'flame_gun', x: 2875, y: 900, respawnTime: 18 },
+      { id: 'atl_wpn_5', weaponType: 'grenade_launcher', x: 1330, y: 740, respawnTime: 22 },
+      { id: 'atl_wpn_6', weaponType: 'heavy_cannon', x: 2270, y: 740, respawnTime: 25 },
+      { id: 'atl_wpn_7', weaponType: 'rocket_launcher', x: 1800, y: 560, respawnTime: 30 },
+      { id: 'atl_wpn_8', weaponType: 'railgun', x: 1800, y: 200, respawnTime: 45 },
+    ],
+    platforms: [
+      { id: 'atl_plaza', x: 400, y: 1160, width: 2800, height: 220, color: '#0D9488', type: 'ground', isPassableDown: false },
+      { id: 'atl_terrace_l', x: 450, y: 920, width: 550, height: 34, color: '#14B8A6', type: 'stone', isPassableDown: true },
+      { id: 'atl_terrace_r', x: 2600, y: 920, width: 550, height: 34, color: '#14B8A6', type: 'stone', isPassableDown: true },
+      { id: 'atl_colonnade_l', x: 1100, y: 760, width: 460, height: 32, color: '#2DD4BF', type: 'stone', isPassableDown: true },
+      { id: 'atl_colonnade_r', x: 2040, y: 760, width: 460, height: 32, color: '#2DD4BF', type: 'stone', isPassableDown: true },
+      { id: 'atl_throne', x: 1450, y: 580, width: 700, height: 30, color: '#0F766E', type: 'wood', isPassableDown: true },
+      { id: 'atl_balcony', x: 1620, y: 380, width: 360, height: 28, color: '#5EEAD4', type: 'stone', isPassableDown: true },
+      { id: 'atl_spire', x: 1700, y: 220, width: 200, height: 24, color: '#99F6E4', type: 'wood', isPassableDown: true },
+      { id: 'atl_spring_l', x: 300, y: 700, width: 100, height: 24, color: '#2DD4BF', type: 'bounce', isPassableDown: true },
+      { id: 'atl_spring_r', x: 3220, y: 700, width: 100, height: 24, color: '#2DD4BF', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // EXTRA LARGE MAP 2: Neo-Tokyo Cyber Megalopolis
+  cyber_megacity: {
+    id: 'cyber_megacity',
+    name: 'Neo-Tokyo Cyber Megalopolis',
+    description: 'Sprawling high-rise cyber skyscraper rooftops, maglev train trackways, and holographic billboards.',
+    theme: 'cyber_megacity',
+    size: 'xlarge',
+    width: 3800,
+    height: 1600,
+    bgColor: '#F8FAFC',
+    features: ['Maglev Trackways', 'Skyscraper Plazas', 'Broadcast Spire', 'Neon High-Rise'],
+    spawnPoints: [
+      { x: 800, y: 1190 },
+      { x: 3000, y: 1190 },
+      { x: 800, y: 940 },
+      { x: 3000, y: 940 },
+      { x: 1900, y: 760 },
+      { x: 1900, y: 580 },
+      { x: 1900, y: 380 },
+      { x: 1900, y: 200 },
+      { x: 1450, y: 760 },
+      { x: 2350, y: 760 },
+    ],
+    weaponSpawns: [
+      { id: 'cm_wpn_1', weaponType: 'pistol', x: 1100, y: 1230, respawnTime: 7 },
+      { id: 'cm_wpn_2', weaponType: 'burst_smg', x: 2700, y: 1230, respawnTime: 8 },
+      { id: 'cm_wpn_3', weaponType: 'shotgun', x: 800, y: 980, respawnTime: 12 },
+      { id: 'cm_wpn_4', weaponType: 'rifle', x: 3000, y: 980, respawnTime: 15 },
+      { id: 'cm_wpn_5', weaponType: 'flame_gun', x: 1450, y: 800, respawnTime: 18 },
+      { id: 'cm_wpn_6', weaponType: 'heavy_cannon', x: 2350, y: 800, respawnTime: 25 },
+      { id: 'cm_wpn_7', weaponType: 'rocket_launcher', x: 1900, y: 620, respawnTime: 30 },
+      { id: 'cm_wpn_8', weaponType: 'railgun', x: 1900, y: 240, respawnTime: 45 },
+    ],
+    platforms: [
+      { id: 'cm_highway', x: 400, y: 1250, width: 3000, height: 220, color: '#2563EB', type: 'ground', isPassableDown: false },
+      { id: 'cm_roof_l', x: 500, y: 1000, width: 600, height: 36, color: '#3B82F6', type: 'stone', isPassableDown: true },
+      { id: 'cm_roof_r', x: 2700, y: 1000, width: 600, height: 36, color: '#3B82F6', type: 'stone', isPassableDown: true },
+      { id: 'cm_maglev_l', x: 1200, y: 820, width: 500, height: 32, color: '#06B6D4', type: 'stone', isPassableDown: true },
+      { id: 'cm_maglev_r', x: 2100, y: 820, width: 500, height: 32, color: '#06B6D4', type: 'stone', isPassableDown: true },
+      { id: 'cm_holo_plaza', x: 1550, y: 640, width: 700, height: 32, color: '#8B5CF6', type: 'wood', isPassableDown: true },
+      { id: 'cm_spire', x: 1720, y: 440, width: 360, height: 28, color: '#EC4899', type: 'stone', isPassableDown: true },
+      { id: 'cm_antenna', x: 1800, y: 260, width: 200, height: 24, color: '#06B6D4', type: 'wood', isPassableDown: true },
+      { id: 'cm_pad_l', x: 320, y: 800, width: 100, height: 24, color: '#EC4899', type: 'bounce', isPassableDown: true },
+      { id: 'cm_pad_r', x: 3400, y: 800, width: 100, height: 24, color: '#EC4899', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // EXTRA LARGE MAP 3: Great Dragon Peaks & Chasm
+  dragon_valley: {
+    id: 'dragon_valley',
+    name: 'Great Dragon Peaks & Chasm',
+    description: 'Immense alpine peaks connected by long swaying rope bridges over an echoing chasm.',
+    theme: 'dragon_valley',
+    size: 'xlarge',
+    width: 3700,
+    height: 1550,
+    bgColor: '#FEFCE8',
+    features: ['Dragon Peak Spires', 'Chasm Suspension Bridges', 'Updraft Current', 'Alpine Slopes'],
+    spawnPoints: [
+      { x: 760, y: 1140 },
+      { x: 2940, y: 1140 },
+      { x: 760, y: 900 },
+      { x: 2940, y: 900 },
+      { x: 1850, y: 720 },
+      { x: 1850, y: 540 },
+      { x: 1850, y: 340 },
+      { x: 1850, y: 160 },
+      { x: 1390, y: 720 },
+      { x: 2310, y: 720 },
+    ],
+    weaponSpawns: [
+      { id: 'dv_wpn_1', weaponType: 'pebble_blaster', x: 1100, y: 1180, respawnTime: 5 },
+      { id: 'dv_wpn_2', weaponType: 'burst_smg', x: 2600, y: 1180, respawnTime: 8 },
+      { id: 'dv_wpn_3', weaponType: 'shotgun', x: 760, y: 940, respawnTime: 12 },
+      { id: 'dv_wpn_4', weaponType: 'rifle', x: 2940, y: 940, respawnTime: 15 },
+      { id: 'dv_wpn_5', weaponType: 'flame_gun', x: 1390, y: 760, respawnTime: 18 },
+      { id: 'dv_wpn_6', weaponType: 'heavy_cannon', x: 2310, y: 760, respawnTime: 25 },
+      { id: 'dv_wpn_7', weaponType: 'rocket_launcher', x: 1850, y: 580, respawnTime: 30 },
+      { id: 'dv_wpn_8', weaponType: 'railgun', x: 1850, y: 200, respawnTime: 45 },
+    ],
+    platforms: [
+      { id: 'dv_lowlands', x: 420, y: 1200, width: 2860, height: 220, color: '#15803D', type: 'ground', isPassableDown: false },
+      { id: 'dv_crag_l', x: 480, y: 960, width: 560, height: 36, color: '#16A34A', type: 'stone', isPassableDown: true },
+      { id: 'dv_crag_r', x: 2660, y: 960, width: 560, height: 36, color: '#16A34A', type: 'stone', isPassableDown: true },
+      { id: 'dv_bridge_l', x: 1150, y: 780, width: 480, height: 32, color: '#D97706', type: 'wood', isPassableDown: true },
+      { id: 'dv_bridge_r', x: 2070, y: 780, width: 480, height: 32, color: '#D97706', type: 'wood', isPassableDown: true },
+      { id: 'dv_arch', x: 1500, y: 600, width: 700, height: 32, color: '#DC2626', type: 'wood', isPassableDown: true },
+      { id: 'dv_tooth', x: 1650, y: 400, width: 400, height: 28, color: '#EAB308', type: 'stone', isPassableDown: true },
+      { id: 'dv_pinnacle', x: 1750, y: 220, width: 200, height: 24, color: '#F59E0B', type: 'wood', isPassableDown: true },
+      { id: 'dv_updraft_l', x: 300, y: 750, width: 100, height: 24, color: '#22C55E', type: 'bounce', isPassableDown: true },
+      { id: 'dv_updraft_r', x: 3320, y: 750, width: 100, height: 24, color: '#22C55E', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // ==========================================
+  // 3 NEW MYSTERY MAPS (Hidden Caves & Super Weapons)
+  // ==========================================
+
+  // MYSTERY MAP 4: Crystal Cavern of Eternity (Super Weapon: Plasma Vortex)
+  mystery_crystal: {
+    id: 'mystery_crystal',
+    name: 'Mystery IV: Crystal Cavern of Eternity',
+    description: 'Bright prismatic amethyst & emerald crystal cavern. Hidden in the deep Secluded Crystal Grotto lies the Plasma Vortex Annihilator.',
+    theme: 'mystery_crystal',
+    size: 'mystery',
+    width: 3600,
+    height: 1600,
+    bgColor: '#FAF5FF',
+    features: ['Prismatic Crystals', 'Secluded Crystal Grotto Cave', 'Super Weapon: Plasma Vortex', 'Graviton Launchers'],
+    spawnPoints: [
+      { x: 600, y: 1100 },
+      { x: 2600, y: 1100 },
+      { x: 1800, y: 880 },
+      { x: 1800, y: 520 },
+      { x: 1800, y: 300 },
+      { x: 1200, y: 920 },
+      { x: 2400, y: 920 },
+      { x: 600, y: 650 },
+      { x: 3000, y: 650 },
+      { x: 1800, y: 1100 },
+    ],
+    weaponSpawns: [
+      // Standard Map Weapons
+      { id: 'mc_wpn_1', weaponType: 'burst_smg', x: 900, y: 1160, respawnTime: 8 },
+      { id: 'mc_wpn_2', weaponType: 'rifle', x: 2700, y: 1160, respawnTime: 15 },
+      { id: 'mc_wpn_3', weaponType: 'shotgun', x: 1200, y: 960, respawnTime: 12 },
+      { id: 'mc_wpn_4', weaponType: 'rocket_launcher', x: 2400, y: 960, respawnTime: 30 },
+      { id: 'mc_wpn_5', weaponType: 'railgun', x: 1800, y: 340, respawnTime: 45 },
+      // EXCLUSIVE SUPER WEAPON #4: Plasma Vortex (Hidden in Secluded Crystal Grotto Cave)
+      { id: 'mc_super_plasma', weaponType: 'plasma_vortex', x: 3200, y: 1340, respawnTime: 150 },
+    ],
+    platforms: [
+      // Main Cavern Floor
+      { id: 'mc_ground', x: 350, y: 1200, width: 2500, height: 200, color: '#9333EA', type: 'ground', isPassableDown: false },
+
+      // HIDDEN EXPLORATION CAVE: Secluded Crystal Grotto (Lower Right Wing)
+      { id: 'mc_cave_floor', x: 2950, y: 1380, width: 500, height: 160, color: '#7E22CE', type: 'stone', isPassableDown: false },
+      { id: 'mc_cave_roof', x: 2900, y: 1180, width: 550, height: 36, color: '#6B21A8', type: 'stone', isPassableDown: false },
+      { id: 'mc_cave_entry_ledge', x: 2850, y: 1280, width: 140, height: 26, color: '#C084FC', type: 'wood', isPassableDown: true },
+
+      // Mid Level Crystal Bridges
+      { id: 'mc_bridge_l', x: 500, y: 980, width: 550, height: 32, color: '#C084FC', type: 'stone', isPassableDown: true },
+      { id: 'mc_bridge_r', x: 2150, y: 980, width: 550, height: 32, color: '#C084FC', type: 'stone', isPassableDown: true },
+      { id: 'mc_altar', x: 1450, y: 780, width: 700, height: 32, color: '#34D399', type: 'wood', isPassableDown: true },
+      { id: 'mc_upper_spire', x: 1620, y: 560, width: 360, height: 28, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'mc_pinnacle', x: 1700, y: 360, width: 200, height: 24, color: '#E879F9', type: 'wood', isPassableDown: true },
+
+      // Prismatic Crystal Jump Pads
+      { id: 'mc_pad_l', x: 260, y: 800, width: 95, height: 24, color: '#C084FC', type: 'bounce', isPassableDown: true },
+      { id: 'mc_pad_r', x: 2750, y: 800, width: 95, height: 24, color: '#C084FC', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // MYSTERY MAP 5: Solar Sunken Citadel (Super Weapon: Divine Solar Hammer)
+  mystery_celestial: {
+    id: 'mystery_celestial',
+    name: 'Mystery V: Solar Sunken Citadel',
+    description: 'Radiant golden sun citadel. Hidden deep within the subterranean Sunken Chamber of the Sun lies the Divine Solar Hammer.',
+    theme: 'mystery_celestial',
+    size: 'mystery',
+    width: 3800,
+    height: 1650,
+    bgColor: '#FFFBEB',
+    features: ['Sun-God Monoliths', 'Subterranean Sun Chamber Cave', 'Super Weapon: Solar Hammer', 'Radiant Aurora'],
+    spawnPoints: [
+      { x: 700, y: 1100 },
+      { x: 3100, y: 1100 },
+      { x: 1900, y: 880 },
+      { x: 1900, y: 560 },
+      { x: 1900, y: 320 },
+      { x: 1300, y: 920 },
+      { x: 2500, y: 920 },
+      { x: 700, y: 680 },
+      { x: 3100, y: 680 },
+      { x: 1900, y: 1100 },
+    ],
+    weaponSpawns: [
+      // Standard Map Weapons
+      { id: 'mcel_wpn_1', weaponType: 'burst_smg', x: 1000, y: 1160, respawnTime: 8 },
+      { id: 'mcel_wpn_2', weaponType: 'shotgun', x: 2800, y: 1160, respawnTime: 12 },
+      { id: 'mcel_wpn_3', weaponType: 'rifle', x: 1300, y: 960, respawnTime: 15 },
+      { id: 'mcel_wpn_4', weaponType: 'heavy_cannon', x: 2500, y: 960, respawnTime: 25 },
+      { id: 'mcel_wpn_5', weaponType: 'railgun', x: 1900, y: 360, respawnTime: 45 },
+      // EXCLUSIVE SUPER WEAPON #5: Divine Solar Hammer (Hidden in Subterranean Sun Chamber Cave)
+      { id: 'mcel_super_hammer', weaponType: 'solar_hammer', x: 1900, y: 1470, respawnTime: 150 },
+    ],
+    platforms: [
+      // Upper Left & Right Main Citadel Plaza Wings
+      { id: 'mcel_floor_l', x: 400, y: 1180, width: 1050, height: 180, color: '#D97706', type: 'ground', isPassableDown: false },
+      { id: 'mcel_floor_r', x: 2350, y: 1180, width: 1050, height: 180, color: '#D97706', type: 'ground', isPassableDown: false },
+
+      // HIDDEN EXPLORATION CAVE: Subterranean Chamber of the Sun (Deep Center Crypt)
+      { id: 'mcel_crypt_floor', x: 1550, y: 1520, width: 700, height: 130, color: '#B45309', type: 'stone', isPassableDown: false },
+      { id: 'mcel_crypt_gate_l', x: 1450, y: 1350, width: 180, height: 26, color: '#F59E0B', type: 'wood', isPassableDown: true },
+      { id: 'mcel_crypt_gate_r', x: 2170, y: 1350, width: 180, height: 26, color: '#F59E0B', type: 'wood', isPassableDown: true },
+
+      // Center Sun Altar & Columns
+      { id: 'mcel_sun_altar', x: 1550, y: 960, width: 700, height: 32, color: '#F59E0B', type: 'stone', isPassableDown: true },
+      { id: 'mcel_tier_l', x: 600, y: 940, width: 500, height: 30, color: '#FDE047', type: 'wood', isPassableDown: true },
+      { id: 'mcel_tier_r', x: 2700, y: 940, width: 500, height: 30, color: '#FDE047', type: 'wood', isPassableDown: true },
+      { id: 'mcel_spire_deck', x: 1700, y: 600, width: 400, height: 28, color: '#EF4444', type: 'wood', isPassableDown: true },
+      { id: 'mcel_pinnacle', x: 1800, y: 380, width: 200, height: 24, color: '#FBBF24', type: 'stone', isPassableDown: true },
+
+      // Solar Prominence Jump Pads
+      { id: 'mcel_pad_l', x: 300, y: 780, width: 95, height: 24, color: '#F59E0B', type: 'bounce', isPassableDown: true },
+      { id: 'mcel_pad_r', x: 3400, y: 780, width: 95, height: 24, color: '#F59E0B', type: 'bounce', isPassableDown: true },
+    ],
+  },
+
+  // MYSTERY MAP 6: Chrono Void Nexus (Super Weapon: Chrono Singularity Cannon)
+  mystery_chrono: {
+    id: 'mystery_chrono',
+    name: 'Mystery VI: Chrono Void Nexus',
+    description: 'Shimmering turquoise time nexus with floating hourglass obelisks. Hidden within the deep Time Rift Cavern lies the Chrono Singularity Cannon.',
+    theme: 'mystery_chrono',
+    size: 'mystery',
+    width: 4000,
+    height: 1700,
+    bgColor: '#F0FDFA',
+    features: ['Floating Obelisks', 'Time Rift Cavern Cave', 'Super Weapon: Chrono Cannon', 'Quantum Phase Rings'],
+    spawnPoints: [
+      { x: 1200, y: 1140 },
+      { x: 3200, y: 1140 },
+      { x: 2200, y: 920 },
+      { x: 2200, y: 580 },
+      { x: 2200, y: 340 },
+      { x: 1600, y: 960 },
+      { x: 2800, y: 960 },
+      { x: 1200, y: 720 },
+      { x: 3200, y: 720 },
+      { x: 2200, y: 1140 },
+    ],
+    weaponSpawns: [
+      // Standard Map Weapons
+      { id: 'mchr_wpn_1', weaponType: 'pistol', x: 1500, y: 1180, respawnTime: 7 },
+      { id: 'mchr_wpn_2', weaponType: 'burst_smg', x: 2900, y: 1180, respawnTime: 8 },
+      { id: 'mchr_wpn_3', weaponType: 'shotgun', x: 1600, y: 1000, respawnTime: 12 },
+      { id: 'mchr_wpn_4', weaponType: 'rocket_launcher', x: 2800, y: 1000, respawnTime: 30 },
+      { id: 'mchr_wpn_5', weaponType: 'railgun', x: 2200, y: 380, respawnTime: 45 },
+      // EXCLUSIVE SUPER WEAPON #6: Chrono Singularity Cannon (Hidden in Time Rift Cavern)
+      { id: 'mchr_super_chrono', weaponType: 'chrono_blaster', x: 700, y: 1510, respawnTime: 150 },
+    ],
+    platforms: [
+      // Main Center-Right Nexus Floor
+      { id: 'mchr_ground', x: 1000, y: 1220, width: 2600, height: 200, color: '#0F766E', type: 'ground', isPassableDown: false },
+
+      // HIDDEN EXPLORATION CAVE: Time Rift Cavern (Far Lower Left Floating Obelisk Island)
+      { id: 'mchr_cave_floor', x: 450, y: 1560, width: 500, height: 140, color: '#0D9488', type: 'stone', isPassableDown: false },
+      { id: 'mchr_cave_roof', x: 400, y: 1360, width: 550, height: 36, color: '#115E59', type: 'stone', isPassableDown: false },
+      { id: 'mchr_cave_ledge', x: 880, y: 1460, width: 140, height: 26, color: '#22D3EE', type: 'wood', isPassableDown: true },
+
+      // Upper Floating Temporal Platforms
+      { id: 'mchr_ring_l', x: 1100, y: 1000, width: 550, height: 32, color: '#2DD4BF', type: 'stone', isPassableDown: true },
+      { id: 'mchr_ring_r', x: 2750, y: 1000, width: 550, height: 32, color: '#2DD4BF', type: 'stone', isPassableDown: true },
+      { id: 'mchr_grand_nexus', x: 1850, y: 800, width: 700, height: 32, color: '#06B6D4', type: 'wood', isPassableDown: true },
+      { id: 'mchr_upper_spire', x: 2020, y: 600, width: 360, height: 28, color: '#22D3EE', type: 'stone', isPassableDown: true },
+      { id: 'mchr_pinnacle', x: 2100, y: 400, width: 200, height: 24, color: '#A5F3FC', type: 'wood', isPassableDown: true },
+
+      // Temporal Distortion Jump Pads
+      { id: 'mchr_pad_l', x: 920, y: 820, width: 95, height: 24, color: '#22D3EE', type: 'bounce', isPassableDown: true },
+      { id: 'mchr_pad_r', x: 3350, y: 820, width: 95, height: 24, color: '#22D3EE', type: 'bounce', isPassableDown: true },
+    ],
+  },
 };
 
 export const DEFAULT_ARENA_ID = 'park';

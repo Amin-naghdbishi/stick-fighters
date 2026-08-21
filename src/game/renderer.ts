@@ -307,154 +307,424 @@ export class GameRenderer {
   private drawArenaBackdrop(arena: Arena, time: number) {
     const ctx = this.ctx;
 
-    // Sun / Cartoon Light
+    // 1. Universal Bright Sky Sun & Drifting Fluffy Clouds
     ctx.save();
     ctx.beginPath();
-    ctx.arc(1150, 140, 65, 0, Math.PI * 2);
+    ctx.arc(arena.width * 0.75, 130, 65, 0, Math.PI * 2);
     ctx.fillStyle = '#FFE57F';
     ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = '#1E293B';
     ctx.stroke();
 
-    ctx.strokeStyle = '#FFE082';
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = '#FDE047';
+    ctx.lineWidth = 3;
     ctx.setLineDash([8, 8]);
     for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
       ctx.beginPath();
-      ctx.moveTo(1150 + Math.cos(a) * 75, 140 + Math.sin(a) * 75);
-      ctx.lineTo(1150 + Math.cos(a) * 110, 140 + Math.sin(a) * 110);
+      ctx.moveTo(arena.width * 0.75 + Math.cos(a) * 75, 130 + Math.sin(a) * 75);
+      ctx.lineTo(arena.width * 0.75 + Math.cos(a) * 110, 130 + Math.sin(a) * 110);
       ctx.stroke();
     }
     ctx.setLineDash([]);
     ctx.restore();
 
-    this.drawComicCloud(240 + Math.sin(time * 0.0005) * 30, 120, 70);
-    this.drawComicCloud(680 + Math.cos(time * 0.0004) * 40, 90, 85);
-    this.drawComicCloud(1180 + Math.sin(time * 0.0006) * 25, 180, 60);
+    // Universal Drifting Fluffy Clouds
+    const cloudStep = Math.max(500, Math.floor(arena.width / 4));
+    for (let cx = 150; cx < arena.width; cx += cloudStep) {
+      const cy = 100 + ((cx * 17) % 120);
+      const cr = 60 + ((cx * 7) % 35);
+      const floatX = cx + Math.sin(time * 0.0004 + cx) * 35;
+      this.drawComicCloud(floatX, cy, cr);
+    }
 
+    // 2. Specific Theme Decorative Backdrops
     if (arena.theme === 'park') {
       ctx.fillStyle = '#A3E048';
-      ctx.strokeStyle = '#2D3748';
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#1E293B';
+      ctx.lineWidth = 3.5;
 
       ctx.beginPath();
-      ctx.moveTo(-100, 750);
-      ctx.quadraticCurveTo(350, 480, 700, 680);
-      ctx.quadraticCurveTo(1100, 520, 1600, 750);
-      ctx.lineTo(1600, 950);
-      ctx.lineTo(-100, 950);
+      ctx.moveTo(-100, arena.height - 100);
+      ctx.quadraticCurveTo(arena.width * 0.25, arena.height - 350, arena.width * 0.5, arena.height - 180);
+      ctx.quadraticCurveTo(arena.width * 0.75, arena.height - 320, arena.width + 100, arena.height - 100);
+      ctx.lineTo(arena.width + 100, arena.height);
+      ctx.lineTo(-100, arena.height);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      this.drawCartoonTree(150, 560, 55);
-      this.drawCartoonTree(1250, 560, 60);
-      this.drawCartoonTree(700, 640, 45);
+      for (let tx = 200; tx < arena.width; tx += 450) {
+        this.drawCartoonTree(tx, arena.height - 240, 55);
+      }
+      this.drawHotAirBalloon(arena.width * 0.25, 200, 45, time, '#FF4081', '#FFEB3B');
     } else if (arena.theme === 'town') {
-      ctx.fillStyle = '#FFD8A8';
-      ctx.strokeStyle = '#2D3748';
-      ctx.lineWidth = 3;
+      ctx.fillStyle = '#FED7AA';
+      ctx.strokeStyle = '#1E293B';
+      ctx.lineWidth = 3.5;
 
-      ctx.fillRect(80, 360, 160, 400);
-      ctx.strokeRect(80, 360, 160, 400);
-      ctx.beginPath();
-      ctx.moveTo(60, 360);
-      ctx.lineTo(160, 260);
-      ctx.lineTo(260, 360);
-      ctx.closePath();
-      ctx.fillStyle = '#E8590C';
-      ctx.fill();
-      ctx.stroke();
+      for (let bx = 100; bx < arena.width; bx += 320) {
+        const bh = 300 + ((bx * 13) % 200);
+        ctx.fillStyle = bx % 640 === 0 ? '#FED7AA' : '#BAE6FD';
+        ctx.fillRect(bx, arena.height - bh, 220, bh);
+        ctx.strokeRect(bx, arena.height - bh, 220, bh);
 
-      ctx.fillStyle = '#D0EBFF';
-      ctx.fillRect(1160, 340, 180, 450);
-      ctx.strokeRect(1160, 340, 180, 450);
-      ctx.beginPath();
-      ctx.moveTo(1140, 340);
-      ctx.lineTo(1250, 240);
-      ctx.lineTo(1360, 340);
-      ctx.closePath();
-      ctx.fillStyle = '#1971C2';
-      ctx.fill();
-      ctx.stroke();
-
-      this.drawBunting(350, 380, 850, 410, time);
-    } else if (arena.theme === 'island') {
-      this.drawRainbow(700, 550, 450);
-      this.drawFloatingMiniRock(180, 280, 60, time);
-      this.drawFloatingMiniRock(1220, 240, 70, time + 2);
-    } else if (arena.theme === 'castle') {
-      ctx.fillStyle = '#D1C4E9';
-      ctx.strokeStyle = '#2D3748';
-      ctx.lineWidth = 3;
-
-      ctx.fillRect(520, 200, 360, 550);
-      ctx.strokeRect(520, 200, 360, 550);
-      for (let bx = 520; bx < 880; bx += 60) {
-        ctx.fillRect(bx, 170, 35, 30);
-        ctx.strokeRect(bx, 170, 35, 30);
-      }
-      this.drawFlag(700, 120, '#E53935', time);
-    } else if (arena.theme === 'dojo') {
-      ctx.fillStyle = '#FEF3C7';
-      ctx.strokeStyle = '#78350F';
-      ctx.lineWidth = 3;
-      for (let sx = 100; sx < arena.width - 100; sx += 200) {
-        ctx.strokeRect(sx, 180, 180, 400);
-        ctx.strokeRect(sx + 10, 190, 75, 180);
-        ctx.strokeRect(sx + 95, 190, 75, 180);
-        ctx.strokeRect(sx + 10, 380, 75, 180);
-        ctx.strokeRect(sx + 95, 380, 75, 180);
-      }
-      for (let lx = 250; lx < arena.width; lx += 350) {
+        // Triangular Gabled Roof
+        ctx.fillStyle = bx % 640 === 0 ? '#EA580C' : '#0284C7';
         ctx.beginPath();
-        ctx.moveTo(lx, 0);
-        ctx.lineTo(lx, 140);
-        ctx.strokeStyle = '#1F2937';
-        ctx.stroke();
-        ctx.fillStyle = '#DC2626';
-        ctx.strokeStyle = '#7F1D1D';
-        ctx.beginPath();
-        ctx.arc(lx, 160, 22, 0, Math.PI * 2);
+        ctx.moveTo(bx - 15, arena.height - bh);
+        ctx.lineTo(bx + 110, arena.height - bh - 80);
+        ctx.lineTo(bx + 235, arena.height - bh);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
       }
-    } else if (arena.theme === 'cyber') {
-      ctx.strokeStyle = '#93C5FD';
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 4]);
-      for (let gy = 100; gy < arena.height; gy += 80) {
+      this.drawBunting(150, 360, arena.width - 150, 390, time);
+    } else if (arena.theme === 'island') {
+      this.drawRainbow(arena.width / 2, arena.height - 250, 450);
+      for (let rx = 200; rx < arena.width; rx += 450) {
+        this.drawFloatingMiniRock(rx, 260 + ((rx * 11) % 120), 65, time + rx * 0.01);
+      }
+      this.drawPalmTree(250, arena.height - 220, 60, time);
+      this.drawPalmTree(arena.width - 250, arena.height - 220, 60, time);
+    } else if (arena.theme === 'castle') {
+      ctx.fillStyle = '#DDD6FE';
+      ctx.strokeStyle = '#1E293B';
+      ctx.lineWidth = 3.5;
+
+      ctx.fillRect(arena.width * 0.3, 220, arena.width * 0.4, arena.height - 220);
+      ctx.strokeRect(arena.width * 0.3, 220, arena.width * 0.4, arena.height - 220);
+      for (let bx = arena.width * 0.3; bx < arena.width * 0.7 - 20; bx += 55) {
+        ctx.fillRect(bx, 190, 32, 30);
+        ctx.strokeRect(bx, 190, 32, 30);
+      }
+      this.drawFlag(arena.width / 2, 140, '#EF4444', time);
+    } else if (arena.theme === 'dojo') {
+      ctx.fillStyle = '#FEF3C7';
+      ctx.strokeStyle = '#78350F';
+      ctx.lineWidth = 3.5;
+      for (let sx = 80; sx < arena.width - 80; sx += 220) {
+        ctx.strokeRect(sx, 180, 200, 420);
+        ctx.strokeRect(sx + 10, 190, 85, 190);
+        ctx.strokeRect(sx + 105, 190, 85, 190);
+        ctx.strokeRect(sx + 10, 390, 85, 190);
+        ctx.strokeRect(sx + 105, 390, 85, 190);
+      }
+      this.drawToriiGate(arena.width / 2, 160, 220, 340);
+      for (let lx = 200; lx < arena.width; lx += 350) {
+        this.drawLanternPost(lx, 260, time);
+      }
+    } else if (arena.theme === 'bamboo') {
+      // Bamboo Grove Sanctuary (New Small Map)
+      ctx.fillStyle = '#DCFCE7';
+      ctx.strokeStyle = '#15803D';
+      ctx.lineWidth = 3.5;
+
+      // Layered bamboo stalks across backdrop
+      for (let bx = 60; bx < arena.width; bx += 60) {
+        const sway = Math.sin(time * 0.002 + bx) * 6;
+        ctx.fillStyle = bx % 120 === 0 ? '#4ADE80' : '#22C55E';
+        ctx.fillRect(bx + sway - 8, 80, 16, arena.height - 80);
+        ctx.strokeRect(bx + sway - 8, 80, 16, arena.height - 80);
+
+        // Bamboo joints
+        for (let jy = 140; jy < arena.height - 100; jy += 90) {
+          ctx.fillStyle = '#14532D';
+          ctx.fillRect(bx + sway - 11, jy, 22, 6);
+        }
+      }
+      this.drawToriiGate(arena.width / 2, 180, 180, 280);
+    } else if (arena.theme === 'arcade') {
+      // Pixel Arcade Arena (New Small Map)
+      ctx.strokeStyle = '#F472B6';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      for (let gy = 80; gy < arena.height; gy += 70) {
         ctx.beginPath();
         ctx.moveTo(0, gy);
         ctx.lineTo(arena.width, gy);
         ctx.stroke();
       }
-      for (let gx = 100; gx < arena.width; gx += 120) {
+      for (let gx = 80; gx < arena.width; gx += 90) {
         ctx.beginPath();
         ctx.moveTo(gx, 0);
         ctx.lineTo(gx, arena.height);
         ctx.stroke();
       }
       ctx.setLineDash([]);
-    } else if (arena.theme === 'volcano') {
-      ctx.fillStyle = '#FED7AA';
-      ctx.strokeStyle = '#9A3412';
-      ctx.lineWidth = 3;
+
+      // Neon arcade signs
+      ctx.fillStyle = '#FDE047';
+      ctx.font = '900 32px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('★ ARCADE ZONE ★', arena.width / 2, 140);
+    } else if (arena.theme === 'glacier') {
+      // Frozen Glacier Cavern (New Small Map)
+      ctx.fillStyle = '#E0F2FE';
+      ctx.strokeStyle = '#0284C7';
+      ctx.lineWidth = 3.5;
+
       ctx.beginPath();
-      ctx.arc(arena.width / 2, arena.height + 200, 500, 0, Math.PI, true);
+      ctx.moveTo(0, arena.height - 200);
+      for (let gx = 0; gx <= arena.width; gx += 280) {
+        ctx.lineTo(gx + 140, arena.height - 450);
+        ctx.lineTo(gx + 280, arena.height - 200);
+      }
+      ctx.lineTo(arena.width, arena.height);
+      ctx.lineTo(0, arena.height);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      for (let cx = 150; cx < arena.width; cx += 320) {
+        this.drawCrystalCluster(cx, arena.height - 260, 50, '#38BDF8', time);
+      }
+    } else if (arena.theme === 'desert') {
+      // Sunken Oasis Ruins (New Medium Map)
+      ctx.fillStyle = '#FEF08A';
+      ctx.strokeStyle = '#CA8A04';
+      ctx.lineWidth = 3.5;
+
+      ctx.beginPath();
+      ctx.moveTo(-50, arena.height - 150);
+      ctx.quadraticCurveTo(arena.width * 0.3, arena.height - 420, arena.width * 0.6, arena.height - 220);
+      ctx.quadraticCurveTo(arena.width * 0.85, arena.height - 380, arena.width + 50, arena.height - 150);
+      ctx.lineTo(arena.width + 50, arena.height);
+      ctx.lineTo(-50, arena.height);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      this.drawPalmTree(240, arena.height - 260, 70, time);
+      this.drawPalmTree(arena.width - 240, arena.height - 260, 70, time);
+      this.drawAncientColumn(arena.width * 0.35, arena.height - 340, 36, 120, '#FDE68A');
+      this.drawAncientColumn(arena.width * 0.65, arena.height - 340, 36, 120, '#FDE68A');
+    } else if (arena.theme === 'pirate') {
+      // Buccaneer Pirate Cove (New Medium Map)
+      this.drawRainbow(arena.width / 2, arena.height - 180, 500);
+      this.drawPalmTree(180, arena.height - 280, 75, time);
+      this.drawPalmTree(arena.width - 180, arena.height - 280, 75, time);
+
+      // Distant Pirate Ship Silhouette
+      ctx.fillStyle = '#78350F';
+      ctx.strokeStyle = '#1E293B';
+      ctx.lineWidth = 3;
+      ctx.fillRect(arena.width * 0.42, 380, 240, 60);
+      ctx.strokeRect(arena.width * 0.42, 380, 240, 60);
+      // Masts & Sails
+      ctx.fillRect(arena.width * 0.48, 260, 10, 120);
+      ctx.fillRect(arena.width * 0.58, 240, 10, 140);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(arena.width * 0.44, 280, 80, 50);
+      ctx.fillRect(arena.width * 0.54, 260, 90, 60);
+    } else if (arena.theme === 'circus') {
+      // Carnival Big Top (New Medium Map)
+      ctx.fillStyle = '#FFE4E6';
+      ctx.strokeStyle = '#E11D48';
+      ctx.lineWidth = 3.5;
+
+      // Big Top Tent
+      ctx.beginPath();
+      ctx.moveTo(arena.width * 0.2, arena.height - 200);
+      ctx.lineTo(arena.width * 0.5, 160);
+      ctx.lineTo(arena.width * 0.8, arena.height - 200);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      this.drawFlag(arena.width * 0.5, 110, '#E11D48', time);
+      this.drawBunting(120, 360, arena.width - 120, 390, time);
+    } else if (arena.theme === 'steampunk') {
+      // Clockwork Airship Zeppelin (New Large Map)
+      ctx.fillStyle = '#FEF3C7';
+      for (let gx = 300; gx < arena.width - 200; gx += 480) {
+        this.drawClockworkGear(gx, 350, 65, 10, '#D97706', 0.001, time);
+        this.drawClockworkGear(gx + 90, 420, 45, 8, '#B45309', -0.0015, time);
+      }
+      this.drawHotAirBalloon(400, 220, 55, time, '#F59E0B', '#B45309');
+      this.drawHotAirBalloon(arena.width - 400, 240, 55, time + 2, '#38BDF8', '#0284C7');
+    } else if (arena.theme === 'space') {
+      // Orbital Star Station (New Large Map)
+      ctx.fillStyle = '#06B6D4';
+      ctx.strokeStyle = '#0891B2';
+      ctx.lineWidth = 2.5;
+
+      // Distant Earth / Planet Curve
+      ctx.fillStyle = '#38BDF8';
+      ctx.beginPath();
+      ctx.arc(arena.width * 0.8, arena.height + 400, 700, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      for (let sx = 200; sx < arena.width; sx += 400) {
+        this.drawCrystalCluster(sx, 320, 45, '#A5F3FC', time);
+      }
+    } else if (arena.theme === 'temple') {
+      // Celestial Sky Sanctuary (New Large Map)
+      this.drawRainbow(arena.width / 2, arena.height - 350, 650);
+      for (let rx = 300; rx < arena.width; rx += 600) {
+        this.drawFloatingMiniRock(rx, 380, 80, time + rx);
+        this.drawToriiGate(rx, 260, 140, 160);
+      }
+    } else if (arena.theme === 'atlantis') {
+      // Sunken Atlantis Palace (New Extra Large Map)
+      ctx.fillStyle = '#CCFBF1';
+      ctx.strokeStyle = '#0F766E';
+      ctx.lineWidth = 4;
+
+      for (let ax = 300; ax < arena.width; ax += 550) {
+        this.drawAncientColumn(ax, arena.height - 600, 48, 380, '#99F6E4');
+        this.drawCrystalCluster(ax + 120, arena.height - 300, 60, '#2DD4BF', time);
+      }
+    } else if (arena.theme === 'cyber_megacity') {
+      // Neo-Tokyo Cyber Megalopolis (New Extra Large Map)
+      ctx.strokeStyle = '#38BDF8';
+      ctx.lineWidth = 3.5;
+
+      for (let mx = 100; mx < arena.width; mx += 320) {
+        const h = 500 + ((mx * 17) % 450);
+        ctx.fillStyle = mx % 640 === 0 ? '#E0F2FE' : '#F1F5F9';
+        ctx.fillRect(mx, arena.height - h, 260, h);
+        ctx.strokeRect(mx, arena.height - h, 260, h);
+
+        // Neon Windows
+        ctx.fillStyle = '#FDE047';
+        for (let wy = arena.height - h + 40; wy < arena.height - 120; wy += 55) {
+          for (let wx = mx + 25; wx < mx + 235; wx += 45) {
+            ctx.fillRect(wx, wy, 20, 24);
+          }
+        }
+      }
+    } else if (arena.theme === 'dragon_valley') {
+      // Great Dragon Peaks & Chasm (New Extra Large Map)
+      ctx.fillStyle = '#BBF7D0';
+      ctx.strokeStyle = '#15803D';
+      ctx.lineWidth = 4;
+
+      ctx.beginPath();
+      ctx.moveTo(-100, arena.height - 200);
+      for (let px = 0; px <= arena.width; px += 700) {
+        ctx.lineTo(px + 350, arena.height - 950);
+        ctx.lineTo(px + 700, arena.height - 200);
+      }
+      ctx.lineTo(arena.width + 100, arena.height);
+      ctx.lineTo(-100, arena.height);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      for (let px = 350; px < arena.width; px += 700) {
+        this.drawPineTree(px, arena.height - 850, 120, '#16A34A');
+      }
+    } else if (arena.theme === 'mystery_crystal') {
+      // Mystery IV: Crystal Cavern of Eternity (Amethyst & Emerald Bright Prismatic Grotto)
+      ctx.fillStyle = '#F3E8FF';
+      ctx.strokeStyle = '#9333EA';
+      ctx.lineWidth = 4;
+
+      for (let cx = 200; cx < arena.width; cx += 450) {
+        this.drawCrystalCluster(cx, 400 + Math.sin(cx + time * 0.001) * 80, 90, '#C084FC', time);
+        this.drawCrystalCluster(cx + 200, arena.height - 350, 75, '#34D399', time + 1);
+      }
+      // Secluded Exploration Cave Entrance on lower right
+      this.drawCaveEntrance(3200, 1380, 260, 220, '#7E22CE', '#C084FC', time);
+    } else if (arena.theme === 'mystery_celestial') {
+      // Mystery V: Solar Sunken Citadel (Radiant Golden Sun Citadel & Ancient Sun Altar)
+      ctx.fillStyle = '#FEF3C7';
+      ctx.strokeStyle = '#D97706';
+      ctx.lineWidth = 4;
+
+      // Radiant Solar Sun Disc
+      ctx.fillStyle = '#FDE047';
+      ctx.beginPath();
+      ctx.arc(arena.width / 2, 280, 140, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      for (let ax = 300; ax < arena.width; ax += 600) {
+        this.drawAncientColumn(ax, arena.height - 550, 55, 360, '#FDE68A');
+      }
+      // Subterranean Chamber of the Sun Cave Entrance
+      this.drawCaveEntrance(1900, 1500, 280, 240, '#B45309', '#FDE047', time);
+    } else if (arena.theme === 'mystery_chrono') {
+      // Mystery VI: Chrono Void Nexus (Shimmering Turquoise Time Nexus & Obelisks)
+      ctx.fillStyle = '#CCFBF1';
+      ctx.strokeStyle = '#0D9488';
+      ctx.lineWidth = 4;
+
+      for (let nx = 350; nx < arena.width; nx += 550) {
+        this.drawFloatingMiniRock(nx, 420 + Math.sin(nx * 0.002 + time * 0.001) * 90, 95, time);
+        this.drawCrystalCluster(nx, 320, 70, '#22D3EE', time);
+      }
+      // Time Rift Exploration Cavern Entrance
+      this.drawCaveEntrance(700, 1520, 270, 230, '#0F766E', '#22D3EE', time);
+    } else if (arena.theme === 'mystery_mountain' || arena.theme === 'mystery_sky') {
+      // Mystery I: Stormpeak Mountain
+      ctx.fillStyle = '#E2E8F0';
+      ctx.strokeStyle = '#64748B';
+      ctx.lineWidth = 4;
+
+      ctx.beginPath();
+      ctx.moveTo(0, arena.height - 600);
+      for (let mx = 0; mx <= arena.width; mx += 700) {
+        ctx.lineTo(mx + 350, arena.height - 1500);
+        ctx.lineTo(mx + 700, arena.height - 600);
+      }
+      ctx.lineTo(arena.width, arena.height);
+      ctx.lineTo(0, arena.height);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      for (let px = 350; px < arena.width; px += 700) {
+        this.drawPineTree(px, arena.height - 1380, 110, '#475569');
+      }
+    } else if (arena.theme === 'mystery_jungle' || arena.theme === 'mystery_depths') {
+      // Mystery II: Primordial Jungle
+      ctx.fillStyle = '#DCFCE7';
+      ctx.strokeStyle = '#15803D';
+      ctx.lineWidth = 4;
+
+      ctx.beginPath();
+      ctx.moveTo(0, arena.height - 600);
+      for (let jx = 0; jx <= arena.width; jx += 600) {
+        ctx.quadraticCurveTo(jx + 300, arena.height - 1050, jx + 600, arena.height - 600);
+      }
+      ctx.lineTo(arena.width, arena.height);
+      ctx.lineTo(0, arena.height);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      for (let tx = 300; tx < arena.width; tx += 600) {
+        this.drawPalmTree(tx, arena.height - 750, 90, time);
+      }
+    } else if (arena.theme === 'mystery_volcanic' || arena.theme === 'mystery_void' || arena.theme === 'volcano') {
+      // Mystery III: Obsidian Volcanic Rift
+      ctx.fillStyle = '#FED7AA';
+      ctx.strokeStyle = '#C2410C';
+      ctx.lineWidth = 4;
+
+      ctx.beginPath();
+      ctx.moveTo(0, arena.height - 450);
+      for (let vx = 0; vx <= arena.width; vx += 600) {
+        ctx.lineTo(vx + 300, arena.height - 1100);
+        ctx.lineTo(vx + 600, arena.height - 450);
+      }
+      ctx.lineTo(arena.width, arena.height);
+      ctx.lineTo(0, arena.height);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
     } else if (arena.theme === 'forest') {
-      ctx.fillStyle = '#C8E6C9';
-      ctx.strokeStyle = '#2E7D32';
-      ctx.lineWidth = 3;
+      ctx.fillStyle = '#DCFCE7';
+      ctx.strokeStyle = '#16A34A';
+      ctx.lineWidth = 4;
 
       ctx.beginPath();
       ctx.moveTo(0, arena.height - 300);
       for (let hx = 0; hx <= arena.width; hx += 400) {
-        ctx.quadraticCurveTo(hx + 200, arena.height - 500, hx + 400, arena.height - 300);
+        ctx.quadraticCurveTo(hx + 200, arena.height - 520, hx + 400, arena.height - 300);
       }
       ctx.lineTo(arena.width, arena.height);
       ctx.lineTo(0, arena.height);
@@ -463,57 +733,49 @@ export class GameRenderer {
       ctx.stroke();
 
       for (let tx = 200; tx < arena.width; tx += 450) {
-        ctx.fillStyle = '#8D6E63';
-        ctx.strokeStyle = '#4E342E';
-        ctx.fillRect(tx, 200, 70, arena.height - 200);
-        ctx.strokeRect(tx, 200, 70, arena.height - 200);
-        this.drawCartoonTree(tx + 35, 200, 110);
+        this.drawCartoonTree(tx, arena.height - 320, 80);
       }
     } else if (arena.theme === 'ruins') {
-      ctx.fillStyle = '#FFF9C4';
-      ctx.strokeStyle = '#8D6E63';
-      ctx.lineWidth = 3;
+      ctx.fillStyle = '#FEF9C3';
+      ctx.strokeStyle = '#CA8A04';
+      ctx.lineWidth = 4;
 
       for (let rx = 250; rx < arena.width - 200; rx += 500) {
-        ctx.strokeRect(rx, 350, 160, 450);
-        ctx.beginPath();
-        ctx.arc(rx + 80, 350, 80, Math.PI, 0);
-        ctx.stroke();
-        for (let px = rx + 25; px < rx + 140; px += 30) {
-          ctx.beginPath();
-          ctx.moveTo(px, 350);
-          ctx.lineTo(px, 800);
-          ctx.stroke();
-        }
+        this.drawAncientColumn(rx, arena.height - 500, 48, 320, '#FEF08A');
+        this.drawAncientColumn(rx + 160, arena.height - 500, 48, 320, '#FEF08A');
       }
     } else if (arena.theme === 'canyon') {
-      ctx.fillStyle = '#FFCCBC';
-      ctx.strokeStyle = '#BF360C';
-      ctx.lineWidth = 3;
+      ctx.fillStyle = '#FFEDD5';
+      ctx.strokeStyle = '#EA580C';
+      ctx.lineWidth = 4;
 
       ctx.beginPath();
-      ctx.moveTo(0, arena.height - 400);
+      ctx.moveTo(0, arena.height - 380);
       for (let cx = 0; cx <= arena.width; cx += 500) {
-        ctx.lineTo(cx + 150, arena.height - 650);
-        ctx.lineTo(cx + 350, arena.height - 650);
-        ctx.lineTo(cx + 500, arena.height - 400);
+        ctx.lineTo(cx + 150, arena.height - 620);
+        ctx.lineTo(cx + 350, arena.height - 620);
+        ctx.lineTo(cx + 500, arena.height - 380);
       }
       ctx.lineTo(arena.width, arena.height);
       ctx.lineTo(0, arena.height);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+
+      for (let px = 250; px < arena.width; px += 500) {
+        this.drawPineTree(px, arena.height - 580, 80, '#C2410C');
+      }
     } else if (arena.theme === 'metropolis') {
-      ctx.strokeStyle = '#37474F';
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 3.5;
 
       for (let mx = 100; mx < arena.width; mx += 260) {
         const h = 400 + ((mx * 13) % 350);
-        ctx.fillStyle = mx % 520 === 0 ? '#CFD8DC' : '#ECEFF1';
+        ctx.fillStyle = mx % 520 === 0 ? '#E2E8F0' : '#F1F5F9';
         ctx.fillRect(mx, arena.height - h, 200, h);
         ctx.strokeRect(mx, arena.height - h, 200, h);
 
-        ctx.fillStyle = '#FFE082';
+        ctx.fillStyle = '#FDE047';
         for (let wy = arena.height - h + 30; wy < arena.height - 100; wy += 45) {
           for (let wx = mx + 20; wx < mx + 180; wx += 35) {
             if ((wx + wy) % 3 !== 0) {
@@ -521,82 +783,6 @@ export class GameRenderer {
             }
           }
         }
-      }
-    } else if (arena.theme === 'mystery_mountain' || arena.theme === 'mystery_sky') {
-      // Stormpeak Mountain Backdrop: Light slate alpine peaks, storm clouds, bright atmosphere
-      ctx.fillStyle = '#CBD5E1';
-      ctx.strokeStyle = '#64748B';
-      ctx.lineWidth = 4;
-
-      ctx.beginPath();
-      ctx.moveTo(0, arena.height - 800);
-      for (let mx = 0; mx <= arena.width; mx += 800) {
-        ctx.lineTo(mx + 400, arena.height - 1800);
-        ctx.lineTo(mx + 800, arena.height - 800);
-      }
-      ctx.lineTo(arena.width, arena.height);
-      ctx.lineTo(0, arena.height);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      for (let cx = 350; cx < arena.width; cx += 700) {
-        this.drawComicCloud(cx, 400 + Math.sin(cx * 0.01 + time * 0.0005) * 60, 120);
-      }
-    } else if (arena.theme === 'mystery_jungle' || arena.theme === 'mystery_depths') {
-      // Primordial Jungle Backdrop: Lush rainforest canopy, ancient stone ruins, vibrant foliage
-      ctx.fillStyle = '#16A34A';
-      ctx.strokeStyle = '#15803D';
-      ctx.lineWidth = 4;
-
-      ctx.beginPath();
-      ctx.moveTo(0, arena.height - 700);
-      for (let jx = 0; jx <= arena.width; jx += 600) {
-        ctx.quadraticCurveTo(jx + 300, arena.height - 1100, jx + 600, arena.height - 700);
-      }
-      ctx.lineTo(arena.width, arena.height);
-      ctx.lineTo(0, arena.height);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      for (let tx = 400; tx < arena.width; tx += 650) {
-        ctx.fillStyle = '#854D0E';
-        ctx.strokeStyle = '#543007';
-        ctx.fillRect(tx, 300, 90, arena.height - 300);
-        ctx.strokeRect(tx, 300, 90, arena.height - 300);
-        this.drawCartoonTree(tx + 45, 260, 140);
-      }
-    } else if (arena.theme === 'mystery_volcanic' || arena.theme === 'mystery_void') {
-      // Obsidian Volcanic Rift Backdrop: Warm terracotta rock cliffs, glowing orange lava pools
-      ctx.fillStyle = '#D97706';
-      ctx.strokeStyle = '#92400E';
-      ctx.lineWidth = 4;
-
-      ctx.beginPath();
-      ctx.moveTo(0, arena.height - 500);
-      for (let vx = 0; vx <= arena.width; vx += 700) {
-        ctx.lineTo(vx + 350, arena.height - 1200);
-        ctx.lineTo(vx + 700, arena.height - 500);
-      }
-      ctx.lineTo(arena.width, arena.height);
-      ctx.lineTo(0, arena.height);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      // Bubbling Lava Floor Pool at bottom of volcanic rift
-      ctx.fillStyle = '#F97316';
-      ctx.strokeStyle = '#EF4444';
-      ctx.fillRect(0, arena.height - 160, arena.width, 160);
-      ctx.strokeRect(0, arena.height - 160, arena.width, 160);
-
-      ctx.fillStyle = '#FDE047';
-      for (let lx = 100; lx < arena.width; lx += 220) {
-        const bubble = Math.sin(time * 0.004 + lx) * 10;
-        ctx.beginPath();
-        ctx.arc(lx, arena.height - 140 + bubble, 18, 0, Math.PI * 2);
-        ctx.fill();
       }
     }
   }
@@ -852,6 +1038,66 @@ export class GameRenderer {
 
         ctx.strokeStyle = '#FFFFFF';
         ctx.lineWidth = 2;
+        ctx.stroke();
+      } else if (p.weaponType === 'plasma_vortex') {
+        // Swirling Gravitational Plasma Singularity (Mystery IV)
+        const vortexR = 18 + Math.sin(time * 0.01) * 4;
+        ctx.fillStyle = '#C084FC';
+        ctx.strokeStyle = '#7E22CE';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, vortexR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Swirling accretion arms
+        ctx.strokeStyle = '#E879F9';
+        ctx.lineWidth = 2.5;
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 2) {
+          ctx.beginPath();
+          ctx.arc(0, 0, vortexR * 1.5, a + time * 0.008, a + time * 0.008 + Math.PI / 3);
+          ctx.stroke();
+        }
+
+        // White-hot singularity center
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(0, 0, 7, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (p.weaponType === 'solar_hammer') {
+        // Radiant Solar Flare Wave (Mystery V)
+        ctx.fillStyle = '#FDE047';
+        ctx.strokeStyle = '#D97706';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#F59E0B';
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+          const fx = Math.cos(a + time * 0.006) * 32;
+          const fy = Math.sin(a + time * 0.006) * 32;
+          ctx.beginPath();
+          ctx.arc(fx, fy, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (p.weaponType === 'chrono_blaster') {
+        // Temporal Singularity Distortion Beam (Mystery VI)
+        ctx.fillStyle = '#22D3EE';
+        ctx.strokeStyle = '#0891B2';
+        ctx.lineWidth = 3;
+        ctx.fillRect(-28, -6, 56, 12);
+        ctx.strokeRect(-28, -6, 56, 12);
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(-24, -2, 48, 4);
+
+        // Distortion phase rings
+        ctx.strokeStyle = '#A5F3FC';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 14, 0, Math.PI * 2);
         ctx.stroke();
       }
 
@@ -2180,6 +2426,79 @@ export class GameRenderer {
         ctx.fillStyle = '#FACC15';
         ctx.fillRect(26, -4, 8, 8);
         break;
+
+      case 'plasma_vortex':
+        // Mystery IV: Gravitational Singularity Annihilator
+        ctx.fillStyle = '#6B21A8';
+        ctx.strokeStyle = '#0F172A';
+        ctx.fillRect(-8, -6, 26, 12);
+        ctx.strokeRect(-8, -6, 26, 12);
+        // Crystal Prongs
+        ctx.fillStyle = '#C084FC';
+        ctx.beginPath();
+        ctx.moveTo(18, -12);
+        ctx.lineTo(34, -4);
+        ctx.lineTo(26, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(18, 12);
+        ctx.lineTo(34, 4);
+        ctx.lineTo(26, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Floating Singularity Core
+        ctx.fillStyle = '#F43F5E';
+        ctx.beginPath();
+        ctx.arc(28, 0, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        break;
+
+      case 'solar_hammer':
+        // Mystery V: Divine Solar Warhammer
+        ctx.fillStyle = '#78350F';
+        ctx.strokeStyle = '#0F172A';
+        // Long Handle
+        ctx.fillRect(-14, -3, 36, 6);
+        ctx.strokeRect(-14, -3, 36, 6);
+        // Solar Hammer Head
+        ctx.fillStyle = '#F59E0B';
+        ctx.fillRect(18, -18, 16, 36);
+        ctx.strokeRect(18, -18, 16, 36);
+        // Sun Crest Inset
+        ctx.fillStyle = '#FDE047';
+        ctx.beginPath();
+        ctx.arc(26, 0, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // Prominence Flames
+        ctx.fillStyle = '#EF4444';
+        ctx.fillRect(34, -14, 6, 28);
+        break;
+
+      case 'chrono_blaster':
+        // Mystery VI: Chrono Singularity Cannon
+        ctx.fillStyle = '#0F766E';
+        ctx.strokeStyle = '#0F172A';
+        // Sleek Chassis
+        ctx.fillRect(-10, -7, 32, 14);
+        ctx.strokeRect(-10, -7, 32, 14);
+        // Quantum Phase Rings
+        ctx.fillStyle = '#06B6D4';
+        ctx.fillRect(14, -11, 4, 22);
+        ctx.strokeRect(14, -11, 4, 22);
+        ctx.fillRect(22, -9, 4, 18);
+        ctx.strokeRect(22, -9, 4, 18);
+        // Chrono Core
+        ctx.fillStyle = '#22D3EE';
+        ctx.beginPath();
+        ctx.arc(4, 0, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        break;
     }
 
     ctx.restore();
@@ -2626,37 +2945,63 @@ export class GameRenderer {
     ctx.stroke();
   }
 
-  private drawComicCloud(x: number, y: number, r: number) {
+  /**
+   * Fluffy organic comic cloud: 100% rounded multi-lobed silhouette with zero sharp corners or flat creases.
+   */
+  private drawComicCloud(
+    x: number,
+    y: number,
+    r: number,
+    cloudColor: string = '#FFFFFF',
+    outlineColor: string = '#334155'
+  ) {
     const ctx = this.ctx;
     ctx.save();
-    ctx.fillStyle = '#FFFFFF';
-    ctx.strokeStyle = '#334155';
+    ctx.fillStyle = cloudColor;
+    ctx.strokeStyle = outlineColor;
     ctx.lineWidth = 3.5;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    const baseY = y + r * 0.35;
-    const leftX = x - r * 0.65;
-    const rightX = x + r * 1.33;
+    const lobes = [
+      { lx: x - r * 0.55, ly: y + r * 0.05, lr: r * 0.38 },
+      { lx: x - r * 0.32, ly: y - r * 0.22, lr: r * 0.44 },
+      { lx: x + r * 0.08, ly: y - r * 0.35, lr: r * 0.52 },
+      { lx: x + r * 0.52, ly: y - r * 0.20, lr: r * 0.46 },
+      { lx: x + r * 0.82, ly: y + r * 0.08, lr: r * 0.36 },
+      { lx: x + r * 0.50, ly: y + r * 0.26, lr: r * 0.36 },
+      { lx: x + r * 0.05, ly: y + r * 0.30, lr: r * 0.42 },
+      { lx: x - r * 0.35, ly: y + r * 0.24, lr: r * 0.36 },
+    ];
 
-    // 1. Fill cloud interior
+    // 1. Fill solid interior
     ctx.beginPath();
-    ctx.arc(x - r * 0.25, y, r * 0.42, 0, Math.PI * 2);
-    ctx.arc(x + r * 0.15, y - r * 0.3, r * 0.55, 0, Math.PI * 2);
-    ctx.arc(x + r * 0.65, y - r * 0.2, r * 0.48, 0, Math.PI * 2);
-    ctx.arc(x + r * 0.95, y + r * 0.05, r * 0.40, 0, Math.PI * 2);
-    ctx.fillRect(leftX, y - r * 0.1, rightX - leftX, baseY - (y - r * 0.1));
+    for (const lobe of lobes) {
+      ctx.moveTo(lobe.lx + lobe.lr, lobe.ly);
+      ctx.arc(lobe.lx, lobe.ly, lobe.lr, 0, Math.PI * 2);
+    }
     ctx.fill();
 
-    // 2. Stroke complete outer perimeter (including bottom base line)
+    // 2. Stroke outer puffy arcs
+    for (const lobe of lobes) {
+      ctx.beginPath();
+      ctx.arc(lobe.lx, lobe.ly, lobe.lr, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // 3. Clean interior mask to remove overlapping internal stroke lines
     ctx.beginPath();
-    ctx.moveTo(leftX, baseY);
-    ctx.arc(x - r * 0.25, y, r * 0.42, Math.PI * 0.75, Math.PI * 1.45);
-    ctx.arc(x + r * 0.15, y - r * 0.3, r * 0.55, Math.PI * 1.15, Math.PI * 1.95);
-    ctx.arc(x + r * 0.65, y - r * 0.2, r * 0.48, Math.PI * 1.6, Math.PI * 2.2);
-    ctx.arc(x + r * 0.95, y + r * 0.05, r * 0.40, Math.PI * 1.85, Math.PI * 0.35);
-    ctx.lineTo(leftX, baseY); // Complete bottom line stroke connecting base
-    ctx.closePath();
+    for (const lobe of lobes) {
+      ctx.moveTo(lobe.lx + lobe.lr - 2, lobe.ly);
+      ctx.arc(lobe.lx, lobe.ly, lobe.lr - 2, 0, Math.PI * 2);
+    }
+    ctx.fill();
+
+    // 4. Subtle comic highlight curve on top-left
+    ctx.strokeStyle = '#F1F5F9';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(x + r * 0.08, y - r * 0.35, r * 0.40, Math.PI * 1.1, Math.PI * 1.7);
     ctx.stroke();
 
     ctx.restore();
@@ -2669,7 +3014,7 @@ export class GameRenderer {
     ctx.lineCap = 'round';
     ctx.lineWidth = 3;
 
-    // 1. Trunk
+    // Trunk with wood color
     ctx.fillStyle = '#8D6E63';
     ctx.strokeStyle = '#2D3748';
     ctx.beginPath();
@@ -2677,28 +3022,38 @@ export class GameRenderer {
     ctx.fill();
     ctx.stroke();
 
-    // 2. Fill foliage canopy solid
+    // Fluffy multi-lobed green canopy
+    const treeLobes = [
+      { tx: x, ty: y - 20, tr: size },
+      { tx: x - size * 0.5, ty: y, tr: size * 0.7 },
+      { tx: x + size * 0.5, ty: y, tr: size * 0.7 },
+      { tx: x - size * 0.3, ty: y - size * 0.6, tr: size * 0.65 },
+      { tx: x + size * 0.3, ty: y - size * 0.6, tr: size * 0.65 },
+    ];
+
     ctx.fillStyle = '#4CAF50';
     ctx.beginPath();
-    ctx.arc(x, y - 20, size, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(x - size * 0.5, y, size * 0.7, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(x + size * 0.5, y, size * 0.7, 0, Math.PI * 2);
+    for (const tl of treeLobes) {
+      ctx.moveTo(tl.tx + tl.tr, tl.ty);
+      ctx.arc(tl.tx, tl.ty, tl.tr, 0, Math.PI * 2);
+    }
     ctx.fill();
 
-    // 3. Stroke outer canopy boundary without internal line artifacts
     ctx.strokeStyle = '#2D3748';
-    ctx.beginPath();
-    ctx.arc(x - size * 0.5, y, size * 0.7, Math.PI * 0.5, Math.PI * 1.55);
-    ctx.arc(x, y - 20, size, Math.PI * 1.1, Math.PI * 1.9);
-    ctx.arc(x + size * 0.5, y, size * 0.7, Math.PI * 1.45, Math.PI * 0.5);
-    ctx.closePath();
-    ctx.stroke();
+    for (const tl of treeLobes) {
+      ctx.beginPath();
+      ctx.arc(tl.tx, tl.ty, tl.tr, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
-    // 4. Berries / Apples
+    ctx.beginPath();
+    for (const tl of treeLobes) {
+      ctx.moveTo(tl.tx + tl.tr - 2, tl.ty);
+      ctx.arc(tl.tx, tl.ty, tl.tr - 2, 0, Math.PI * 2);
+    }
+    ctx.fill();
+
+    // Apples
     ctx.fillStyle = '#EF4444';
     ctx.strokeStyle = '#7F1D1D';
     ctx.lineWidth = 1.5;
@@ -2714,6 +3069,297 @@ export class GameRenderer {
       ctx.stroke();
     }
 
+    ctx.restore();
+  }
+
+  private drawPineTree(x: number, y: number, h: number, pineColor: string = '#15803D') {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 3;
+
+    // Trunk
+    ctx.fillStyle = '#78350F';
+    ctx.strokeStyle = '#451A03';
+    ctx.fillRect(x - 6, y, 12, 35);
+    ctx.strokeRect(x - 6, y, 12, 35);
+
+    // 3 Rounded layered tiers
+    ctx.fillStyle = pineColor;
+    ctx.strokeStyle = '#1E293B';
+    const tiers = [
+      { ty: y - 5, tw: h * 0.7, th: h * 0.4 },
+      { ty: y - h * 0.3, tw: h * 0.55, th: h * 0.35 },
+      { ty: y - h * 0.6, tw: h * 0.4, th: h * 0.35 },
+    ];
+    for (const t of tiers) {
+      ctx.beginPath();
+      ctx.moveTo(x - t.tw / 2, t.ty);
+      ctx.quadraticCurveTo(x, t.ty - 6, x + t.tw / 2, t.ty);
+      ctx.lineTo(x, t.ty - t.th);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  private drawPalmTree(x: number, y: number, size: number, time: number) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 3;
+
+    // Curved Trunk
+    ctx.strokeStyle = '#8D6E63';
+    ctx.lineWidth = 14;
+    ctx.beginPath();
+    ctx.moveTo(x, y + 80);
+    ctx.quadraticCurveTo(x + 15, y + 40, x + 8, y);
+    ctx.stroke();
+
+    // Palm Fronds
+    ctx.fillStyle = '#22C55E';
+    ctx.strokeStyle = '#15803D';
+    ctx.lineWidth = 2.5;
+    for (let i = 0; i < 5; i++) {
+      const angle = (i / 5) * Math.PI * 2 + Math.sin(time * 0.002 + i) * 0.1;
+      const fx = x + 8 + Math.cos(angle) * size;
+      const fy = y + Math.sin(angle) * size * 0.7;
+      ctx.beginPath();
+      ctx.moveTo(x + 8, y);
+      ctx.quadraticCurveTo(x + 8 + Math.cos(angle) * (size * 0.5), y - 10 + Math.sin(angle) * (size * 0.5), fx, fy);
+      ctx.quadraticCurveTo(x + 8 + Math.cos(angle) * (size * 0.5), y + 10 + Math.sin(angle) * (size * 0.5), x + 8, y);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    // Coconuts
+    ctx.fillStyle = '#78350F';
+    ctx.beginPath();
+    ctx.arc(x + 4, y + 5, 5, 0, Math.PI * 2);
+    ctx.arc(x + 12, y + 5, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  private drawToriiGate(x: number, y: number, w: number, h: number) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.fillStyle = '#DC2626';
+    ctx.strokeStyle = '#1E293B';
+    ctx.lineWidth = 3;
+
+    // Twin Pillars
+    ctx.fillRect(x - w / 2 + 15, y, 16, h);
+    ctx.strokeRect(x - w / 2 + 15, y, 16, h);
+    ctx.fillRect(x + w / 2 - 31, y, 16, h);
+    ctx.strokeRect(x + w / 2 - 31, y, 16, h);
+
+    // Crossbar
+    ctx.fillRect(x - w / 2, y + 25, w, 14);
+    ctx.strokeRect(x - w / 2, y + 25, w, 14);
+
+    // Top Curved Roof Bar
+    ctx.fillStyle = '#1E293B';
+    ctx.beginPath();
+    ctx.moveTo(x - w / 2 - 15, y - 8);
+    ctx.quadraticCurveTo(x, y + 2, x + w / 2 + 15, y - 8);
+    ctx.lineTo(x + w / 2 + 18, y + 10);
+    ctx.quadraticCurveTo(x, y + 16, x - w / 2 - 18, y + 10);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  private drawAncientColumn(x: number, y: number, w: number, h: number, colColor: string = '#E2E8F0') {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.fillStyle = colColor;
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 3;
+
+    // Shaft
+    ctx.fillRect(x - w / 2, y, w, h);
+    ctx.strokeRect(x - w / 2, y, w, h);
+
+    // Flutes
+    ctx.strokeStyle = '#94A3B8';
+    ctx.lineWidth = 1.5;
+    for (let fx = x - w / 2 + 8; fx < x + w / 2 - 4; fx += 10) {
+      ctx.beginPath();
+      ctx.moveTo(fx, y + 10);
+      ctx.lineTo(fx, y + h - 10);
+      ctx.stroke();
+    }
+
+    // Capital & Base
+    ctx.fillStyle = '#F8FAFC';
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 3;
+    ctx.fillRect(x - w / 2 - 6, y - 10, w + 12, 14);
+    ctx.strokeRect(x - w / 2 - 6, y - 10, w + 12, 14);
+    ctx.fillRect(x - w / 2 - 6, y + h - 4, w + 12, 14);
+    ctx.strokeRect(x - w / 2 - 6, y + h - 4, w + 12, 14);
+    ctx.restore();
+  }
+
+  private drawCrystalCluster(x: number, y: number, size: number, colorHex: string, time: number) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.fillStyle = colorHex;
+    ctx.strokeStyle = '#1E293B';
+    ctx.lineWidth = 2.5;
+
+    const shards = [
+      { sx: 0, sy: 0, sw: size * 0.45, sh: size },
+      { sx: -size * 0.35, sy: size * 0.2, sw: size * 0.35, sh: size * 0.7 },
+      { sx: size * 0.35, sy: size * 0.25, sw: size * 0.35, sh: size * 0.65 },
+    ];
+
+    for (const sh of shards) {
+      ctx.beginPath();
+      ctx.moveTo(x + sh.sx - sh.sw / 2, y + sh.sy);
+      ctx.lineTo(x + sh.sx, y + sh.sy - sh.sh);
+      ctx.lineTo(x + sh.sx + sh.sw / 2, y + sh.sy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Crystal facet line
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x + sh.sx, y + sh.sy - sh.sh);
+      ctx.lineTo(x + sh.sx, y + sh.sy);
+      ctx.stroke();
+      ctx.strokeStyle = '#1E293B';
+      ctx.lineWidth = 2.5;
+    }
+
+    // Sparkle Glint
+    const glint = (Math.sin(time * 0.005 + x) + 1) / 2;
+    if (glint > 0.6) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(x, y - size * 0.8, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  private drawClockworkGear(x: number, y: number, r: number, teeth: number, color: string, rotSpeed: number, time: number) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(time * rotSpeed);
+    ctx.fillStyle = color;
+    ctx.strokeStyle = '#451A03';
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    for (let i = 0; i < teeth; i++) {
+      const a = (i / teeth) * Math.PI * 2;
+      ctx.save();
+      ctx.rotate(a);
+      ctx.fillRect(r - 4, -4, 10, 8);
+      ctx.strokeRect(r - 4, -4, 10, 8);
+      ctx.restore();
+    }
+
+    // Center hub
+    ctx.fillStyle = '#FEF3C7';
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.35, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  private drawCaveEntrance(x: number, y: number, w: number, h: number, rockColor: string, glowColor: string, time: number) {
+    const ctx = this.ctx;
+    ctx.save();
+
+    // Dark mysterious interior with glowing mist
+    ctx.fillStyle = '#0F172A';
+    ctx.strokeStyle = '#1E293B';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(x, y - h / 2, w / 2, Math.PI, 0);
+    ctx.lineTo(x + w / 2, y);
+    ctx.lineTo(x - w / 2, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Glowing mystical cave beacon
+    const glowAlpha = 0.3 + Math.sin(time * 0.003) * 0.15;
+    ctx.fillStyle = glowColor;
+    ctx.globalAlpha = glowAlpha;
+    ctx.beginPath();
+    ctx.arc(x, y - h * 0.35, w * 0.35, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+
+    // Rock arch frame
+    ctx.fillStyle = rockColor;
+    ctx.strokeStyle = '#0F172A';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(x, y - h / 2, w / 2 + 18, Math.PI, 0);
+    ctx.lineTo(x + w / 2 + 18, y);
+    ctx.lineTo(x + w / 2, y);
+    ctx.arc(x, y - h / 2, w / 2, 0, Math.PI, true);
+    ctx.lineTo(x - w / 2 - 18, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  private drawHotAirBalloon(x: number, y: number, size: number, time: number, col1: string, col2: string) {
+    const ctx = this.ctx;
+    const floatY = y + Math.sin(time * 0.0015 + x) * 16;
+    ctx.save();
+    ctx.translate(x, floatY);
+
+    // Balloon Envelope
+    ctx.fillStyle = col1;
+    ctx.strokeStyle = '#1E293B';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, -size * 0.4, size * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Colored vertical stripes
+    ctx.fillStyle = col2;
+    ctx.beginPath();
+    ctx.arc(0, -size * 0.4, size * 0.6, Math.PI * 0.3, Math.PI * 0.7);
+    ctx.arc(0, -size * 0.4, size * 0.6, Math.PI * 1.3, Math.PI * 1.7);
+    ctx.fill();
+    ctx.stroke();
+
+    // Basket
+    ctx.fillStyle = '#78350F';
+    ctx.fillRect(-size * 0.15, size * 0.4, size * 0.3, size * 0.2);
+    ctx.strokeRect(-size * 0.15, size * 0.4, size * 0.3, size * 0.2);
+
+    // Ropes
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.2, size * 0.1);
+    ctx.lineTo(-size * 0.12, size * 0.4);
+    ctx.moveTo(size * 0.2, size * 0.1);
+    ctx.lineTo(size * 0.12, size * 0.4);
+    ctx.stroke();
     ctx.restore();
   }
 

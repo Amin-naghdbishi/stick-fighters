@@ -11,7 +11,10 @@ export type WeaponType =
   | 'railgun'
   | 'thunder_sword'
   | 'infinite_gun'
-  | 'inferno_cannon';
+  | 'inferno_cannon'
+  | 'plasma_vortex'
+  | 'solar_hammer'
+  | 'chrono_blaster';
 
 export interface WeaponConfig {
   id: WeaponType;
@@ -31,14 +34,14 @@ export interface WeaponConfig {
   recoil: number; // Impulse applied backwards to shooter
   knockback: number; // Impulse applied to target
   respawnTime: number; // Seconds to respawn on map
-  explosionRadius?: number; // For grenade / rocket
+  explosionRadius?: number; // For grenade / rocket / plasma vortex
   hasGravity?: boolean; // For grenades
   isFlame?: boolean; // For flame gun continuous flow
-  isBeam?: boolean; // For railgun instantaneous line
+  isBeam?: boolean; // For railgun / chrono blaster instantaneous line
   isSuper?: boolean; // For Super Weapons
-  isMelee?: boolean; // For Thunder Sword
-  isInstantKill?: boolean; // For Thunder Sword
-  areaDamageRadius?: number; // For Thunder Sword area kill
+  isMelee?: boolean; // For Thunder Sword / Solar Hammer
+  isInstantKill?: boolean; // For Super Weapons
+  areaDamageRadius?: number; // For Melee area kill
   lifetime?: number; // 15 seconds active lifetime
   spawnScale?: number; // Render scale at spawn (small)
   heldScale?: number; // Render scale when held (large)
@@ -272,7 +275,7 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     description: 'High-voltage accelerator beam with quick charge and instantaneous arena-wide pierce.',
   },
 
-  // SUPER WEAPON #1: Thunder Sword (Mystery I Exclusive)
+  // SUPER WEAPON #1: Thunder Sword (Mystery I Exclusive - Stormpeak Mountain)
   thunder_sword: {
     id: 'thunder_sword',
     name: 'Thunder Sword',
@@ -283,8 +286,8 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     isInstantKill: true,
     areaDamageRadius: 140,
     lifetime: 15,
-    damage: 999,
-    fireRate: 0.22, // Rapid heroic sword swings
+    damage: 999, // 100% One-Hit Kill
+    fireRate: 0.22,
     projectileSpeed: 0,
     projectileLife: 0,
     range: 220,
@@ -297,18 +300,19 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#FACC15',
     bulletColor: '#38BDF8',
     icon: '⚡🗡️',
-    description: 'Gigantic sword emitting lightning. Instant death & area strike for 15 seconds.',
+    description: 'Mystery I: Gigantic sword emitting lightning. Instant death & area strike for 15 seconds.',
   },
 
-  // SUPER WEAPON #2: Infinite Gun (Mystery II Exclusive)
+  // SUPER WEAPON #2: Infinite Gun (Mystery II Exclusive - Primordial Jungle)
   infinite_gun: {
     id: 'infinite_gun',
     name: 'Infinite Gun',
     category: 'super',
     tier: 11,
     isSuper: true,
+    isInstantKill: true,
     lifetime: 15,
-    damage: 18,
+    damage: 120, // 100% One-Hit Kill per single bullet!
     fireRate: 0.04, // 25 rounds / sec hyper-stream
     projectileSpeed: 44,
     projectileLife: 2.6,
@@ -322,10 +326,10 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#EA580C',
     bulletColor: '#F59E0B',
     icon: '🌩️🔫',
-    description: 'Colossal heavy machine gun with extreme fire rate, long reach & unlimited ammo for 15 seconds.',
+    description: 'Mystery II: Colossal heavy machine gun with one-hit kill bullets & unlimited ammo for 15 seconds.',
   },
 
-  // SUPER WEAPON #3: Inferno Cannon (Mystery III Exclusive)
+  // SUPER WEAPON #3: Inferno Cannon (Mystery III Exclusive - Obsidian Volcanic Rift)
   inferno_cannon: {
     id: 'inferno_cannon',
     name: 'Inferno Cannon',
@@ -333,9 +337,10 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     tier: 11,
     isSuper: true,
     isFlame: true,
+    isInstantKill: true,
     lifetime: 15,
-    damage: 18,
-    fireRate: 0.05, // 20 ticks / sec apocalyptic fire torrent
+    damage: 110, // 100% One-Hit Kill per flame strike!
+    fireRate: 0.05,
     projectileSpeed: 26,
     projectileLife: 1.4,
     range: 1092,
@@ -348,7 +353,89 @@ export const WEAPONS_CONFIG: Record<WeaponType, WeaponConfig> = {
     color: '#DC2626',
     bulletColor: '#F97316',
     icon: '🌋🔥',
-    description: 'Apocalyptic flame cannon unleashing gigantic long-reaching fire streams for 15 seconds.',
+    description: 'Mystery III: Apocalyptic flame cannon unleashing one-hit incinerating fire streams for 15 seconds.',
+  },
+
+  // SUPER WEAPON #4: Plasma Vortex (Mystery IV Exclusive - Crystal Cavern of Eternity)
+  plasma_vortex: {
+    id: 'plasma_vortex',
+    name: 'Plasma Vortex',
+    category: 'super',
+    tier: 11,
+    isSuper: true,
+    isInstantKill: true,
+    lifetime: 15,
+    damage: 999, // 100% One-Hit Kill
+    explosionRadius: 150,
+    fireRate: 0.32,
+    projectileSpeed: 34,
+    projectileLife: 3.0,
+    range: 3500,
+    ammoCapacity: 999,
+    recoil: 3.5,
+    knockback: 25.0,
+    respawnTime: 150,
+    spawnScale: 0.7,
+    heldScale: 2.5,
+    color: '#A855F7',
+    bulletColor: '#C084FC',
+    icon: '🌀🌌',
+    description: 'Mystery IV: Swirling gravitational plasma singularity that vaporizes everything in its radius.',
+  },
+
+  // SUPER WEAPON #5: Divine Solar Hammer (Mystery V Exclusive - Solar Sunken Citadel)
+  solar_hammer: {
+    id: 'solar_hammer',
+    name: 'Solar Hammer',
+    category: 'super',
+    tier: 11,
+    isSuper: true,
+    isMelee: true,
+    isInstantKill: true,
+    areaDamageRadius: 150,
+    lifetime: 15,
+    damage: 999, // 100% One-Hit Kill
+    fireRate: 0.24,
+    projectileSpeed: 0,
+    projectileLife: 0,
+    range: 240,
+    ammoCapacity: 999,
+    recoil: 4.0,
+    knockback: 40.0,
+    respawnTime: 150,
+    spawnScale: 0.7,
+    heldScale: 2.6,
+    color: '#F59E0B',
+    bulletColor: '#FDE047',
+    icon: '☀️🔨',
+    description: 'Mystery V: Divine radiant sun hammer radiating solar prominence waves that instantly crushes opponents.',
+  },
+
+  // SUPER WEAPON #6: Chrono Singularity Cannon (Mystery VI Exclusive - Chrono Void Nexus)
+  chrono_blaster: {
+    id: 'chrono_blaster',
+    name: 'Chrono Cannon',
+    category: 'super',
+    tier: 11,
+    isSuper: true,
+    isBeam: true,
+    isInstantKill: true,
+    lifetime: 15,
+    damage: 999, // 100% One-Hit Kill
+    fireRate: 0.28,
+    projectileSpeed: 75,
+    projectileLife: 2.0,
+    range: 4000,
+    ammoCapacity: 999,
+    recoil: 5.0,
+    knockback: 30.0,
+    respawnTime: 150,
+    spawnScale: 0.7,
+    heldScale: 2.5,
+    color: '#06B6D4',
+    bulletColor: '#22D3EE',
+    icon: '⏳⚡',
+    description: 'Mystery VI: Piercing temporal singularity beam that tears spacetime and disintegrates opponents instantly.',
   },
 };
 
@@ -366,5 +453,8 @@ export const ORDERED_WEAPON_KEYS: WeaponType[] = [
   'thunder_sword',
   'infinite_gun',
   'inferno_cannon',
+  'plasma_vortex',
+  'solar_hammer',
+  'chrono_blaster',
 ];
 
