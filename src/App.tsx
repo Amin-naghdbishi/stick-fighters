@@ -401,6 +401,7 @@ export default function App() {
                 onPracticeBots={() => handlePracticeBots(1)}
                 onOpenCustomizer={() => {
                   sound.playJump();
+                  setPreviousView('home');
                   setView('studio');
                 }}
                 onOpenSettings={() => setShowSettings(true)}
@@ -418,8 +419,15 @@ export default function App() {
             >
               <CharacterStudio
                 customization={customization}
+                previousView={previousView}
                 onSave={handleSaveCustomization}
-                onBack={() => setView('home')}
+                onBack={() => {
+                  if (previousView === 'lobby' && room) {
+                    setView('lobby');
+                  } else {
+                    setView('home');
+                  }
+                }}
               />
             </motion.div>
           )}
@@ -439,7 +447,11 @@ export default function App() {
                 onStartGame={handleStartGame}
                 onUpdateSettings={handleUpdateRoomSettings}
                 onLeaveRoom={handleLeaveRoom}
-                onOpenCustomizer={() => setView('studio')}
+                onOpenCustomizer={() => {
+                  sound.playJump();
+                  setPreviousView('lobby');
+                  setView('studio');
+                }}
                 onPreviewMap={handlePreviewMap}
                 onSendChat={handleSendChat}
                 chatMessages={chatMessages}

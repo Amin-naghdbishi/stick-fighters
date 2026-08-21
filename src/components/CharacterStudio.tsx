@@ -33,6 +33,7 @@ interface CharacterStudioProps {
   customization: FighterCustomization;
   onSave: (cust: FighterCustomization) => void;
   onBack: () => void;
+  previousView?: string;
 }
 
 type CategoryTab =
@@ -69,6 +70,7 @@ export const CharacterStudio: React.FC<CharacterStudioProps> = ({
   customization,
   onSave,
   onBack,
+  previousView,
 }) => {
   const [current, setCurrent] = useState<FighterCustomization>({ ...customization });
   const [activeTab, setActiveTab] = useState<CategoryTab>('skin');
@@ -236,7 +238,7 @@ export const CharacterStudio: React.FC<CharacterStudioProps> = ({
           className="flex items-center gap-2 px-4 py-2 bg-white text-black font-bold rounded-xl border-3 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-amber-50 active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer text-sm sm:text-base"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Back to Menu</span>
+          <span>{previousView === 'lobby' ? 'Back to Room' : 'Back to Menu'}</span>
         </button>
 
         <div className="flex items-center gap-2">

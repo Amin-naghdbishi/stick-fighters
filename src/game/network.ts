@@ -8,18 +8,59 @@ import {
   ServerMessage,
 } from '../types/game';
 
+export type ConnectionStatus =
+  | 'CONNECTED'
+  | 'CONNECTING'
+  | 'DISCONNECTED'
+  | 'RECONNECTING'
+  | 'SERVER_UNAVAILABLE';
+
 type MessageCallback = (msg: ServerMessage) => void;
+type StatusCallback = (status: ConnectionStatus) => void;
 
 export class NetworkClient {
   private ws: WebSocket | null = null;
   private listeners: Set<MessageCallback> = new Set();
+  private statusListeners: Set<StatusCallback> = new Set();
   public myId: string | null = null;
   public isConnected: boolean = false;
+  public connectionStatus: ConnectionStatus = 'DISCONNECTED';
   private reconnectTimer: any = null;
+  private reconnectAttempts: number = 0;
+  private maxReconnectAttempts: number = 12;
   private pendingCustomization: FighterCustomization | null = null;
 
   constructor() {
     this.connect();
+  }
+
+  private setStatus(status: ConnectionStatus) {
+    if (this.connectionStatus !== status) {
+      this.connectionStatus = status;
+      this.notifyStatus(status);
+    }
+  }
+
+  private cleanSocket() {
+    if (this.ws) {
+      this.ws.onopen = null;
+      this.ws.onmessage = null;
+      this.ws.onclose = null;
+      this.ws.onerror = null;
+      try {
+        this.ws.close();
+      } catch (e) {}
+      this.ws = null;
+    }
+  }
+
+  private getWsUrl(): string {
+    const customServerUrl = (import.meta as any).env?.VITE_GAME_SERVER_URL;
+    if (customServerUrl && typeof customServerUrl === 'string' && customServerUrl.trim() !== '') {
+      return customServerUrl.trim();
+    }
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.host}/ws`;
   }
 
   public connect() {
@@ -27,29 +68,27 @@ export class NetworkClient {
       return;
     }
 
+    this.cleanSocket();
+    this.setStatus(this.reconnectAttempts > 0 ? 'RECONNECTING' : 'CONNECTING');
+
     try {
-      let wsUrl: string;
-      const customServerUrl = (import.meta as any).env?.VITE_GAME_SERVER_URL;
+      const wsUrl = this.getWsUrl();
+      console.log(`[NetworkClient] Connecting to server at ${wsUrl} (Attempt ${this.reconnectAttempts + 1})`);
+      const socket = new WebSocket(wsUrl);
+      this.ws = socket;
 
-      if (customServerUrl && typeof customServerUrl === 'string' && customServerUrl.trim() !== '') {
-        wsUrl = customServerUrl.trim();
-      } else {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        wsUrl = `${protocol}//${window.location.host}/ws`;
-      }
-
-      console.log(`Connecting to game server at: ${wsUrl}`);
-      this.ws = new WebSocket(wsUrl);
-
-      this.ws.onopen = () => {
+      socket.onopen = () => {
         this.isConnected = true;
-        console.log('Connected to Stick Fighters game server!');
+        this.reconnectAttempts = 0;
+        this.setStatus('CONNECTED');
+        console.log('[NetworkClient] Connected cleanly to Stick Fighters server.');
+
         if (this.pendingCustomization) {
           this.send({ type: 'update_customization', customization: this.pendingCustomization });
         }
       };
 
-      this.ws.onmessage = (event) => {
+      socket.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data) as ServerMessage;
           if (msg.type === 'room_joined') {
@@ -57,30 +96,45 @@ export class NetworkClient {
           }
           this.notify(msg);
         } catch (err) {
-          console.error('Failed to parse incoming server message:', err);
+          console.error('[NetworkClient] Failed to parse server message:', err);
         }
       };
 
-      this.ws.onclose = () => {
+      socket.onclose = (event) => {
         this.isConnected = false;
-        console.warn('Disconnected from game server. Reconnecting in 2s...');
-        this.scheduleReconnect();
+        this.cleanSocket();
+
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+          this.scheduleReconnect();
+        } else {
+          this.setStatus('SERVER_UNAVAILABLE');
+          console.warn('[NetworkClient] Max reconnection attempts reached. Server unavailable.');
+        }
       };
 
-      this.ws.onerror = (err) => {
-        console.error('WebSocket connection error:', err);
+      socket.onerror = () => {
+        // Silently handled by onclose
       };
     } catch (err) {
-      console.error('Failed to initialize WebSocket:', err);
+      console.error('[NetworkClient] Connection creation error:', err);
       this.scheduleReconnect();
     }
   }
 
   private scheduleReconnect() {
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+    this.reconnectAttempts++;
+    const backoff = Math.min(8000, Math.floor(1000 * Math.pow(1.3, this.reconnectAttempts)));
+    this.setStatus('RECONNECTING');
+
     this.reconnectTimer = setTimeout(() => {
       this.connect();
-    }, 2500);
+    }, backoff);
+  }
+
+  public manualReconnect() {
+    this.reconnectAttempts = 0;
+    this.connect();
   }
 
   public onMessage(cb: MessageCallback): () => void {
@@ -88,9 +142,21 @@ export class NetworkClient {
     return () => this.listeners.delete(cb);
   }
 
+  public onStatusChange(cb: StatusCallback): () => void {
+    this.statusListeners.add(cb);
+    cb(this.connectionStatus);
+    return () => this.statusListeners.delete(cb);
+  }
+
   private notify(msg: ServerMessage) {
     for (const cb of this.listeners) {
       cb(msg);
+    }
+  }
+
+  private notifyStatus(status: ConnectionStatus) {
+    for (const cb of this.statusListeners) {
+      cb(status);
     }
   }
 

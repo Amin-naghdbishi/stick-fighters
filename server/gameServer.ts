@@ -1151,4 +1151,18 @@ export class GameServer {
       }
     }
   }
+
+  public shutdown() {
+    console.log('Shutting down GameServer...');
+    for (const roomId of Array.from(this.roomLoops.keys())) {
+      this.stopRoomLoop(roomId);
+    }
+    for (const session of this.reconnectSessions.values()) {
+      clearTimeout(session.timeout);
+    }
+    this.reconnectSessions.clear();
+    this.rooms.clear();
+    this.roomClients.clear();
+    this.clients.clear();
+  }
 }

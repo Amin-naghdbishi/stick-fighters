@@ -7,12 +7,12 @@ import { GameServer } from './server/gameServer.js';
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
   const server = http.createServer(app);
 
   app.use(express.json());
 
-  // Health check
+  // Health check endpoint
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', time: Date.now() });
   });
@@ -21,9 +21,28 @@ async function startServer() {
   const wss = new WebSocketServer({ server, path: '/ws' });
   const gameServer = new GameServer();
 
-  wss.on('connection', (ws, req) => {
+  wss.on('connection', (ws) => {
     gameServer.handleConnection(ws);
   });
+
+  // Handle process shutdown signals gracefully
+  const handleShutdown = (signal: string) => {
+    console.log(`Received ${signal}. Shutting down HTTP & WebSocket server...`);
+    gameServer.shutdown();
+    wss.clients.forEach((client) => {
+      try {
+        client.close(1001, 'Server Shutting Down');
+      } catch (e) {}
+    });
+    wss.close();
+    server.close(() => {
+      console.log('HTTP & WebSocket server closed cleanly.');
+      process.exit(0);
+    });
+  };
+
+  process.on('SIGINT', () => handleShutdown('SIGINT'));
+  process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 
   // Vite middleware for development vs static build in production
   if (process.env.NODE_ENV !== 'production') {
@@ -40,7 +59,7 @@ async function startServer() {
     });
   }
 
-  server.listen(PORT, '0.0.0.0', () => {
+  server.listen(PORT, () => {
     console.log(`Stick Fighters game server running at http://0.0.0.0:${PORT}`);
   });
 }
