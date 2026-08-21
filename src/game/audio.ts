@@ -1322,148 +1322,109 @@ class SoundEngine {
         osc.stop(now + 0.22);
         break;
       }
-      case 'flame_gun': {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(160, now);
-        osc.frequency.linearRampToValueAtTime(120, now + 0.15);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-        osc.connect(gain);
-        gain.connect(this.sfxGainNode);
-        osc.start();
-        osc.stop(now + 0.16);
-        break;
-      }
-      case 'grenade_launcher':
-      case 'heavy_cannon': {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(180, now);
-        osc.frequency.exponentialRampToValueAtTime(40, now + 0.25);
-        gain.gain.setValueAtTime(0.6, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-        osc.connect(gain);
-        gain.connect(this.sfxGainNode);
-        osc.start();
-        osc.stop(now + 0.26);
-        break;
-      }
-      case 'rocket_launcher': {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(220, now);
-        osc.frequency.exponentialRampToValueAtTime(60, now + 0.35);
-        gain.gain.setValueAtTime(0.5, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-        osc.connect(gain);
-        gain.connect(this.sfxGainNode);
-        osc.start();
-        osc.stop(now + 0.36);
-        break;
-      }
-      case 'railgun': {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(1200, now);
-        osc.frequency.exponentialRampToValueAtTime(80, now + 0.3);
-        gain.gain.setValueAtTime(0.6, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.connect(gain);
-        gain.connect(this.sfxGainNode);
-        osc.start();
-        osc.stop(now + 0.32);
-        break;
-      }
-      case 'infinite_gun': {
-        // Heavy Metallic Machine Gun Rotary Snap (Short, punchy, per-shot)
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(750, now);
-        osc.frequency.exponentialRampToValueAtTime(120, now + 0.05);
-        gain.gain.setValueAtTime(0.45, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-        osc.connect(gain);
-        gain.connect(this.sfxGainNode);
-        osc.start(now);
-        osc.stop(now + 0.06);
+      case 'flame_gun':
+      case 'inferno_cannon': {
+        // Massive Roaring Flamethrower / Fire Combustion Blast (Real Noise + Sub-Bass Roar)
+        const duration = weaponType === 'inferno_cannon' ? 0.35 : 0.18;
+        const bufferSize = Math.floor(this.ctx.sampleRate * duration);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1; // White Noise for turbulent flames
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
 
-        // Bass thud
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(weaponType === 'inferno_cannon' ? 1000 : 700, now);
+        filter.frequency.exponentialRampToValueAtTime(180, now + duration);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(weaponType === 'inferno_cannon' ? 0.70 : 0.40, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.sfxGainNode);
+        noise.start(now);
+
+        // Deep Sub-Bass Combustion Pulse Layer
         const thud = this.ctx.createOscillator();
         const thudGain = this.ctx.createGain();
         thud.type = 'triangle';
-        thud.frequency.setValueAtTime(220, now);
-        thud.frequency.exponentialRampToValueAtTime(50, now + 0.05);
-        thudGain.gain.setValueAtTime(0.35, now);
-        thudGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        thud.frequency.setValueAtTime(160, now);
+        thud.frequency.exponentialRampToValueAtTime(40, now + duration);
+        thudGain.gain.setValueAtTime(weaponType === 'inferno_cannon' ? 0.55 : 0.30, now);
+        thudGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
         thud.connect(thudGain);
         thudGain.connect(this.sfxGainNode);
         thud.start(now);
-        thud.stop(now + 0.06);
+        thud.stop(now + duration);
         break;
       }
       case 'thunder_sword': {
-        // Thunder Lightning Boom
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        const filter = this.ctx.createBiquadFilter();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(880, now);
-        osc.frequency.exponentialRampToValueAtTime(45, now + 0.4);
+        // Supersonic Lightning Strike + Thunder Crack + Electric Discharge
+        const duration = 0.45;
+        // 1. Supersonic High-Pitch Lightning Snap / Crack (Filtered Noise Transient)
+        const snapLen = 0.05;
+        const snapBuf = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * snapLen), this.ctx.sampleRate);
+        const snapData = snapBuf.getChannelData(0);
+        for (let i = 0; i < snapBuf.length; i++) {
+          snapData[i] = Math.random() * 2 - 1;
+        }
+        const snap = this.ctx.createBufferSource();
+        snap.buffer = snapBuf;
 
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(3000, now);
-        filter.frequency.exponentialRampToValueAtTime(150, now + 0.4);
+        const snapFilter = this.ctx.createBiquadFilter();
+        snapFilter.type = 'highpass';
+        snapFilter.frequency.setValueAtTime(2800, now);
 
-        gain.gain.setValueAtTime(0.7, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
+        const snapGain = this.ctx.createGain();
+        snapGain.gain.setValueAtTime(0.85, now);
+        snapGain.gain.exponentialRampToValueAtTime(0.01, now + snapLen);
 
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.sfxGainNode);
-        osc.start(now);
-        osc.stop(now + 0.45);
+        snap.connect(snapFilter);
+        snapFilter.connect(snapGain);
+        snapGain.connect(this.sfxGainNode);
+        snap.start(now);
 
-        // Electric Spark Zing Layer
+        // 2. Deep Atmospheric Thunder Boom Impact
+        const thunder = this.ctx.createOscillator();
+        const thunderFilter = this.ctx.createBiquadFilter();
+        const thunderGain = this.ctx.createGain();
+
+        thunder.type = 'sine';
+        thunder.frequency.setValueAtTime(240, now);
+        thunder.frequency.exponentialRampToValueAtTime(25, now + duration);
+
+        thunderFilter.type = 'lowpass';
+        thunderFilter.frequency.setValueAtTime(1800, now);
+        thunderFilter.frequency.exponentialRampToValueAtTime(70, now + duration);
+
+        thunderGain.gain.setValueAtTime(0.85, now);
+        thunderGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        thunder.connect(thunderFilter);
+        thunderFilter.connect(thunderGain);
+        thunderGain.connect(this.sfxGainNode);
+        thunder.start(now);
+        thunder.stop(now + duration);
+
+        // 3. Electric Spark Zing Modulation
         const spark = this.ctx.createOscillator();
         const sparkGain = this.ctx.createGain();
-        spark.type = 'square';
-        spark.frequency.setValueAtTime(1600, now);
-        spark.frequency.exponentialRampToValueAtTime(300, now + 0.2);
-        sparkGain.gain.setValueAtTime(0.3, now);
-        sparkGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        spark.type = 'sawtooth';
+        spark.frequency.setValueAtTime(2600, now);
+        spark.frequency.exponentialRampToValueAtTime(450, now + 0.16);
+        sparkGain.gain.setValueAtTime(0.35, now);
+        sparkGain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+
         spark.connect(sparkGain);
         sparkGain.connect(this.sfxGainNode);
         spark.start(now);
-        spark.stop(now + 0.22);
-        break;
-      }
-      case 'inferno_cannon': {
-        // Massive Dragon Flame Roar
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        const filter = this.ctx.createBiquadFilter();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(240, now);
-        osc.frequency.linearRampToValueAtTime(80, now + 0.25);
-
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(1200, now);
-        filter.frequency.exponentialRampToValueAtTime(200, now + 0.25);
-
-        gain.gain.setValueAtTime(0.55, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.sfxGainNode);
-        osc.start(now);
-        osc.stop(now + 0.26);
+        spark.stop(now + 0.16);
         break;
       }
       default: {

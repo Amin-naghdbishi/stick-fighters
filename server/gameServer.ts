@@ -456,6 +456,7 @@ export class GameServer {
       respawnTimer: 0,
     }));
     room.projectiles = [];
+    room.burningGround = [];
 
     // Clean out old bots
     for (const pid of Object.keys(room.players)) {
@@ -789,6 +790,7 @@ export class GameServer {
                 f.isDead = false;
                 f.state = 'idle';
                 f.invincibleTimer = 1.5;
+                f.burningTimer = 0;
                 f.facing = f.x < arena.width / 2 ? 1 : -1;
                 f.weapons = {};
                 f.activeWeapon = null;

@@ -15,6 +15,10 @@ export const FRICTION_AIR = 0.94;
 export const FIGHTER_WIDTH = 36;
 export const FIGHTER_HEIGHT = 74;
 
+// Burn and Ground Fire Lifetimes (seconds)
+export const BURN_DURATION = 2.5;         // Seconds a hit player burns
+export const GROUND_FIRE_DURATION = 3.0;   // Seconds a ground platform burns
+
 // Unarmed Attack specs (Weakened as weapons are the primary combat powerhouse)
 export const ATTACK_FAST_DAMAGE = 4;
 export const ATTACK_FAST_DURATION = 0.20; // seconds
@@ -98,6 +102,7 @@ export function createInitialFighter(
     score: 0,
     respawnTimer: 0,
     lastAttackerId: null,
+    burningTimer: 0,
     // Weapon & Inventory
     weapons: {},
     activeWeapon: null,
@@ -115,6 +120,7 @@ export function updateFighterPhysics(
   dt: number = 1 / 60
 ): void {
   if (fighter.isDead) {
+    fighter.burningTimer = 0; // Clear any residual burn state on death
     fighter.vx *= 0.85;
     fighter.vy += GRAVITY;
     fighter.x += fighter.vx;
@@ -140,6 +146,21 @@ export function updateFighterPhysics(
   if (fighter.hitStunTimer > 0) {
     fighter.hitStunTimer -= dt;
     fighter.state = 'hit';
+  }
+
+  // Burning timer countdown & burn tick damage (Inferno Cannon hit effect)
+  if (typeof fighter.burningTimer === 'number' && fighter.burningTimer > 0) {
+    fighter.burningTimer -= dt;
+    if (fighter.invincibleTimer <= 0 && !fighter.isDead) {
+      fighter.hp = Math.max(0, fighter.hp - dt * 12); // Burn tick damage
+      if (fighter.hp <= 0) {
+        fighter.isDead = true;
+        fighter.burningTimer = 0; // Instantly remove fire on death
+      }
+    }
+    if (fighter.burningTimer <= 0) {
+      fighter.burningTimer = 0;
+    }
   }
 
   // Super Weapon 15-second lifetime countdown
@@ -706,8 +727,8 @@ export function updateProjectiles(
           x: p.x,
           y: p.y,
           width: 70,
-          life: 3.0,
-          maxLife: 3.0,
+          life: GROUND_FIRE_DURATION,
+          maxLife: GROUND_FIRE_DURATION,
           shooterId: p.shooterId,
         });
       }
@@ -734,7 +755,7 @@ export function updateProjectiles(
 
     if (hitFighter) {
       if (p.weaponType === 'inferno_cannon' || p.isFlame) {
-        hitFighter.burningTimer = 2.5; // Target catches fire!
+        hitFighter.burningTimer = BURN_DURATION; // Target catches fire!
       }
       const isBlocked = hitFighter.isBlocking && hitFighter.shield > 10;
       const damage = isBlocked ? Math.round(p.damage * 0.25) : p.damage;

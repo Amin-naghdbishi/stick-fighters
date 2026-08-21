@@ -109,6 +109,7 @@ export class LocalGameEngine {
       botDifficulty,
       weaponSpawns: initialWeaponSpawns,
       projectiles: [],
+      burningGround: [],
     };
     if (isPreview) {
       this.countdownTimer = 0;
@@ -334,6 +335,7 @@ export class LocalGameEngine {
               f.isDead = false;
               f.state = 'idle';
               f.invincibleTimer = 1.5;
+              f.burningTimer = 0;
               f.facing = f.x < arena.width / 2 ? 1 : -1;
               f.weapons = {};
               f.activeWeapon = null;
