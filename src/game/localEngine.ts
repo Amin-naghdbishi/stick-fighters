@@ -208,6 +208,25 @@ export class LocalGameEngine {
       const projResult = updateProjectiles(this.room.projectiles, fighters, arena, dt);
       this.room.projectiles = projResult.activeProjectiles;
 
+      // Update Burning Ground
+      if (!this.room.burningGround) this.room.burningGround = [];
+      if (projResult.burningGround.length > 0) {
+        this.room.burningGround.push(...projResult.burningGround);
+      }
+      for (let i = this.room.burningGround.length - 1; i >= 0; i--) {
+        const bg = this.room.burningGround[i];
+        bg.life -= dt;
+        if (bg.life <= 0) {
+          this.room.burningGround.splice(i, 1);
+          continue;
+        }
+        for (const f of fighters) {
+          if (!f.isDead && Math.abs(f.x - bg.x) < bg.width / 2 && Math.abs(f.y - bg.y) < 35) {
+            f.burningTimer = 1.5;
+          }
+        }
+      }
+
       const allHitsCombined = [...projResult.hits, ...extraHits];
 
       // Hits

@@ -503,20 +503,34 @@ export function fireFighterWeapon(
   }
   fighter.weaponCooldown = config.fireRate;
 
-  // Thunder Sword Special Area Slash & Instant Kill
-  if (config.isInstantKill && config.isMelee) {
-    const strikeDist = 70;
-    const strikeX = fighter.x + Math.cos(fighter.aimAngle) * strikeDist;
-    const strikeY = (fighter.y - FIGHTER_HEIGHT * 0.5) + Math.sin(fighter.aimAngle) * strikeDist;
-    const areaRadius = config.areaDamageRadius || 120;
+  // Thunder Sword / Melee Super Weapon Special Area Attack
+  if (config.id === 'thunder_sword') {
+    const reach = 100;
+    const strikeX = fighter.x + Math.cos(fighter.aimAngle) * reach;
+    const strikeY = (fighter.y - FIGHTER_HEIGHT * 0.55) + Math.sin(fighter.aimAngle) * reach;
+    const areaRadius = 120; // 120px instant kill area
 
-    if (explosionsOut) {
-      explosionsOut.push({ x: strikeX, y: strikeY, radius: areaRadius, color: '#38BDF8' });
-    }
+    // Create a visible lightning bolt projectile originating from sword tip
+    projectiles.push({
+      id: `proj_${fighter.id}_${now}_thunder`,
+      shooterId: fighter.id,
+      weaponType: 'thunder_sword',
+      x: strikeX,
+      y: strikeY,
+      vx: Math.cos(fighter.aimAngle) * 45,
+      vy: Math.sin(fighter.aimAngle) * 45,
+      life: 0.15,
+      maxLife: 0.15,
+      damage: 999,
+      knockback: config.knockback,
+      color: '#38BDF8',
+      createdAt: now,
+    });
 
-    if (allFighters) {
-      for (const target of allFighters) {
-        if (target.id === fighter.id || target.isDead || target.invincibleTimer > 0) continue;
+    for (const target of allFighters || []) {
+      if (target.id === fighter.id || target.isDead || target.invincibleTimer > 0) continue;
+      const isBlocked = target.isBlocking && target.shield > 10;
+      if (!isBlocked) {
         const d = Math.hypot(target.x - strikeX, (target.y - FIGHTER_HEIGHT * 0.5) - strikeY);
         if (d <= areaRadius) {
           // Instant Death calculated on server!
@@ -648,10 +662,12 @@ export function updateProjectiles(
   activeProjectiles: ProjectileState[];
   hits: HitResult[];
   explosions: { x: number; y: number; radius: number; color: string }[];
+  burningGround: BurningGroundState[];
 } {
   const active: ProjectileState[] = [];
   const hits: HitResult[] = [];
   const explosions: { x: number; y: number; radius: number; color: string }[] = [];
+  const burningGround: BurningGroundState[] = [];
 
   for (const p of projectiles) {
     p.life -= dt;
@@ -684,6 +700,17 @@ export function updateProjectiles(
     }
 
     if (hitPlatform) {
+      if (p.weaponType === 'inferno_cannon' || p.isFlame) {
+        burningGround.push({
+          id: 'bg_' + Math.random().toString(36).substring(2, 7),
+          x: p.x,
+          y: p.y,
+          width: 70,
+          life: 3.0,
+          maxLife: 3.0,
+          shooterId: p.shooterId,
+        });
+      }
       if (p.explosionRadius && p.explosionRadius > 0) {
         explosions.push({ x: p.x, y: p.y, radius: p.explosionRadius, color: p.color });
         applyExplosionDamage(p.x, p.y, p.explosionRadius, p.damage, p.shooterId, fighters, hits);
@@ -706,6 +733,9 @@ export function updateProjectiles(
     }
 
     if (hitFighter) {
+      if (p.weaponType === 'inferno_cannon' || p.isFlame) {
+        hitFighter.burningTimer = 2.5; // Target catches fire!
+      }
       const isBlocked = hitFighter.isBlocking && hitFighter.shield > 10;
       const damage = isBlocked ? Math.round(p.damage * 0.25) : p.damage;
       hitFighter.hp = Math.max(0, hitFighter.hp - damage);
@@ -752,7 +782,7 @@ export function updateProjectiles(
     active.push(p);
   }
 
-  return { activeProjectiles: active, hits, explosions };
+  return { activeProjectiles: active, hits, explosions, burningGround };
 }
 
 function applyExplosionDamage(

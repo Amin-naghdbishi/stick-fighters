@@ -47,12 +47,30 @@ export interface FighterCustomization {
   hat: HatType;
 }
 
+export type ArenaTheme =
+  | 'dojo'
+  | 'cyber'
+  | 'park'
+  | 'town'
+  | 'island'
+  | 'castle'
+  | 'volcano'
+  | 'forest'
+  | 'ruins'
+  | 'canyon'
+  | 'metropolis'
+  | 'mystery_jungle'
+  | 'mystery_mountain'
+  | 'mystery_volcanic';
+
+export type MapSize = 'small' | 'medium' | 'large' | 'xlarge' | 'mystery';
+
 export interface FighterState {
   id: string;
   name: string;
-  gender: Gender;
+  gender: 'male' | 'female';
   color: string;
-  hat: HatType;
+  hat: 'none' | 'cap' | 'crown' | 'ninja' | 'headband' | 'viking' | 'boxing' | 'halo';
   x: number;
   y: number;
   vx: number;
@@ -60,32 +78,42 @@ export interface FighterState {
   facing: 1 | -1; // 1 = right, -1 = left
   hp: number;
   maxHp: number;
-  shield: number; // 0 to 100
+  shield: number;
   isGrounded: boolean;
   isBlocking: boolean;
   canDoubleJump: boolean;
   state: FighterActionState;
-  stateTimer: number; // in seconds or frames
+  stateTimer: number;
   attackCooldown: number;
   comboStep: number;
   invincibleTimer: number;
   hitStunTimer: number;
   isDead: boolean;
-  isReady: boolean;
-  isBot: boolean;
+  isReady?: boolean;
+  isBot?: boolean;
   kills: number;
   deaths: number;
-  score: number; // (kills * 2) - (deaths * 1)
-  respawnTimer: number; // countdown in seconds when dead
+  score: number;
+  respawnTimer: number;
   lastAttackerId: string | null;
-  ping?: number;
-  // Weapon & Inventory State
-  weapons: Record<string, number>; // weaponType -> current ammo (max 10)
-  activeWeapon: WeaponType | null; // null = unarmed
-  aimAngle: number; // in radians
-  weaponCooldown: number; // fire cooldown timer
-  chargeTimer: number; // for railgun charge up
-  superWeaponTimer?: number; // 15s timer for active super weapons
+  // Weapon & Inventory
+  weapons: { [key in WeaponType]?: number }; // Map of owned weapons -> ammo count
+  activeWeapon: WeaponType | null;
+  aimAngle: number; // radians
+  weaponCooldown: number;
+  chargeTimer: number;
+  superWeaponTimer?: number;
+  burningTimer?: number;
+}
+
+export interface BurningGroundState {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  life: number;
+  maxLife: number;
+  shooterId: string;
 }
 
 export interface Platform {
@@ -228,6 +256,7 @@ export interface RoomState {
   botDifficulty?: BotDifficultyLevel; // 1 (Very Easy) to 5 (Master)
   weaponSpawns?: ActiveWeaponSpawn[];
   projectiles?: ProjectileState[];
+  burningGround?: BurningGroundState[];
 }
 
 // Client to Server Messages

@@ -25,8 +25,7 @@ export const ARENAS: Record<string, Arena> = {
     ],
     weaponSpawns: [
       { id: 'd_wpn_1', weaponType: 'pebble_blaster', x: 290, y: 420, respawnTime: 5 },
-      { id: 'd_wpn_2', weaponType: 'pistol', x: 600, y: 290, respawnTime: 7 },
-      { id: 'd_wpn_3', weaponType: 'pebble_blaster', x: 910, y: 420, respawnTime: 5 },
+      { id: 'd_wpn_2', weaponType: 'pistol', x: 910, y: 420, respawnTime: 7 },
     ],
     platforms: [
       // Main Tatami Ring Floor
@@ -66,9 +65,7 @@ export const ARENAS: Record<string, Arena> = {
     ],
     weaponSpawns: [
       { id: 'cy_wpn_1', weaponType: 'pebble_blaster', x: 325, y: 440, respawnTime: 5 },
-      { id: 'cy_wpn_2', weaponType: 'pistol', x: 545, y: 320, respawnTime: 7 },
-      { id: 'cy_wpn_3', weaponType: 'pistol', x: 735, y: 320, respawnTime: 7 },
-      { id: 'cy_wpn_4', weaponType: 'pebble_blaster', x: 955, y: 440, respawnTime: 5 },
+      { id: 'cy_wpn_2', weaponType: 'pistol', x: 955, y: 440, respawnTime: 7 },
     ],
     platforms: [
       { id: 'cy_ground', x: 180, y: 620, width: 920, height: 110, color: '#3B82F6', type: 'ground', isPassableDown: false },
@@ -106,7 +103,6 @@ export const ARENAS: Record<string, Arena> = {
       { id: 'p_wpn_1', weaponType: 'pebble_blaster', x: 425, y: 450, respawnTime: 5 },
       { id: 'p_wpn_2', weaponType: 'burst_smg', x: 740, y: 310, respawnTime: 8 },
       { id: 'p_wpn_3', weaponType: 'shotgun', x: 1055, y: 450, respawnTime: 12 },
-      { id: 'p_wpn_4', weaponType: 'pistol', x: 740, y: 620, respawnTime: 7 },
     ],
     platforms: [
       // Main Ground
@@ -145,11 +141,9 @@ export const ARENAS: Record<string, Arena> = {
       { x: 780, y: 570 },
     ],
     weaponSpawns: [
-      { id: 't_wpn_1', weaponType: 'pebble_blaster', x: 350, y: 630, respawnTime: 5 },
-      { id: 't_wpn_2', weaponType: 'pistol', x: 465, y: 450, respawnTime: 7 },
-      { id: 't_wpn_3', weaponType: 'burst_smg', x: 780, y: 330, respawnTime: 8 },
-      { id: 't_wpn_4', weaponType: 'shotgun', x: 1095, y: 450, respawnTime: 12 },
-      { id: 't_wpn_5', weaponType: 'pistol', x: 780, y: 660, respawnTime: 7 },
+      { id: 't_wpn_1', weaponType: 'pebble_blaster', x: 465, y: 450, respawnTime: 5 },
+      { id: 't_wpn_2', weaponType: 'burst_smg', x: 780, y: 330, respawnTime: 8 },
+      { id: 't_wpn_3', weaponType: 'shotgun', x: 1095, y: 450, respawnTime: 12 },
     ],
     platforms: [
       // Main Rooftop Block Left
@@ -190,11 +184,8 @@ export const ARENAS: Record<string, Arena> = {
     weaponSpawns: [
       { id: 'i_wpn_1', weaponType: 'pistol', x: 290, y: 500, respawnTime: 7 },
       { id: 'i_wpn_2', weaponType: 'shotgun', x: 630, y: 450, respawnTime: 12 },
-      { id: 'i_wpn_3', weaponType: 'flame_gun', x: 890, y: 650, respawnTime: 18 },
-      { id: 'i_wpn_4', weaponType: 'burst_smg', x: 1150, y: 450, respawnTime: 8 },
-      { id: 'i_wpn_5', weaponType: 'rifle', x: 750, y: 310, respawnTime: 15 },
-      { id: 'i_wpn_6', weaponType: 'grenade_launcher', x: 890, y: 180, respawnTime: 22 },
-      { id: 'i_wpn_7', weaponType: 'pistol', x: 1490, y: 500, respawnTime: 7 },
+      { id: 'i_wpn_3', weaponType: 'burst_smg', x: 1150, y: 450, respawnTime: 8 },
+      { id: 'i_wpn_4', weaponType: 'rifle', x: 750, y: 310, respawnTime: 15 },
     ],
     platforms: [
       // Main Center Island
@@ -238,10 +229,8 @@ export const ARENAS: Record<string, Arena> = {
     weaponSpawns: [
       { id: 'c_wpn_1', weaponType: 'shotgun', x: 355, y: 500, respawnTime: 12 },
       { id: 'c_wpn_2', weaponType: 'burst_smg', x: 665, y: 520, respawnTime: 8 },
-      { id: 'c_wpn_3', weaponType: 'grenade_launcher', x: 900, y: 340, respawnTime: 22 },
-      { id: 'c_wpn_4', weaponType: 'rifle', x: 1135, y: 520, respawnTime: 15 },
-      { id: 'c_wpn_5', weaponType: 'flame_gun', x: 1445, y: 500, respawnTime: 18 },
-      { id: 'c_wpn_6', weaponType: 'pistol', x: 900, y: 700, respawnTime: 7 },
+      { id: 'c_wpn_3', weaponType: 'rifle', x: 1135, y: 520, respawnTime: 15 },
+      { id: 'c_wpn_4', weaponType: 'flame_gun', x: 1445, y: 500, respawnTime: 18 },
     ],
     platforms: [
       // Main Keep Floor
@@ -285,10 +274,8 @@ export const ARENAS: Record<string, Arena> = {
     weaponSpawns: [
       { id: 'v_wpn_1', weaponType: 'flame_gun', x: 430, y: 530, respawnTime: 18 },
       { id: 'v_wpn_2', weaponType: 'shotgun', x: 730, y: 440, respawnTime: 12 },
-      { id: 'v_wpn_3', weaponType: 'grenade_launcher', x: 910, y: 290, respawnTime: 22 },
-      { id: 'v_wpn_4', weaponType: 'rifle', x: 1090, y: 440, respawnTime: 15 },
-      { id: 'v_wpn_5', weaponType: 'burst_smg', x: 1390, y: 530, respawnTime: 8 },
-      { id: 'v_wpn_6', weaponType: 'pistol', x: 910, y: 720, respawnTime: 7 },
+      { id: 'v_wpn_3', weaponType: 'rifle', x: 1090, y: 440, respawnTime: 15 },
+      { id: 'v_wpn_4', weaponType: 'burst_smg', x: 1390, y: 530, respawnTime: 8 },
     ],
     platforms: [
       { id: 'v_ground', x: 280, y: 740, width: 1260, height: 140, color: '#B91C1C', type: 'ground', isPassableDown: false },
@@ -330,10 +317,6 @@ export const ARENAS: Record<string, Arena> = {
       { id: 'xl_f_4', weaponType: 'shotgun', x: 2455, y: 840, respawnTime: 12 },
       { id: 'xl_f_5', weaponType: 'rifle', x: 790, y: 660, respawnTime: 15 },
       { id: 'xl_f_6', weaponType: 'flame_gun', x: 2810, y: 660, respawnTime: 18 },
-      { id: 'xl_f_7', weaponType: 'grenade_launcher', x: 1310, y: 600, respawnTime: 22 },
-      { id: 'xl_f_8', weaponType: 'heavy_cannon', x: 2290, y: 600, respawnTime: 25 },
-      { id: 'xl_f_9', weaponType: 'rocket_launcher', x: 1800, y: 1160, respawnTime: 30 },
-      { id: 'xl_f_10', weaponType: 'railgun', x: 1800, y: 460, respawnTime: 45 },
     ],
     platforms: [
       // 1. Lower Valley Forest Floor (Split across roots and rivers)
@@ -392,10 +375,6 @@ export const ARENAS: Record<string, Arena> = {
       { id: 'xl_r_4', weaponType: 'shotgun', x: 2140, y: 960, respawnTime: 12 },
       { id: 'xl_r_5', weaponType: 'rifle', x: 2720, y: 900, respawnTime: 15 },
       { id: 'xl_r_6', weaponType: 'flame_gun', x: 3230, y: 1000, respawnTime: 18 },
-      { id: 'xl_r_7', weaponType: 'grenade_launcher', x: 910, y: 660, respawnTime: 22 },
-      { id: 'xl_r_8', weaponType: 'heavy_cannon', x: 2890, y: 660, respawnTime: 25 },
-      { id: 'xl_r_9', weaponType: 'rocket_launcher', x: 1900, y: 800, respawnTime: 30 },
-      { id: 'xl_r_10', weaponType: 'railgun', x: 1900, y: 500, respawnTime: 45 },
     ],
     platforms: [
       // 1. Colosseum Sand Arena Floor
@@ -451,10 +430,6 @@ export const ARENAS: Record<string, Arena> = {
       { id: 'xl_c_4', weaponType: 'shotgun', x: 2780, y: 920, respawnTime: 12 },
       { id: 'xl_c_5', weaponType: 'rifle', x: 3360, y: 1040, respawnTime: 15 },
       { id: 'xl_c_6', weaponType: 'flame_gun', x: 910, y: 720, respawnTime: 18 },
-      { id: 'xl_c_7', weaponType: 'grenade_launcher', x: 3090, y: 720, respawnTime: 22 },
-      { id: 'xl_c_8', weaponType: 'heavy_cannon', x: 2000, y: 1320, respawnTime: 25 },
-      { id: 'xl_c_9', weaponType: 'rocket_launcher', x: 2000, y: 680, respawnTime: 30 },
-      { id: 'xl_c_10', weaponType: 'railgun', x: 2000, y: 460, respawnTime: 45 },
     ],
     platforms: [
       // 1. Sandstone Mesa Bottoms (Deep gorge chasms between them)
@@ -511,10 +486,6 @@ export const ARENAS: Record<string, Arena> = {
       { id: 'xl_m_4', weaponType: 'shotgun', x: 2460, y: 860, respawnTime: 12 },
       { id: 'xl_m_5', weaponType: 'rifle', x: 3040, y: 940, respawnTime: 15 },
       { id: 'xl_m_6', weaponType: 'flame_gun', x: 860, y: 660, respawnTime: 18 },
-      { id: 'xl_m_7', weaponType: 'grenade_launcher', x: 2740, y: 660, respawnTime: 22 },
-      { id: 'xl_m_8', weaponType: 'heavy_cannon', x: 1800, y: 620, respawnTime: 25 },
-      { id: 'xl_m_9', weaponType: 'rocket_launcher', x: 1800, y: 1200, respawnTime: 30 },
-      { id: 'xl_m_10', weaponType: 'railgun', x: 1800, y: 440, respawnTime: 45 },
     ],
     platforms: [
       // 1. Lower Skyline Roof Blocks
@@ -544,14 +515,14 @@ export const ARENAS: Record<string, Arena> = {
   },
   mystery_sky: {
     id: 'mystery_sky',
-    name: 'Mystery I: Aetheria Sky Apex',
-    description: 'A colossal 6,000px vertical sky sanctuary with dense, reachable cloud catwalks, skyways, soaring launch-pads, and the Legendary Thunder Sword at its highest apex.',
-    theme: 'mystery_sky',
+    name: 'Mystery I: Stormpeak Mountain',
+    description: 'A stormy alpine mountain environment spanning 6,000 pixels with rocky cliffs, thunder cloud catwalks, and the legendary Thunder Sword.',
+    theme: 'mystery_mountain',
     size: 'mystery',
     width: 6000,
     height: 3600,
-    bgColor: '#EFF6FF',
-    features: ['6000px Vertical Sky Realm', 'Reachably Spaced Catwalks & Towers', 'Apex Sanctuary Thunder Sword'],
+    bgColor: '#0F172A',
+    features: ['Mountain Realm', 'Stormy Atmosphere', 'Apex Thunder Sword'],
     spawnPoints: [
       { x: 800, y: 3100 },
       { x: 5200, y: 3100 },
@@ -565,7 +536,7 @@ export const ARENAS: Record<string, Arena> = {
       { x: 3000, y: 3100 },
     ],
     weaponSpawns: [
-      // 10 Normal Weapons placed directly on accessible platform walkways
+      // 12 Normal Weapons
       { id: 'ms_wpn_1', weaponType: 'pebble_blaster', x: 700, y: 2880, respawnTime: 5 },
       { id: 'ms_wpn_2', weaponType: 'pistol', x: 1500, y: 2630, respawnTime: 7 },
       { id: 'ms_wpn_3', weaponType: 'burst_smg', x: 4500, y: 2880, respawnTime: 8 },
@@ -576,92 +547,81 @@ export const ARENAS: Record<string, Arena> = {
       { id: 'ms_wpn_8', weaponType: 'heavy_cannon', x: 2000, y: 1130, respawnTime: 25 },
       { id: 'ms_wpn_9', weaponType: 'rocket_launcher', x: 4000, y: 1130, respawnTime: 30 },
       { id: 'ms_wpn_10', weaponType: 'railgun', x: 3000, y: 1130, respawnTime: 45 },
-      // SUPER WEAPON #1: Thunder Sword at the highest apex platform
+      { id: 'ms_wpn_11', weaponType: 'pistol', x: 2400, y: 2380, respawnTime: 7 },
+      { id: 'ms_wpn_12', weaponType: 'burst_smg', x: 3600, y: 2380, respawnTime: 8 },
+      // SUPER WEAPON #1: Thunder Sword
       { id: 'ms_super_1', weaponType: 'thunder_sword', x: 3000, y: 350, respawnTime: 150 },
     ],
     platforms: [
-      // Ground Islands (y = 3200)
-      { id: 'ms_g_1', x: 200, y: 3200, width: 1400, height: 200, color: '#3B82F6', type: 'ground', isPassableDown: false },
-      { id: 'ms_g_2', x: 1800, y: 3220, width: 1200, height: 200, color: '#0284C7', type: 'ground', isPassableDown: false },
-      { id: 'ms_g_3', x: 3200, y: 3220, width: 1200, height: 200, color: '#0284C7', type: 'ground', isPassableDown: false },
-      { id: 'ms_g_4', x: 4600, y: 3200, width: 1200, height: 200, color: '#3B82F6', type: 'ground', isPassableDown: false },
+      { id: 'ms_g_1', x: 200, y: 3200, width: 1400, height: 200, color: '#334155', type: 'ground', isPassableDown: false },
+      { id: 'ms_g_2', x: 1800, y: 3220, width: 1200, height: 200, color: '#475569', type: 'ground', isPassableDown: false },
+      { id: 'ms_g_3', x: 3200, y: 3220, width: 1200, height: 200, color: '#475569', type: 'ground', isPassableDown: false },
+      { id: 'ms_g_4', x: 4600, y: 3200, width: 1200, height: 200, color: '#334155', type: 'ground', isPassableDown: false },
 
-      // Tier 1 Walkways (y = 2950) - 250px above ground
-      { id: 'ms_t1_1', x: 400, y: 2950, width: 650, height: 28, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t1_2', x: 1300, y: 2950, width: 650, height: 28, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t1_3', x: 2200, y: 2950, width: 650, height: 28, color: '#60A5FA', type: 'stone', isPassableDown: true },
-      { id: 'ms_t1_4', x: 3150, y: 2950, width: 650, height: 28, color: '#60A5FA', type: 'stone', isPassableDown: true },
-      { id: 'ms_t1_5', x: 4050, y: 2950, width: 650, height: 28, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t1_6', x: 4950, y: 2950, width: 650, height: 28, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t1_1', x: 400, y: 2950, width: 650, height: 28, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'ms_t1_2', x: 1300, y: 2950, width: 650, height: 28, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'ms_t1_3', x: 2200, y: 2950, width: 650, height: 28, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'ms_t1_4', x: 3150, y: 2950, width: 650, height: 28, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'ms_t1_5', x: 4050, y: 2950, width: 650, height: 28, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'ms_t1_6', x: 4950, y: 2950, width: 650, height: 28, color: '#64748B', type: 'wood', isPassableDown: true },
 
-      // Tier 2 Catwalks (y = 2700) - 250px above Tier 1
-      { id: 'ms_t2_1', x: 200, y: 2700, width: 750, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t2_2', x: 1150, y: 2700, width: 850, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t2_3', x: 2200, y: 2700, width: 750, height: 30, color: '#A7F3D0', type: 'stone', isPassableDown: true },
-      { id: 'ms_t2_4', x: 3050, y: 2700, width: 750, height: 30, color: '#A7F3D0', type: 'stone', isPassableDown: true },
-      { id: 'ms_t2_5', x: 4000, y: 2700, width: 850, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t2_6', x: 5050, y: 2700, width: 750, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t2_1', x: 200, y: 2700, width: 750, height: 30, color: '#334155', type: 'wood', isPassableDown: true },
+      { id: 'ms_t2_2', x: 1150, y: 2700, width: 850, height: 30, color: '#334155', type: 'wood', isPassableDown: true },
+      { id: 'ms_t2_3', x: 2200, y: 2700, width: 750, height: 30, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'ms_t2_4', x: 3050, y: 2700, width: 750, height: 30, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'ms_t2_5', x: 4000, y: 2700, width: 850, height: 30, color: '#334155', type: 'wood', isPassableDown: true },
+      { id: 'ms_t2_6', x: 5050, y: 2700, width: 750, height: 30, color: '#334155', type: 'wood', isPassableDown: true },
 
-      // Tier 3 Bridges (y = 2450)
-      { id: 'ms_t3_1', x: 500, y: 2450, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t3_2', x: 1550, y: 2450, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t3_3', x: 2600, y: 2450, width: 800, height: 32, color: '#60A5FA', type: 'stone', isPassableDown: true },
-      { id: 'ms_t3_4', x: 3600, y: 2450, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t3_5', x: 4650, y: 2450, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t3_1', x: 500, y: 2450, width: 850, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'ms_t3_2', x: 1550, y: 2450, width: 850, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'ms_t3_3', x: 2600, y: 2450, width: 800, height: 32, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'ms_t3_4', x: 3600, y: 2450, width: 850, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'ms_t3_5', x: 4650, y: 2450, width: 850, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
 
-      // Tier 4 Sky Highway (y = 2200)
       { id: 'ms_t4_1', x: 300, y: 2200, width: 800, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
       { id: 'ms_t4_2', x: 1300, y: 2200, width: 900, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
       { id: 'ms_t4_3', x: 2400, y: 2200, width: 1200, height: 32, color: '#F59E0B', type: 'stone', isPassableDown: true },
       { id: 'ms_t4_4', x: 3800, y: 2200, width: 900, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
       { id: 'ms_t4_5', x: 4900, y: 2200, width: 800, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
 
-      // Tier 5 Mid Skyway (y = 1950)
-      { id: 'ms_t5_1', x: 600, y: 1950, width: 900, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
-      { id: 'ms_t5_2', x: 1700, y: 1950, width: 950, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
-      { id: 'ms_t5_3', x: 2850, y: 1950, width: 300, height: 30, color: '#A855F7', type: 'wood', isPassableDown: true },
-      { id: 'ms_t5_4', x: 3350, y: 1950, width: 950, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
-      { id: 'ms_t5_5', x: 4500, y: 1950, width: 900, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'ms_t5_1', x: 600, y: 1950, width: 900, height: 30, color: '#334155', type: 'stone', isPassableDown: true },
+      { id: 'ms_t5_2', x: 1700, y: 1950, width: 950, height: 30, color: '#334155', type: 'stone', isPassableDown: true },
+      { id: 'ms_t5_3', x: 2850, y: 1950, width: 300, height: 30, color: '#334155', type: 'wood', isPassableDown: true },
+      { id: 'ms_t5_4', x: 3350, y: 1950, width: 950, height: 30, color: '#334155', type: 'stone', isPassableDown: true },
+      { id: 'ms_t5_5', x: 4500, y: 1950, width: 900, height: 30, color: '#334155', type: 'stone', isPassableDown: true },
 
-      // Tier 6 High Cloud Runway (y = 1700)
-      { id: 'ms_t6_1', x: 400, y: 1700, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t6_2', x: 1450, y: 1700, width: 1000, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t6_3', x: 2600, y: 1700, width: 800, height: 32, color: '#60A5FA', type: 'stone', isPassableDown: true },
-      { id: 'ms_t6_4', x: 3550, y: 1700, width: 1000, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t6_5', x: 4750, y: 1700, width: 850, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t6_1', x: 400, y: 1700, width: 850, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'ms_t6_2', x: 1450, y: 1700, width: 1000, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'ms_t6_3', x: 2600, y: 1700, width: 800, height: 32, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'ms_t6_4', x: 3550, y: 1700, width: 1000, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'ms_t6_5', x: 4750, y: 1700, width: 850, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
 
-      // Tier 7 Cloud Deck (y = 1450)
-      { id: 'ms_t7_1', x: 700, y: 1450, width: 900, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t7_2', x: 1800, y: 1450, width: 950, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t7_3', x: 2900, y: 1450, width: 200, height: 30, color: '#A7F3D0', type: 'stone', isPassableDown: true },
-      { id: 'ms_t7_4', x: 3250, y: 1450, width: 950, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t7_5', x: 4400, y: 1450, width: 900, height: 30, color: '#818CF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t7_1', x: 700, y: 1450, width: 900, height: 30, color: '#334155', type: 'wood', isPassableDown: true },
+      { id: 'ms_t7_2', x: 1800, y: 1450, width: 950, height: 30, color: '#334155', type: 'wood', isPassableDown: true },
+      { id: 'ms_t7_3', x: 2900, y: 1450, width: 200, height: 30, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'ms_t7_4', x: 3250, y: 1450, width: 950, height: 30, color: '#334155', type: 'wood', isPassableDown: true },
+      { id: 'ms_t7_5', x: 4400, y: 1450, width: 900, height: 30, color: '#334155', type: 'wood', isPassableDown: true },
 
-      // Tier 8 Spire Concourse (y = 1200)
       { id: 'ms_t8_1', x: 500, y: 1200, width: 900, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
       { id: 'ms_t8_2', x: 1600, y: 1200, width: 1000, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
       { id: 'ms_t8_3', x: 2700, y: 1200, width: 600, height: 32, color: '#F59E0B', type: 'stone', isPassableDown: true },
       { id: 'ms_t8_4', x: 3400, y: 1200, width: 1000, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
       { id: 'ms_t8_5', x: 4600, y: 1200, width: 900, height: 30, color: '#FBBF24', type: 'wood', isPassableDown: true },
 
-      // Tier 9 Upper Spire Ledges (y = 950)
-      { id: 'ms_t9_1', x: 800, y: 950, width: 950, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
-      { id: 'ms_t9_2', x: 1950, y: 950, width: 850, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
-      { id: 'ms_t9_3', x: 3200, y: 950, width: 850, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
-      { id: 'ms_t9_4', x: 4250, y: 950, width: 950, height: 30, color: '#A855F7', type: 'stone', isPassableDown: true },
+      { id: 'ms_t9_1', x: 800, y: 950, width: 950, height: 30, color: '#334155', type: 'stone', isPassableDown: true },
+      { id: 'ms_t9_2', x: 1950, y: 950, width: 850, height: 30, color: '#334155', type: 'stone', isPassableDown: true },
+      { id: 'ms_t9_3', x: 3200, y: 950, width: 850, height: 30, color: '#334155', type: 'stone', isPassableDown: true },
+      { id: 'ms_t9_4', x: 4250, y: 950, width: 950, height: 30, color: '#334155', type: 'stone', isPassableDown: true },
 
-      // Tier 10 Apex Approach (y = 700)
-      { id: 'ms_t10_1', x: 1100, y: 700, width: 1000, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
-      { id: 'ms_t10_2', x: 2300, y: 700, width: 600, height: 30, color: '#60A5FA', type: 'stone', isPassableDown: true },
-      { id: 'ms_t10_3', x: 3100, y: 700, width: 600, height: 30, color: '#60A5FA', type: 'stone', isPassableDown: true },
-      { id: 'ms_t10_4', x: 3900, y: 700, width: 1000, height: 30, color: '#38BDF8', type: 'wood', isPassableDown: true },
+      { id: 'ms_t10_1', x: 1100, y: 700, width: 1000, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
+      { id: 'ms_t10_2', x: 2300, y: 700, width: 600, height: 30, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'ms_t10_3', x: 3100, y: 700, width: 600, height: 30, color: '#475569', type: 'stone', isPassableDown: true },
+      { id: 'ms_t10_4', x: 3900, y: 700, width: 1000, height: 30, color: '#64748B', type: 'wood', isPassableDown: true },
 
-      // Tier 11 Apex Shrine (y = 420)
       { id: 'ms_t11_1', x: 1600, y: 480, width: 750, height: 30, color: '#FACC15', type: 'stone', isPassableDown: true },
       { id: 'ms_apex_shrine', x: 2600, y: 420, width: 800, height: 36, color: '#FACC15', type: 'stone', isPassableDown: true },
       { id: 'ms_t11_2', x: 3650, y: 480, width: 750, height: 30, color: '#FACC15', type: 'stone', isPassableDown: true },
 
-      // Vertical Boost Bouncers for rapid upward traversal
       { id: 'ms_b_1', x: 500, y: 3180, width: 120, height: 24, color: '#FF5252', type: 'bounce', isPassableDown: true },
       { id: 'ms_b_2', x: 5380, y: 3180, width: 120, height: 24, color: '#FF5252', type: 'bounce', isPassableDown: true },
       { id: 'ms_b_3', x: 1900, y: 2680, width: 110, height: 24, color: '#FFD700', type: 'bounce', isPassableDown: true },
@@ -672,13 +632,12 @@ export const ARENAS: Record<string, Arena> = {
   },
   mystery_depths: {
     id: 'mystery_depths',
-    name: 'Mystery II: Subterranean Abyss',
-    description: 'A deep 7,200px underground cavern with continuous basalt ledges, interconnecting corridors, steam bounce-shafts, and the Infinite Gun hidden in the lower subterranean chamber.',
-    theme: 'mystery_depths',
+    name: 'Mystery II: Primordial Jungle',
+    description: 'A dense unexplored jungle realm with ancient stone ruins, leafy canopies, mossy ledges, and the Infinite Machine Gun.',
+    theme: 'mystery_jungle',
     size: 'mystery',
     width: 7200,
     height: 3200,
-    bgColor: '#0F172A',
     features: ['7200px Underground Abyss', 'Multi-level Basalt Corridors', 'Abyssal Shaft Infinite Gun'],
     spawnPoints: [
       { x: 1000, y: 1000 },

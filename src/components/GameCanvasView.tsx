@@ -202,12 +202,6 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
         if (!inp.fire) {
           inp.fire = true;
           changed = true;
-          const myFighter = roomRef.current.players[myIdRef.current];
-          if (myFighter?.activeWeapon) {
-            sound.playWeaponFire(myFighter.activeWeapon);
-          } else {
-            sound.playFastPunch();
-          }
         }
       }
 
@@ -271,12 +265,28 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
       if (changed) emitInput();
     };
 
+    const handleWeaponFireEvent = (e: any) => {
+      const detail = e.detail;
+      if (!detail || !rendererRef.current) return;
+      if (detail.weaponType === 'infinite_gun') {
+        rendererRef.current.triggerShake(5, 0.08);
+      } else if (detail.weaponType === 'thunder_sword') {
+        rendererRef.current.triggerElectricPulse(0.15);
+        rendererRef.current.triggerShake(8, 0.12);
+      } else if (detail.weaponType === 'inferno_cannon') {
+        rendererRef.current.triggerFirePulse(0.12);
+        rendererRef.current.triggerShake(4, 0.08);
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('sf_weapon_fire', handleWeaponFireEvent);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('sf_weapon_fire', handleWeaponFireEvent);
     };
   }, [emitInput, onReturnToLobby]);
 
@@ -315,8 +325,6 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
       if (!myFighter?.activeWeapon) {
         inputRef.current.fastAttack = true;
         sound.playFastPunch();
-      } else {
-        sound.playWeaponFire(myFighter.activeWeapon);
       }
       emitInput();
     }
@@ -352,9 +360,7 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
         if (key === 'block') sound.playShieldBlock();
         if (key === 'fire') {
           const myFighter = roomRef.current.players[myIdRef.current];
-          if (myFighter?.activeWeapon) {
-            sound.playWeaponFire(myFighter.activeWeapon);
-          } else {
+          if (!myFighter?.activeWeapon) {
             sound.playFastPunch();
           }
         }
@@ -489,7 +495,8 @@ export const GameCanvasView: React.FC<GameCanvasViewProps> = ({
           curPops,
           now,
           curRoom.weaponSpawns || [],
-          curRoom.projectiles || []
+          curRoom.projectiles || [],
+          curRoom.burningGround || []
         );
       }
 

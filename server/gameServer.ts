@@ -676,6 +676,25 @@ export class GameServer {
         const projResult = updateProjectiles(room.projectiles, fighters, arena, dt);
         room.projectiles = projResult.activeProjectiles;
 
+        // Update Burning Ground
+        if (!room.burningGround) room.burningGround = [];
+        if (projResult.burningGround.length > 0) {
+          room.burningGround.push(...projResult.burningGround);
+        }
+        for (let i = room.burningGround.length - 1; i >= 0; i--) {
+          const bg = room.burningGround[i];
+          bg.life -= dt;
+          if (bg.life <= 0) {
+            room.burningGround.splice(i, 1);
+            continue;
+          }
+          for (const f of fighters) {
+            if (!f.isDead && Math.abs(f.x - bg.x) < bg.width / 2 && Math.abs(f.y - bg.y) < 35) {
+              f.burningTimer = 1.5;
+            }
+          }
+        }
+
         const allExplosions = [...projResult.explosions, ...extraExplosions];
         // Broadcast explosions
         for (const exp of allExplosions) {

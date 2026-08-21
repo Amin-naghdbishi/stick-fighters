@@ -53,6 +53,17 @@ export class GameRenderer {
     this.camera.shakeTime = duration;
   }
 
+  private electricScreenTimer: number = 0;
+  private fireScreenTimer: number = 0;
+
+  public triggerElectricPulse(duration: number = 0.15) {
+    this.electricScreenTimer = duration;
+  }
+
+  public triggerFirePulse(duration: number = 0.12) {
+    this.fireScreenTimer = duration;
+  }
+
   /**
    * Updates camera position and zoom: Anchored to Local Player.
    */
@@ -172,10 +183,12 @@ export class GameRenderer {
     comicPops: ComicPop[],
     time: number,
     weaponSpawns: ActiveWeaponSpawn[] = [],
-    projectiles: ProjectileState[] = []
+    projectiles: ProjectileState[] = [],
+    burningGround: any[] = []
   ) {
     const ctx = this.ctx;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dt = 1 / 60;
 
     // 1. HARD RESET matrix and wipe the entire physical canvas buffer to completely eliminate any ghost trails/unrendered pixels
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -206,25 +219,77 @@ export class GameRenderer {
       // 2. Draw Arena Platforms
       this.drawPlatforms(arena);
 
-      // 3. Draw Weapon Spawns
+      // 3. Draw Burning Ground Flames
+      if (burningGround && burningGround.length > 0) {
+        this.drawBurningGround(burningGround, time);
+      }
+
+      // 4. Draw Weapon Spawns
       this.drawWeaponSpawns(weaponSpawns, time);
 
-      // 4. Draw Projectiles
+      // 5. Draw Projectiles
       this.drawProjectiles(projectiles, time);
 
-      // 5. Draw Particles (dust, speed lines, sparks)
+      // 6. Draw Particles (dust, speed lines, sparks)
       this.drawParticles(particles);
 
-      // 6. Draw Fighters (with Aim-rotated arms & weapons)
+      // 7. Draw Fighters (with Aim-rotated arms & weapons)
       for (const f of fighters) {
         this.drawFighter(f, time);
       }
 
-      // 7. Draw Comic Pops ("POW!", "BAM!", "KABOOM!")
+      // 8. Draw Comic Pops ("POW!", "BAM!", "KABOOM!")
       this.drawComicPops(comicPops);
     } finally {
       ctx.restore();
     }
+
+    // Screen Flash Overlay Effects (Controlled short pulses)
+    if (this.electricScreenTimer > 0) {
+      this.electricScreenTimer -= dt;
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = '#38BDF8';
+      ctx.globalAlpha = Math.min(0.28, (this.electricScreenTimer / 0.15) * 0.28);
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.restore();
+    }
+
+    if (this.fireScreenTimer > 0) {
+      this.fireScreenTimer -= dt;
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = '#EF4444';
+      ctx.globalAlpha = Math.min(0.24, (this.fireScreenTimer / 0.12) * 0.24);
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.restore();
+    }
+  }
+
+  private drawBurningGround(burningGround: any[], time: number) {
+    const ctx = this.ctx;
+    ctx.save();
+
+    for (const bg of burningGround) {
+      const alpha = Math.min(1, bg.life / 0.5);
+      ctx.globalAlpha = alpha;
+
+      ctx.fillStyle = '#EF4444';
+      ctx.fillRect(bg.x - bg.width / 2, bg.y - 4, bg.width, 8);
+
+      ctx.fillStyle = Math.random() < 0.5 ? '#F97316' : '#FACC15';
+      for (let fx = bg.x - bg.width / 2 + 6; fx <= bg.x + bg.width / 2 - 6; fx += 14) {
+        const flameH = 16 + Math.sin(time * 0.02 + fx) * 8;
+        ctx.beginPath();
+        ctx.moveTo(fx - 6, bg.y);
+        ctx.lineTo(fx, bg.y - flameH);
+        ctx.lineTo(fx + 6, bg.y);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    ctx.restore();
   }
 
   private drawArenaBackdrop(arena: Arena, time: number) {
@@ -441,58 +506,79 @@ export class GameRenderer {
           }
         }
       }
-    } else if (arena.theme === 'mystery_sky') {
-      // Sky Sanctuary Backdrop: Floating celestial clouds & soaring sky peaks
-      ctx.fillStyle = '#60A5FA';
-      ctx.strokeStyle = '#1D4ED8';
-      ctx.lineWidth = 3;
+    } else if (arena.theme === 'mystery_mountain' || arena.theme === 'mystery_sky') {
+      // Stormpeak Mountain Backdrop: Jagged slate peaks, storm clouds, lightning atmosphere
+      ctx.fillStyle = '#1E293B';
+      ctx.strokeStyle = '#0F172A';
+      ctx.lineWidth = 4;
 
       ctx.beginPath();
-      ctx.moveTo(0, arena.height - 600);
-      for (let sx = 0; sx <= arena.width; sx += 800) {
-        ctx.quadraticCurveTo(sx + 400, arena.height - 1200, sx + 800, arena.height - 600);
+      ctx.moveTo(0, arena.height - 800);
+      for (let mx = 0; mx <= arena.width; mx += 800) {
+        ctx.lineTo(mx + 400, arena.height - 1800);
+        ctx.lineTo(mx + 800, arena.height - 800);
       }
       ctx.lineTo(arena.width, arena.height);
       ctx.lineTo(0, arena.height);
       ctx.fill();
       ctx.stroke();
 
-      for (let cx = 300; cx < arena.width; cx += 650) {
-        this.drawComicCloud(cx, 350 + Math.sin(cx * 0.01 + time * 0.0005) * 70, 110);
+      for (let cx = 350; cx < arena.width; cx += 700) {
+        this.drawComicCloud(cx, 400 + Math.sin(cx * 0.01 + time * 0.0005) * 60, 120);
       }
-    } else if (arena.theme === 'mystery_depths') {
-      // Subterranean Abyss Backdrop: Cavernous rock pillars & bioluminescent crystals
-      ctx.fillStyle = '#1E1B4B';
-      ctx.strokeStyle = '#0F172A';
-      ctx.lineWidth = 3.5;
+    } else if (arena.theme === 'mystery_jungle' || arena.theme === 'mystery_depths') {
+      // Primordial Jungle Backdrop: Dense rainforest canopy, ancient stone ruins, hanging vines
+      ctx.fillStyle = '#14532D';
+      ctx.strokeStyle = '#052E16';
+      ctx.lineWidth = 4;
 
-      for (let dx = 300; dx < arena.width; dx += 750) {
-        ctx.fillRect(dx, 150, 220, arena.height - 150);
-        ctx.strokeRect(dx, 150, 220, arena.height - 150);
+      ctx.beginPath();
+      ctx.moveTo(0, arena.height - 700);
+      for (let jx = 0; jx <= arena.width; jx += 600) {
+        ctx.quadraticCurveTo(jx + 300, arena.height - 1100, jx + 600, arena.height - 700);
+      }
+      ctx.lineTo(arena.width, arena.height);
+      ctx.lineTo(0, arena.height);
+      ctx.fill();
+      ctx.stroke();
 
-        ctx.fillStyle = '#A855F7';
+      for (let tx = 400; tx < arena.width; tx += 650) {
+        ctx.fillStyle = '#78350F';
+        ctx.strokeStyle = '#451A03';
+        ctx.fillRect(tx, 300, 90, arena.height - 300);
+        ctx.strokeRect(tx, 300, 90, arena.height - 300);
+        this.drawCartoonTree(tx + 45, 260, 140);
+      }
+    } else if (arena.theme === 'mystery_volcanic' || arena.theme === 'mystery_void') {
+      // Obsidian Volcanic Rift Backdrop: Lava rivers at bottom, dark basalt cliffs, glowing magma
+      ctx.fillStyle = '#27272A';
+      ctx.strokeStyle = '#09090B';
+      ctx.lineWidth = 4;
+
+      ctx.beginPath();
+      ctx.moveTo(0, arena.height - 500);
+      for (let vx = 0; vx <= arena.width; vx += 700) {
+        ctx.lineTo(vx + 350, arena.height - 1200);
+        ctx.lineTo(vx + 700, arena.height - 500);
+      }
+      ctx.lineTo(arena.width, arena.height);
+      ctx.lineTo(0, arena.height);
+      ctx.fill();
+      ctx.stroke();
+
+      // Bubbling Lava Floor Pool at bottom of volcanic rift
+      ctx.fillStyle = '#DC2626';
+      ctx.strokeStyle = '#991B1B';
+      ctx.fillRect(0, arena.height - 160, arena.width, 160);
+      ctx.strokeRect(0, arena.height - 160, arena.width, 160);
+
+      ctx.fillStyle = '#FACC15';
+      for (let lx = 100; lx < arena.width; lx += 220) {
+        const bubble = Math.sin(time * 0.004 + lx) * 10;
         ctx.beginPath();
-        ctx.arc(dx + 110, 500 + ((dx * 7) % 1100), 24, 0, Math.PI * 2);
+        ctx.arc(lx, arena.height - 140 + bubble, 18, 0, Math.PI * 2);
         ctx.fill();
       }
-    } else if (arena.theme === 'mystery_void') {
-      // Cosmic Rift Void Backdrop: Deep space grid, floating alien monoliths & nebula rings
-      ctx.strokeStyle = '#818CF8';
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([6, 6]);
-      for (let vy = 200; vy < arena.height; vy += 250) {
-        ctx.beginPath();
-        ctx.moveTo(0, vy);
-        ctx.lineTo(arena.width, vy);
-        ctx.stroke();
-      }
-      for (let vx = 300; vx < arena.width; vx += 400) {
-        ctx.beginPath();
-        ctx.moveTo(vx, 0);
-        ctx.lineTo(vx, arena.height);
-        ctx.stroke();
-      }
-      ctx.setLineDash([]);
     }
   }
 
@@ -707,6 +793,43 @@ export class GameRenderer {
         // Core glow
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(-20, -1.5, 40, 3);
+      } else if (p.weaponType === 'infinite_gun') {
+        // Massive Heavy Rotary Armor-Piercing Tracer Bullet
+        ctx.fillStyle = '#F59E0B';
+        ctx.strokeStyle = '#B45309';
+        ctx.lineWidth = 2.5;
+        ctx.fillRect(-14, -4, 28, 8);
+        ctx.strokeRect(-14, -4, 28, 8);
+        // Bright white core & outer glow
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(-10, -2, 20, 4);
+      } else if (p.weaponType === 'inferno_cannon' || p.isFlame) {
+        // Massive Dragonhead Flame Stream
+        const flameSize = 14 + (1 - p.life / p.maxLife) * 22;
+        ctx.fillStyle = Math.random() < 0.5 ? '#EF4444' : Math.random() < 0.5 ? '#F97316' : '#FACC15';
+        ctx.beginPath();
+        ctx.arc(0, 0, flameSize, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Outer fire sparks
+        ctx.fillStyle = '#FACC15';
+        ctx.beginPath();
+        ctx.arc(-flameSize * 0.4, (Math.random() - 0.5) * 10, flameSize * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (p.weaponType === 'thunder_sword') {
+        // Thunder Lightning Bolt Arc
+        ctx.strokeStyle = '#38BDF8';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-40, 0);
+        for (let lx = -30; lx <= 40; lx += 15) {
+          ctx.lineTo(lx, (Math.random() - 0.5) * 18);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2;
+        ctx.stroke();
       }
 
       ctx.restore();
@@ -738,6 +861,21 @@ export class GameRenderer {
     // 3. Stunned Comic Stars
     if (f.hitStunTimer > 0 && !f.isDead) {
       this.drawStunStars(cx, cy - 96, time);
+    }
+
+    // 4. Burning Flame Aura (Inferno Cannon hit)
+    if (f.burningTimer && f.burningTimer > 0 && !f.isDead) {
+      ctx.save();
+      ctx.fillStyle = Math.random() < 0.5 ? '#EF4444' : '#F97316';
+      for (let fi = 0; fi < 5; fi++) {
+        const fx = cx + (Math.random() - 0.5) * 32;
+        const fy = cy - Math.random() * 60;
+        const fr = Math.random() * 7 + 4;
+        ctx.beginPath();
+        ctx.arc(fx, fy, fr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
     }
 
     // 4. Transform for stickman pose
@@ -1678,22 +1816,29 @@ export class GameRenderer {
     const ctx = this.ctx;
     ctx.save();
     ctx.fillStyle = '#FFFFFF';
-    ctx.strokeStyle = '#2D3748';
+    ctx.strokeStyle = '#334155';
     ctx.lineWidth = 3;
 
     ctx.beginPath();
-    ctx.arc(x, y, r * 0.6, 0, Math.PI * 2);
-    ctx.arc(x + r * 0.5, y - r * 0.2, r * 0.7, 0, Math.PI * 2);
-    ctx.arc(x + r * 1.1, y, r * 0.55, 0, Math.PI * 2);
-    ctx.arc(x + r * 0.5, y + r * 0.2, r * 0.6, 0, Math.PI * 2);
-    ctx.closePath();
+    ctx.arc(x, y, r * 0.55, 0, Math.PI * 2);
     ctx.fill();
-    ctx.stroke();
 
-    ctx.fillStyle = '#E2E8F0';
     ctx.beginPath();
-    ctx.arc(x + r * 0.5, y + r * 0.2, r * 0.45, 0, Math.PI);
+    ctx.arc(x + r * 0.45, y - r * 0.25, r * 0.65, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(x + r * 0.95, y, r * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillRect(x, y - r * 0.1, r * 0.95, r * 0.45);
+
+    // Outer outline stroke
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.55, Math.PI * 0.7, Math.PI * 1.8);
+    ctx.arc(x + r * 0.45, y - r * 0.25, r * 0.65, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.arc(x + r * 0.95, y, r * 0.5, Math.PI * 1.7, Math.PI * 0.4);
+    ctx.stroke();
 
     ctx.restore();
   }

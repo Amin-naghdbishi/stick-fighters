@@ -161,6 +161,7 @@ export default function App() {
 
         case 'weapon_fire_event':
           sound.playWeaponFire(msg.weaponType);
+          window.dispatchEvent(new CustomEvent('sf_weapon_fire', { detail: msg }));
           break;
 
         case 'explosion_event':
